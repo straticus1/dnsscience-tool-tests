@@ -2,7 +2,7 @@
 
 **The World's Most Advanced DNS Analysis, Security, Testing, and Debugging Tool**
 
-[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/dnsscience/dnsscience-util)
+[![Version](https://img.shields.io/badge/version-3.1.0-blue.svg)](https://github.com/dnsscience/dnsscience-util)
 [![Python](https://img.shields.io/badge/python-3.8+-green.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
 
@@ -18,6 +18,9 @@ DNSScience Utility combines the power of `dig`, `ldns`, and advanced DNS securit
 
 ### DNSScience.io Platform Integration
 - **Cloud-Based Scanning**: Comprehensive domain security scans via DNSScience.io API
+- **Domain Enrichment**: Complete domain intelligence with DNS, WHOIS, security, and reputation data
+- **RDAP/WHOIS Lookup**: Modern registration data access
+- **Web3 Domain Support**: Blockchain domain resolution (.eth, .crypto, ENS)
 - **Multi-Protocol Validation**: DNSSEC, SPF, DKIM, DMARC, MTA-STS, STARTTLS, SSL certificates
 - **Domain Tracking**: Monitor multiple domains with historical trend analysis
 - **Secure Key Management**: API keys stored with restrictive permissions
@@ -216,6 +219,18 @@ chmod +x dnsscience-util.py
 
 # Search domains
 ./dnsscience-util.py --api-search "example"
+
+# Complete domain enrichment (comprehensive intelligence)
+./dnsscience-util.py --enrich example.com
+./dnsscience-util.py --enrichment example.com --json
+
+# RDAP/WHOIS lookup (modern registration data)
+./dnsscience-util.py --rdap example.com
+./dnsscience-util.py --whois example.com
+
+# Web3 domain lookup (blockchain domains)
+./dnsscience-util.py --web3 vitalik.eth
+./dnsscience-util.py --web3 example.crypto
 
 # Remove API key
 ./dnsscience-util.py --api-remove-key
@@ -564,9 +579,14 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Version
 
-Current version: **3.0.0**
+Current version: **3.1.0**
 
-See [CHANGELOG.md](CHANGELOG.md) for version history.
+### What's New in 3.1.0
+- **Domain Enrichment**: Complete domain intelligence via `--enrich`
+- **RDAP Lookup**: Modern WHOIS replacement via `--rdap`
+- **Web3 Domains**: Blockchain domain support via `--web3`
+
+See [CHANGELOG.md](CHANGELOG.md) for complete version history.
 
 ## Author
 

@@ -5,6 +5,45 @@ All notable changes to DNSScience Utility will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2025-11-11
+
+### Added - DNSScience.io Platform API Enhancements
+
+#### Domain Intelligence & Enrichment
+- **Complete Domain Enrichment**: New `--enrich` command for comprehensive domain intelligence
+  - DNS records and configuration analysis
+  - WHOIS/RDAP registration data
+  - Security posture and threat intelligence
+  - SSL/TLS certificate information
+  - Email security (SPF, DKIM, DMARC) validation
+  - Reputation and risk scores
+  - Historical data and change tracking
+  - Geolocation and hosting information
+  - Supports JSON output for programmatic access
+  - Usage: `./dnsscience-util.py --enrich example.com`
+
+- **RDAP Lookup**: Modern WHOIS replacement via `--rdap` or `--whois`
+  - Standards-based Registration Data Access Protocol
+  - Structured JSON output
+  - More reliable than traditional WHOIS
+  - Usage: `./dnsscience-util.py --rdap example.com`
+
+- **Web3 Domain Support**: Blockchain domain resolution via `--web3`
+  - Support for .eth, .crypto, and other Web3 domains
+  - ENS (Ethereum Name Service) integration
+  - Unstoppable Domains support
+  - Usage: `./dnsscience-util.py --web3 vitalik.eth`
+
+### Changed
+- Enhanced API client with additional endpoints
+- Improved error handling for API operations
+- Better timeout management (15s for enrichment, 10s for lookups)
+
+### Documentation
+- Added usage examples for new API features
+- Updated CLI help text with enrichment and RDAP examples
+- Enhanced pretty-print output formatting for enrichment data
+
 ## [3.0.0] - 2025-11-10
 
 ### Added - Major Feature Release

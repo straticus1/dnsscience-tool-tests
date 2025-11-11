@@ -324,6 +324,42 @@ class DNSScienceAPI:
             self.logger.error(f"API request failed: {e}")
             raise Exception(f"Failed to get domain history: {str(e)}")
 
+    def get_domain_enrichment(self, domain: str) -> Dict:
+        """
+        Get complete enriched domain profile with full data enrichment
+
+        This endpoint provides comprehensive domain intelligence including:
+        - DNS records and configuration
+        - WHOIS/RDAP data
+        - Security posture and threats
+        - SSL/TLS certificate information
+        - Email security (SPF, DKIM, DMARC)
+        - Reputation and risk scores
+        - Historical data and changes
+        - Geolocation and hosting information
+
+        Args:
+            domain: Domain name to enrich
+
+        Returns:
+            Complete enriched domain profile dictionary
+        """
+        if not self.api_key:
+            raise Exception("API key required. Use 'api add-key <key>' to configure.")
+
+        self.logger.info(f"Getting enriched domain profile: {domain}")
+
+        try:
+            response = self.session.get(
+                f"{self.API_BASE_URL}/domain/{domain}/complete-profile",
+                timeout=15
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"API request failed: {e}")
+            raise Exception(f"Failed to get domain enrichment: {str(e)}")
+
     def list_domains(self) -> Dict:
         """List all tracked domains"""
         if not self.api_key:
@@ -360,6 +396,55 @@ class DNSScienceAPI:
         except requests.exceptions.RequestException as e:
             self.logger.error(f"API request failed: {e}")
             raise Exception(f"Search failed: {str(e)}")
+
+    def rdap_lookup(self, domain: str) -> Dict:
+        """
+        Perform RDAP (Registration Data Access Protocol) lookup for domain
+        Modern replacement for WHOIS
+
+        Args:
+            domain: Domain name to lookup
+
+        Returns:
+            RDAP data dictionary containing registration information
+        """
+        self.logger.info(f"Performing RDAP lookup for: {domain}")
+
+        try:
+            response = self.session.get(
+                f"{self.API_BASE_URL}/rdap",
+                params={'domain': domain},
+                timeout=10
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"RDAP lookup failed: {e}")
+            raise Exception(f"RDAP lookup failed: {str(e)}")
+
+    def web3_domain_lookup(self, domain: str) -> Dict:
+        """
+        Lookup Web3 domain information (.eth, .crypto, etc.)
+
+        Args:
+            domain: Web3 domain name to lookup
+
+        Returns:
+            Web3 domain data dictionary
+        """
+        self.logger.info(f"Performing Web3 domain lookup for: {domain}")
+
+        try:
+            response = self.session.get(
+                f"{self.API_BASE_URL}/web3-domains",
+                params={'domain': domain},
+                timeout=10
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"Web3 domain lookup failed: {e}")
+            raise Exception(f"Web3 domain lookup failed: {str(e)}")
 
     def test_connection(self) -> bool:
         """Test API connection and authentication"""
@@ -1633,6 +1718,15 @@ EXAMPLES:
     %(prog)s --api-info example.com
     %(prog)s --api-list
 
+  Data Enrichment:
+    %(prog)s --enrich example.com
+    %(prog)s --enrichment example.com --json
+
+  RDAP & Web3 Lookups:
+    %(prog)s --rdap example.com
+    %(prog)s --whois example.com
+    %(prog)s --web3 vitalik.eth
+
   Output Formats:
     %(prog)s example.com +json
     %(prog)s example.com +yaml
@@ -1710,6 +1804,10 @@ For more information, see: docs/EXAMPLES.md and docs/DNSSCIENCE-API.md
     api_group.add_argument('--api-history', metavar='DOMAIN', help='Get domain scan history')
     api_group.add_argument('--api-list', action='store_true', help='List tracked domains')
     api_group.add_argument('--api-search', metavar='PATTERN', help='Search domains')
+    api_group.add_argument('--enrich', '--enrichment', metavar='DOMAIN',
+                          help='Get complete enriched domain profile (comprehensive data)')
+    api_group.add_argument('--rdap', '--whois', metavar='DOMAIN', help='RDAP lookup (modern WHOIS replacement)')
+    api_group.add_argument('--web3', metavar='DOMAIN', help='Web3 domain lookup (.eth, .crypto, etc.)')
     api_group.add_argument('--api-add-key', metavar='KEY', help='Add/set API key')
     api_group.add_argument('--api-show-key', action='store_true', help='Show current API key (masked)')
     api_group.add_argument('--api-remove-key', action='store_true', help='Remove API key')
@@ -1855,6 +1953,179 @@ For more information, see: docs/EXAMPLES.md and docs/DNSSCIENCE-API.md
             api = DNSScienceAPI(logger=logger)
             result = api.search_domains(args.api_search)
             print(json.dumps(result, indent=2))
+            sys.exit(0)
+
+        # Domain enrichment
+        if args.enrich:
+            api = DNSScienceAPI(logger=logger)
+            result = api.get_domain_enrichment(args.enrich)
+
+            if args.json:
+                print(json.dumps(result, indent=2))
+            else:
+                # Pretty print enriched domain data
+                print(f"\n{Colors.BOLD}=== Complete Domain Enrichment Profile ==={Colors.END}")
+                print(f"{Colors.CYAN}Domain:{Colors.END} {args.enrich}\n")
+
+                # Display summary sections based on available data
+                if isinstance(result, dict):
+                    # DNS Information
+                    if 'dns' in result or 'dns_records' in result:
+                        print(f"{Colors.GREEN}DNS Records:{Colors.END}")
+                        dns_data = result.get('dns') or result.get('dns_records', {})
+                        for record_type, records in dns_data.items() if isinstance(dns_data, dict) else []:
+                            if records:
+                                print(f"  {record_type}:")
+                                if isinstance(records, list):
+                                    for record in records[:5]:  # Limit to first 5
+                                        print(f"    - {record}")
+                                else:
+                                    print(f"    {records}")
+
+                    # Security Information
+                    if 'security' in result:
+                        print(f"\n{Colors.YELLOW}Security Posture:{Colors.END}")
+                        sec = result['security']
+                        if isinstance(sec, dict):
+                            for key, value in sec.items():
+                                print(f"  {key.replace('_', ' ').title()}: {value}")
+
+                    # Email Security
+                    if 'email_security' in result:
+                        print(f"\n{Colors.BLUE}Email Security:{Colors.END}")
+                        email = result['email_security']
+                        if isinstance(email, dict):
+                            for key, value in email.items():
+                                print(f"  {key.upper()}: {value}")
+
+                    # WHOIS/RDAP Data
+                    if 'whois' in result or 'rdap' in result:
+                        print(f"\n{Colors.CYAN}Registration Data:{Colors.END}")
+                        reg_data = result.get('whois') or result.get('rdap', {})
+                        if isinstance(reg_data, dict):
+                            for key, value in reg_data.items():
+                                if key in ['registrar', 'created', 'expires', 'updated']:
+                                    print(f"  {key.title()}: {value}")
+
+                    # SSL/TLS Certificate
+                    if 'ssl' in result or 'certificate' in result:
+                        print(f"\n{Colors.GREEN}SSL/TLS Certificate:{Colors.END}")
+                        cert = result.get('ssl') or result.get('certificate', {})
+                        if isinstance(cert, dict):
+                            for key, value in cert.items():
+                                if key in ['issuer', 'valid_from', 'valid_to', 'subject']:
+                                    print(f"  {key.replace('_', ' ').title()}: {value}")
+
+                    # Reputation/Risk Score
+                    if 'reputation' in result or 'risk_score' in result:
+                        print(f"\n{Colors.YELLOW}Reputation & Risk:{Colors.END}")
+                        if 'reputation' in result:
+                            print(f"  Reputation: {result['reputation']}")
+                        if 'risk_score' in result:
+                            print(f"  Risk Score: {result['risk_score']}")
+
+                    # Geolocation/Hosting
+                    if 'geolocation' in result or 'hosting' in result:
+                        print(f"\n{Colors.BLUE}Hosting & Location:{Colors.END}")
+                        geo = result.get('geolocation') or result.get('hosting', {})
+                        if isinstance(geo, dict):
+                            for key, value in geo.items():
+                                print(f"  {key.replace('_', ' ').title()}: {value}")
+
+                    # Additional metadata
+                    if 'metadata' in result:
+                        print(f"\n{Colors.CYAN}Additional Information:{Colors.END}")
+                        meta = result['metadata']
+                        if isinstance(meta, dict):
+                            for key, value in meta.items():
+                                print(f"  {key.replace('_', ' ').title()}: {value}")
+
+                print(f"\n{Colors.BOLD}Use --json flag for complete data{Colors.END}\n")
+            sys.exit(0)
+
+        # RDAP lookup
+        if args.rdap:
+            api = DNSScienceAPI(logger=logger)
+            result = api.rdap_lookup(args.rdap)
+
+            if args.json:
+                print(json.dumps(result, indent=2))
+            else:
+                # Pretty print RDAP data
+                print(f"\n{Colors.BOLD}=== RDAP Lookup Results ==={Colors.END}")
+                print(f"{Colors.CYAN}Domain:{Colors.END} {args.rdap}\n")
+
+                if 'rdap_data' in result and result['rdap_data']:
+                    for domain_data in result['rdap_data']:
+                        print(f"{Colors.GREEN}Registration Information:{Colors.END}")
+                        if 'ldhName' in domain_data:
+                            print(f"  Domain Name: {domain_data['ldhName']}")
+                        if 'registrationDate' in domain_data:
+                            print(f"  Registered: {domain_data['registrationDate']}")
+                        if 'expirationDate' in domain_data:
+                            print(f"  Expires: {domain_data['expirationDate']}")
+                        if 'lastChangedDate' in domain_data:
+                            print(f"  Last Updated: {domain_data['lastChangedDate']}")
+
+                        if 'status' in domain_data and domain_data['status']:
+                            print(f"\n{Colors.YELLOW}Status:{Colors.END}")
+                            for status in domain_data['status']:
+                                print(f"  - {status}")
+
+                        if 'nameservers' in domain_data and domain_data['nameservers']:
+                            print(f"\n{Colors.BLUE}Nameservers:{Colors.END}")
+                            for ns in domain_data['nameservers']:
+                                if isinstance(ns, dict) and 'ldhName' in ns:
+                                    print(f"  - {ns['ldhName']}")
+                                elif isinstance(ns, str):
+                                    print(f"  - {ns}")
+
+                        if 'entities' in domain_data and domain_data['entities']:
+                            print(f"\n{Colors.CYAN}Entities:{Colors.END}")
+                            for entity in domain_data['entities']:
+                                if isinstance(entity, dict):
+                                    roles = entity.get('roles', [])
+                                    if roles:
+                                        print(f"  Role: {', '.join(roles)}")
+                                    if 'vcardArray' in entity:
+                                        print(f"  Contact Info: [vCard data available]")
+                print()
+            sys.exit(0)
+
+        # Web3 domain lookup
+        if args.web3:
+            api = DNSScienceAPI(logger=logger)
+            result = api.web3_domain_lookup(args.web3)
+
+            if args.json:
+                print(json.dumps(result, indent=2))
+            else:
+                # Pretty print Web3 domain data
+                print(f"\n{Colors.BOLD}=== Web3 Domain Lookup Results ==={Colors.END}")
+                print(f"{Colors.CYAN}Domain:{Colors.END} {args.web3}\n")
+
+                if 'web3_domains' in result and result['web3_domains']:
+                    for domain_data in result['web3_domains']:
+                        print(f"{Colors.GREEN}Domain Information:{Colors.END}")
+                        if 'name' in domain_data:
+                            print(f"  Name: {domain_data['name']}")
+                        if 'blockchain' in domain_data:
+                            print(f"  Blockchain: {domain_data['blockchain']}")
+                        if 'owner' in domain_data:
+                            print(f"  Owner: {domain_data['owner']}")
+                        if 'resolver' in domain_data:
+                            print(f"  Resolver: {domain_data['resolver']}")
+                        if 'addresses' in domain_data and domain_data['addresses']:
+                            print(f"\n{Colors.YELLOW}Addresses:{Colors.END}")
+                            for addr_type, addr_value in domain_data['addresses'].items():
+                                print(f"  {addr_type}: {addr_value}")
+                        if 'records' in domain_data and domain_data['records']:
+                            print(f"\n{Colors.BLUE}Records:{Colors.END}")
+                            for record_key, record_value in domain_data['records'].items():
+                                print(f"  {record_key}: {record_value}")
+                elif 'count' in result and result['count'] == 0:
+                    print(f"{Colors.YELLOW}No Web3 domain information found{Colors.END}")
+                print()
             sys.exit(0)
 
     except Exception as e:
