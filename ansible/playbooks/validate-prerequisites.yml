@@ -1,0 +1,140 @@
+---
+# Validate Prerequisites Before Deployment
+
+- name: Check if running as root/sudo
+  fail:
+    msg: "This playbook requires root or sudo privileges"
+  when: ansible_effective_user_id != 0
+
+- name: Verify Python version
+  command: "{{ python_executable }} --version"
+  register: python_version_output
+  changed_when: false
+  failed_when: false
+
+- name: Ensure minimum Python version
+  assert:
+    that:
+      - python_version_output.stdout is search('3.[789]') or python_version_output.stderr is search('3.[789]')
+    fail_msg: "Python 3.7+ is required, found: {{ python_version_output.stdout }}{{ python_version_output.stderr }}"
+
+- name: Check available disk space
+  shell: df -h {{ base_dir }} | awk 'NR==2 {print $4}' | sed 's/G//'
+  register: disk_space
+  changed_when: false
+  failed_when: false
+
+- name: Ensure sufficient disk space
+  assert:
+    that:
+      - disk_space.stdout | float > 2.0
+    fail_msg: "Insufficient disk space. At least 2GB required, found: {{ disk_space.stdout }}GB"
+  when: disk_space.stdout | regex_search('[0-9]+')
+
+- name: Check memory availability
+  shell: free -m | awk 'NR==2 {print $7}'
+  register: available_memory
+  changed_when: false
+
+- name: Ensure sufficient memory
+  assert:
+    that:
+      - available_memory.stdout | int > 512
+    fail_msg: "Insufficient memory. At least 512MB required, found: {{ available_memory.stdout }}MB"
+
+- name: Check network connectivity
+  uri:
+    url: https://pypi.org/simple/
+    method: HEAD
+    timeout: 10
+  register: pypi_check
+  failed_when: false
+
+- name: Verify package repository access
+  assert:
+    that:
+      - pypi_check.status == 200
+    fail_msg: "Cannot reach PyPI. Check network connectivity."
+
+- name: Check database connectivity
+  wait_for:
+    host: "{{ db_host }}"
+    port: "{{ db_port }}"
+    timeout: 10
+    state: started
+  register: db_connectivity
+  failed_when: false
+
+- name: Verify database is accessible
+  assert:
+    that:
+      - db_connectivity is succeeded
+    fail_msg: "Database is not accessible at {{ db_host }}:{{ db_port }}"
+  when: db_host != 'localhost'
+
+- name: Check if AWS CLI is configured
+  command: aws sts get-caller-identity
+  register: aws_check
+  failed_when: false
+  changed_when: false
+
+- name: Display AWS identity
+  debug:
+    msg: "Deploying as AWS identity: {{ aws_check.stdout | from_json | json_query('Arn') }}"
+  when: aws_check.rc == 0
+
+- name: Check SELinux status
+  command: getenforce
+  register: selinux_status
+  changed_when: false
+  failed_when: false
+
+- name: Display SELinux status
+  debug:
+    msg: "SELinux is {{ selinux_status.stdout | default('not installed') }}"
+
+- name: Verify required commands are available
+  command: "which {{ item }}"
+  loop:
+    - git
+    - curl
+    - tar
+    - systemctl
+  register: command_check
+  failed_when: false
+  changed_when: false
+
+- name: Create required directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "{{ base_dir }}"
+    - "{{ log_dir }}"
+    - "{{ backup_dir }}"
+    - /var/cache/dnsscience
+
+- name: Check if deployment lock exists
+  stat:
+    path: /var/lock/dnsscience-deployment.lock
+  register: deployment_lock
+
+- name: Fail if another deployment is running
+  fail:
+    msg: "Another deployment is currently running. Remove /var/lock/dnsscience-deployment.lock if this is an error."
+  when: deployment_lock.stat.exists
+
+- name: Create deployment lock
+  file:
+    path: /var/lock/dnsscience-deployment.lock
+    state: touch
+    mode: '0644'
+
+- name: Display deployment information
+  debug:
+    msg:
+      - "Starting DNS Science deployment"
+      - "Environment: {{ environment }}"
+      - "Target: {{ inventory_hostname }}"
+      - "Timestamp: {{ ansible_date_time.iso8601 }}"

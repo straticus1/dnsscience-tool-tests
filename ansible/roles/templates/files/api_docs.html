@@ -1,0 +1,1815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - DNS Science</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: #667eea;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        h3 {
+            color: #333;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .toc {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .toc h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .toc ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .toc ul ul {
+            padding-left: 20px;
+        }
+
+        .toc li {
+            margin: 8px 0;
+        }
+
+        .toc a {
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .toc a:hover {
+            color: #5568d3;
+            text-decoration: underline;
+        }
+
+        .endpoint {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .method {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+
+        .method.get {
+            background: #28a745;
+            color: white;
+        }
+
+        .method.post {
+            background: #007bff;
+            color: white;
+        }
+
+        .method.put {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .method.delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .endpoint-path {
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .endpoint-description {
+            margin-top: 10px;
+            color: #666;
+        }
+
+        .code-block {
+            position: relative;
+            margin: 15px 0;
+        }
+
+        pre {
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 0;
+        }
+
+        pre code {
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 6px 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .copy-button:hover {
+            background: #5568d3;
+        }
+
+        .copy-button.copied {
+            background: #28a745;
+        }
+
+        .parameter-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .parameter-table th,
+        .parameter-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .parameter-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .parameter-table code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .badge.required {
+            background: #dc3545;
+            color: white;
+        }
+
+        .badge.optional {
+            background: #6c757d;
+            color: white;
+        }
+
+        .badge.premium {
+            background: #ffd700;
+            color: #333;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .alert.info {
+            background: #d1ecf1;
+            border-left: 4px solid #0c5460;
+            color: #0c5460;
+        }
+
+        .alert.warning {
+            background: #fff3cd;
+            border-left: 4px solid #856404;
+            color: #856404;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            border-left: 4px solid #155724;
+            color: #155724;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 50px;
+            padding: 10px 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            transition: background 0.3s;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        .theme-toggle .sun {
+            font-size: 20px;
+        }
+
+        .theme-toggle .moon {
+            font-size: 20px;
+            display: none;
+        }
+
+        /* Dark Mode Styles */
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        body.dark-mode .theme-toggle {
+            background: #2d2d2d;
+        }
+
+        body.dark-mode .theme-toggle .sun {
+            display: none;
+        }
+
+        body.dark-mode .theme-toggle .moon {
+            display: block;
+        }
+
+        body.dark-mode header,
+        body.dark-mode .content {
+            background: #2d2d2d;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode h1,
+        body.dark-mode h2,
+        body.dark-mode h3 {
+            color: #8b9cff;
+        }
+
+        body.dark-mode .subtitle {
+            color: #b0b0b0;
+        }
+
+        body.dark-mode .toc,
+        body.dark-mode .endpoint {
+            background: #1a1a1a;
+            border-color: #444;
+        }
+
+        body.dark-mode h2 {
+            border-bottom-color: #444;
+        }
+
+        body.dark-mode .endpoint-path {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .endpoint-description {
+            color: #b0b0b0;
+        }
+
+        body.dark-mode .parameter-table th {
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .parameter-table th,
+        body.dark-mode .parameter-table td {
+            border-bottom-color: #444;
+        }
+
+        body.dark-mode .parameter-table code {
+            background: #1a1a1a;
+            color: #8b9cff;
+        }
+
+        body.dark-mode code {
+            background: #1a1a1a;
+            color: #8b9cff;
+        }
+
+        .nav-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            padding: 15px 30px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        body.dark-mode .nav-bar {
+            background: rgba(45,45,45,0.95);
+        }
+
+        .nav-button {
+            padding: 8px 20px;
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nav-button:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .nav-button.primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .nav-button.primary:hover {
+            background: #5568d3;
+            border-color: #5568d3;
+        }
+
+        body.dark-mode .nav-button {
+            color: #8b9cff;
+            border-color: #8b9cff;
+        }
+
+        body.dark-mode .nav-button:hover {
+            background: #8b9cff;
+            color: #1a1a1a;
+        }
+
+        body.dark-mode .nav-button.primary {
+            background: #8b9cff;
+            color: #1a1a1a;
+        }
+
+        .search-box {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        body.dark-mode .search-box {
+            background: #1a1a1a;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        body.dark-mode .search-box input {
+            background: #2d2d2d;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        ul {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+
+        li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <div id="themeToggle" class="theme-toggle">
+        <span class="sun">☀️</span>
+        <span class="moon">🌙</span>
+    </div>
+
+    <div class="container">
+        <!-- Navigation Bar -->
+        <div class="nav-bar">
+            <a href="/" class="nav-button">Home</a>
+            <a href="/docs/api" class="nav-button primary">API Docs</a>
+            <a href="/docs/cli" class="nav-button">CLI Docs</a>
+            <a href="/login" class="nav-button">Login</a>
+            <a href="/signup" class="nav-button">Sign Up</a>
+        </div>
+
+        <header>
+            <h1>API Documentation</h1>
+            <p class="subtitle">Comprehensive REST API reference for DNS Science</p>
+        </header>
+
+        <div class="content">
+            <!-- Search Box -->
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search documentation..." onkeyup="searchDocs()">
+            </div>
+
+            <!-- Table of Contents -->
+            <div class="toc">
+                <h3>Table of Contents</h3>
+                <ul>
+                    <li><a href="#getting-started">Getting Started</a></li>
+                    <li><a href="#authentication">Authentication</a></li>
+                    <li><a href="#rate-limiting">Rate Limiting</a></li>
+                    <li><a href="#domain-endpoints">Domain Endpoints</a>
+                        <ul>
+                            <li><a href="#scan-domain">Scan Domain</a></li>
+                            <li><a href="#get-domain">Get Domain Information</a></li>
+                            <li><a href="#domain-history">Get Domain History</a></li>
+                            <li><a href="#list-domains">List All Domains</a></li>
+                            <li><a href="#search-domains">Search Domains</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#auth-endpoints">Authentication Endpoints</a></li>
+                    <li><a href="#ip-endpoints">IP Intelligence Endpoints</a>
+                        <ul>
+                            <li><a href="#scan-ip">Scan IP Address</a></li>
+                            <li><a href="#ip-reputation">Get IP Reputation</a></li>
+                            <li><a href="#ip-bgp">Get IP BGP Info</a></li>
+                            <li><a href="#ip-history">Get IP Scan History</a></li>
+                            <li><a href="#scan-range">Scan IP Range (CIDR)</a></li>
+                            <li><a href="#get-asn">Get ASN Information</a></li>
+                            <li><a href="#high-risk-ips">Get High-Risk IPs</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#certificate-endpoints">SSL Certificate Endpoints</a></li>
+                    <li><a href="#stats-endpoints">Statistics Endpoints</a></li>
+                    <li><a href="#premium-endpoints">Premium Endpoints</a>
+                        <ul>
+                            <li><a href="#dns-validation">DNS Config Validation</a></li>
+                            <li><a href="#cert-chain">Certificate Chain Resolver</a></li>
+                            <li><a href="#jks-tools">JKS Keystore Tools</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#code-examples">Code Examples</a></li>
+                </ul>
+            </div>
+
+            <!-- Getting Started -->
+            <section id="getting-started">
+                <h2>Getting Started</h2>
+                <p>The DNS Science API is a RESTful API that allows you to scan domains, retrieve DNS security information, and monitor SSL certificates. All API responses are in JSON format.</p>
+
+                <div class="alert info">
+                    <strong>Base URL:</strong> <code>https://dnsscience.com/api</code>
+                </div>
+
+                <p>All requests should include the following headers:</p>
+                <div class="code-block">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>Content-Type: application/json
+Accept: application/json</code></pre>
+                </div>
+            </section>
+
+            <!-- Authentication -->
+            <section id="authentication">
+                <h2>Authentication</h2>
+                <p>Most endpoints are public and do not require authentication. Premium features require an API key or JWT token.</p>
+
+                <h3>API Key Authentication</h3>
+                <p>Include your API key in the request header:</p>
+                <div class="code-block">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>Authorization: Bearer YOUR_API_KEY</code></pre>
+                </div>
+
+                <h3>JWT Token Authentication</h3>
+                <p>After logging in, include the JWT token in your requests:</p>
+                <div class="code-block">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>Authorization: Bearer YOUR_JWT_TOKEN</code></pre>
+                </div>
+
+                <div class="alert warning">
+                    <strong>Security Note:</strong> Never expose your API keys in client-side code. Always make API requests from your backend server.
+                </div>
+            </section>
+
+            <!-- Rate Limiting -->
+            <section id="rate-limiting">
+                <h2>Rate Limiting</h2>
+                <p>To ensure fair usage, the API implements rate limiting:</p>
+                <ul>
+                    <li><strong>Free tier:</strong> 100 requests per hour</li>
+                    <li><strong>Authenticated users:</strong> 1,000 requests per hour</li>
+                    <li><strong>Premium users:</strong> 10,000 requests per hour</li>
+                </ul>
+
+                <p>Rate limit information is included in response headers:</p>
+                <div class="code-block">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code>X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 999
+X-RateLimit-Reset: 1609459200</code></pre>
+                </div>
+            </section>
+
+            <!-- Domain Endpoints -->
+            <section id="domain-endpoints">
+                <h2>Domain Endpoints</h2>
+
+                <!-- Scan Domain -->
+                <div id="scan-domain" class="endpoint">
+                    <h3>
+                        <span class="method post">POST</span>
+                        <span class="endpoint-path">/api/scan</span>
+                    </h3>
+                    <p class="endpoint-description">Scan a domain for DNS security configurations including DNSSEC, SPF, DKIM, DMARC, MTA-STS, and SMTP STARTTLS.</p>
+
+                    <h4>Request Body</h4>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>domain</code></td>
+                                <td>string</td>
+                                <td><span class="badge required">Required</span></td>
+                                <td>Domain name to scan (e.g., example.com)</td>
+                            </tr>
+                            <tr>
+                                <td><code>check_ssl</code></td>
+                                <td>boolean</td>
+                                <td><span class="badge optional">Optional</span></td>
+                                <td>Include SSL certificate scanning (default: true)</td>
+                            </tr>
+                            <tr>
+                                <td><code>advanced</code></td>
+                                <td>boolean</td>
+                                <td><span class="badge optional">Optional</span></td>
+                                <td>Enable advanced mode with comprehensive security checks</td>
+                            </tr>
+                            <tr>
+                                <td><code>expert</code></td>
+                                <td>boolean</td>
+                                <td><span class="badge optional">Optional</span></td>
+                                <td><span class="badge new">NEW</span> Enable expert mode with customizable intelligence sources</td>
+                            </tr>
+                            <tr>
+                                <td><code>options</code></td>
+                                <td>object</td>
+                                <td><span class="badge optional">Optional</span></td>
+                                <td><span class="badge new">NEW</span> Expert mode options: dns, security, email, intel categories</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Example Request (Simple)</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code class="language-bash">curl -X POST https://dnsscience.com/api/scan \
+  -H "Content-Type: application/json" \
+  -d '{"domain": "example.com", "check_ssl": true}'</code></pre>
+                    </div>
+
+                    <h4>Example Request (Expert Mode)</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code class="language-bash">curl -X POST https://dnsscience.com/api/scan \
+  -H "Content-Type: application/json" \
+  -d '{
+    "domain": "example.com",
+    "expert": true,
+    "options": {
+      "dns": ["records", "dnssec", "propagation"],
+      "security": ["ssl", "ssl-chain", "cert-transparency"],
+      "email": ["spf", "dkim", "dmarc", "mx-health"],
+      "intel": ["whois", "reputation", "threat"]
+    }
+  }'</code></pre>
+                    </div>
+
+                    <h4>Example Response</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code class="language-json">{
+  "domain": "example.com",
+  "dnssec_enabled": true,
+  "dnssec_valid": true,
+  "dnssec_details": "DNSSEC validation successful",
+  "spf_valid": true,
+  "spf_record": "v=spf1 include:_spf.google.com ~all",
+  "spf_details": "SPF record found and valid",
+  "dkim_valid": true,
+  "dkim_selectors": "[\"default\", \"google\"]",
+  "dkim_details": "2 DKIM selectors found",
+  "mta_sts_enabled": true,
+  "mta_sts_details": "MTA-STS policy found",
+  "mta_sts_policy": "version: STSv1\nmode: enforce\nmax_age: 604800",
+  "smtp_starttls_25": true,
+  "smtp_starttls_587": true,
+  "smtp_details": "STARTTLS available on both ports",
+  "ssl_certificates": [...]
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- Get Domain -->
+                <div id="get-domain" class="endpoint">
+                    <h3>
+                        <span class="method get">GET</span>
+                        <span class="endpoint-path">/api/domain/{domain}</span>
+                    </h3>
+                    <p class="endpoint-description">Retrieve the latest scan results for a specific domain.</p>
+
+                    <h4>URL Parameters</h4>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>domain</code></td>
+                                <td>string</td>
+                                <td>Domain name to retrieve</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Example Request</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code class="language-bash">curl https://dnsscience.com/api/domain/example.com</code></pre>
+                    </div>
+                </div>
+
+                <!-- Domain History -->
+                <div id="domain-history" class="endpoint">
+                    <h3>
+                        <span class="method get">GET</span>
+                        <span class="endpoint-path">/api/domain/{domain}/history</span>
+                    </h3>
+                    <p class="endpoint-description">Retrieve scan history for a domain to track configuration changes over time.</p>
+
+                    <h4>Query Parameters</h4>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Default</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>limit</code></td>
+                                <td>integer</td>
+                                <td>100</td>
+                                <td>Maximum number of history entries to return</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Example Request</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code class="language-bash">curl https://dnsscience.com/api/domain/example.com/history?limit=10</code></pre>
+                    </div>
+
+                    <h4>Example Response</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code class="language-json">{
+  "domain": "example.com",
+  "count": 10,
+  "history": [
+    {
+      "scan_timestamp": "2025-11-09T10:30:00Z",
+      "dnssec_enabled": true,
+      "spf_valid": true,
+      "dkim_valid": true,
+      ...
+    }
+  ]
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- List Domains -->
+                <div id="list-domains" class="endpoint">
+                    <h3>
+                        <span class="method get">GET</span>
+                        <span class="endpoint-path">/api/domains</span>
+                    </h3>
+                    <p class="endpoint-description">List all tracked domains with pagination support.</p>
+
+                    <h4>Query Parameters</h4>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Default</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>limit</code></td>
+                                <td>integer</td>
+                                <td>100</td>
+                                <td>Maximum number of domains to return</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Example Request</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code class="language-bash">curl https://dnsscience.com/api/domains?limit=50</code></pre>
+                    </div>
+                </div>
+
+                <!-- Search Domains -->
+                <div id="search-domains" class="endpoint">
+                    <h3>
+                        <span class="method get">GET</span>
+                        <span class="endpoint-path">/api/search</span>
+                    </h3>
+                    <p class="endpoint-description">Search for domains by name or pattern.</p>
+
+                    <h4>Query Parameters</h4>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>q</code></td>
+                                <td>string</td>
+                                <td>Search query</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Example Request</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code class="language-bash">curl https://dnsscience.com/api/search?q=google</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- IP Intelligence Endpoints -->
+            <section id="ip-endpoints">
+                <h2>IP Intelligence Endpoints</h2>
+                <p>Comprehensive IP address intelligence including geolocation, BGP routing, threat intelligence, and network information.</p>
+
+                <!-- Scan IP Address -->
+                <div id="scan-ip" class="endpoint">
+                    <h3>
+                        <span class="method get">GET</span>
+                        <span class="endpoint-path">/api/ip/&lt;ip&gt;/scan</span>
+                    </h3>
+                    <p class="endpoint-description">Comprehensive scan of an IP address including geolocation, network info, BGP routing, reputation, and blacklist checks.</p>
+
+                    <h4>Path Parameters</h4>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>ip</code></td>
+                                <td>string</td>
+                                <td>IPv4 address to scan (e.g., 8.8.8.8)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Query Parameters</h4>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Default</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>force_refresh</code></td>
+                                <td>boolean</td>
+                                <td>false</td>
+                                <td>Bypass cache and force fresh scan</td>
+                            </tr>
+                            <tr>
+                                <td><code>full_scan</code></td>
+                                <td>boolean</td>
+                                <td>true</td>
+                                <td>Include full details (BGP, WHOIS, RBLs)</td>
+                            </tr>
+                            <tr>
+                                <td><code>advanced</code></td>
+                                <td>boolean</td>
+                                <td>false</td>
+                                <td><strong>🔬 Advanced Mode:</strong> Enable comprehensive analysis with Cloudflare DNS intelligence, IPInfo privacy detection (VPN/Proxy/Tor/Hosting), AbuseIPDB threat intelligence, enhanced BGP analysis, and comprehensive RBL checks</td>
+                            </tr>
+                            <tr>
+                                <td><code>expert</code></td>
+                                <td>boolean</td>
+                                <td>false</td>
+                                <td><span class="badge new">NEW</span> <strong>🎯 Expert Mode:</strong> Customize intelligence sources and scan options with granular control</td>
+                            </tr>
+                            <tr>
+                                <td><code>options</code></td>
+                                <td>string (JSON)</td>
+                                <td>null</td>
+                                <td><span class="badge new">NEW</span> Expert mode options: geo, security, advanced categories (JSON string)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Example Requests</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code># Standard scan
+curl https://dnsscience.com/api/ip/8.8.8.8/scan
+
+# Advanced scan with all intelligence sources
+curl https://dnsscience.com/api/ip/8.8.8.8/scan?advanced=true
+
+# Expert mode with customizable sources
+curl 'https://dnsscience.com/api/ip/8.8.8.8/scan?expert=true&options={"geo":["ipinfo","maxmind"],"security":["abuseipdb","rbl"]}'
+
+# Force fresh advanced scan
+curl https://dnsscience.com/api/ip/8.8.8.8/scan?advanced=true&force_refresh=true</code></pre>
+                    </div>
+
+                    <h4>Example Response</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code>{
+  "ip": "8.8.8.8",
+  "scan_timestamp": "2025-01-12T10:30:00Z",
+  "scan_duration_ms": 2341,
+  "ip_version": 4,
+  "is_private": false,
+  "geolocation": {
+    "country": "US",
+    "region": "California",
+    "city": "Mountain View",
+    "postal_code": "94035",
+    "coordinates": {
+      "latitude": 37.4056,
+      "longitude": -122.0775
+    },
+    "timezone": "America/Los_Angeles"
+  },
+  "network": {
+    "asn": 15169,
+    "asn_name": "GOOGLE",
+    "organization": "AS15169 Google LLC",
+    "isp": "Google LLC",
+    "hostname": "dns.google",
+    "is_vpn": false,
+    "is_proxy": false,
+    "is_tor": false,
+    "is_hosting": true
+  },
+  "bgp": {
+    "prefix": "8.8.8.0/24",
+    "origin_asn": 15169,
+    "asn_name": "GOOGLE",
+    "asn_country": "US",
+    "is_announced": true,
+    "path": [15169, 7018, 3356]
+  },
+  "reputation": {
+    "abuse_confidence": 0,
+    "total_reports": 0,
+    "num_distinct_users": 0,
+    "last_reported_at": null,
+    "is_whitelisted": false,
+    "usage_type": "Data Center/Web Hosting/Transit",
+    "isp": "Google LLC",
+    "domain": "google.com",
+    "threat_categories": [],
+    "blacklists": {
+      "hit_count": 0,
+      "listed_in": [],
+      "details": {
+        "spamhaus_zen": {"listed": false},
+        "spamhaus_sbl": {"listed": false},
+        "spamhaus_xbl": {"listed": false},
+        "sorbs": {"listed": false},
+        "barracuda": {"listed": false},
+        "spamcop": {"listed": false}
+      }
+    }
+  },
+  "whois": {
+    "net_name": "GOOGLE",
+    "description": "Google LLC",
+    "country": "US",
+    "net_range": "8.8.8.0 - 8.8.8.255",
+    "abuse_contact": "network-abuse@google.com"
+  },
+  "reverse_dns": {
+    "has_ptr": true,
+    "ptr_record": "dns.google",
+    "ptr_records": ["dns.google"]
+  },
+  "data_sources": ["ipinfo", "abuseipdb", "ripestat_bgp", "whois", "rbl", "ptr"],
+  "errors": []
+}</code></pre>
+                    </div>
+
+                    <h4>Response Fields</h4>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>geolocation</code></td>
+                                <td>object</td>
+                                <td>Geographic location data from IPInfo.io (country, region, city, coordinates, timezone)</td>
+                            </tr>
+                            <tr>
+                                <td><code>network.is_vpn</code></td>
+                                <td>boolean</td>
+                                <td>IPInfo.io privacy detection: VPN detected (requires paid tier)</td>
+                            </tr>
+                            <tr>
+                                <td><code>network.is_proxy</code></td>
+                                <td>boolean</td>
+                                <td>IPInfo.io privacy detection: Proxy detected (requires paid tier)</td>
+                            </tr>
+                            <tr>
+                                <td><code>network.is_tor</code></td>
+                                <td>boolean</td>
+                                <td>IPInfo.io privacy detection: Tor exit node detected (requires paid tier)</td>
+                            </tr>
+                            <tr>
+                                <td><code>network.is_hosting</code></td>
+                                <td>boolean</td>
+                                <td>IPInfo.io privacy detection: Datacenter/hosting IP (requires paid tier)</td>
+                            </tr>
+                            <tr>
+                                <td><code>reputation.abuse_confidence</code></td>
+                                <td>integer</td>
+                                <td>AbuseIPDB confidence score (0-100) indicating likelihood of malicious activity</td>
+                            </tr>
+                            <tr>
+                                <td><code>reputation.threat_categories</code></td>
+                                <td>array</td>
+                                <td>AbuseIPDB threat category IDs (3=Fraud, 4=DDoS, 9=Hacking, 10=Spam, 11=Malware, etc.)</td>
+                            </tr>
+                            <tr>
+                                <td><code>reputation.num_distinct_users</code></td>
+                                <td>integer</td>
+                                <td>Number of distinct users who reported this IP to AbuseIPDB</td>
+                            </tr>
+                            <tr>
+                                <td><code>reputation.blacklists</code></td>
+                                <td>object</td>
+                                <td>RBL/DNSBL check results from 10+ blacklist databases</td>
+                            </tr>
+                            <tr>
+                                <td><code>whois.abuse_contact</code></td>
+                                <td>string</td>
+                                <td>Abuse contact email from WHOIS/RIPEstat data</td>
+                            </tr>
+                            <tr>
+                                <td><code>data_sources</code></td>
+                                <td>array</td>
+                                <td>List of successfully queried data sources</td>
+                            </tr>
+                            <tr>
+                                <td><code>errors</code></td>
+                                <td>array</td>
+                                <td>Any errors encountered while querying data sources</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Get IP Reputation -->
+                <div id="ip-reputation" class="endpoint">
+                    <h3>
+                        <span class="method get">GET</span>
+                        <span class="endpoint-path">/api/ip/&lt;ip&gt;/reputation</span>
+                    </h3>
+                    <p class="endpoint-description">Quick reputation check for an IP address (abuse confidence, reports, blacklists).</p>
+
+                    <h4>Example Request</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code>curl https://dnsscience.com/api/ip/45.33.32.156/reputation</code></pre>
+                    </div>
+
+                    <h4>Example Response</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code>{
+  "ip": "45.33.32.156",
+  "abuse_confidence": 0,
+  "total_reports": 0,
+  "blacklists": {
+    "total_hits": 0,
+    "details": {
+      "spamhaus": {"listed": false},
+      "sorbs": {"listed": false},
+      "barracuda": {"listed": false}
+    }
+  },
+  "is_tor": false,
+  "is_proxy": false,
+  "is_vpn": false
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- Get IP BGP Info -->
+                <div id="ip-bgp" class="endpoint">
+                    <h3>
+                        <span class="method get">GET</span>
+                        <span class="endpoint-path">/api/ip/&lt;ip&gt;/bgp</span>
+                    </h3>
+                    <p class="endpoint-description">Get BGP routing information for an IP address.</p>
+
+                    <h4>Example Response</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code>{
+  "ip": "1.1.1.1",
+  "bgp": {
+    "prefix": "1.1.1.0/24",
+    "origin_asn": 13335,
+    "as_path": [13335],
+    "is_announced": true,
+    "rpki_status": "valid"
+  }
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- Get IP History -->
+                <div id="ip-history" class="endpoint">
+                    <h3>
+                        <span class="method get">GET</span>
+                        <span class="endpoint-path">/api/ip/&lt;ip&gt;/history</span>
+                    </h3>
+                    <p class="endpoint-description">Get historical scan data for an IP address.</p>
+
+                    <h4>Query Parameters</h4>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Default</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>limit</code></td>
+                                <td>integer</td>
+                                <td>50</td>
+                                <td>Number of historical scans to return</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Scan IP Range -->
+                <div id="scan-range" class="endpoint">
+                    <h3>
+                        <span class="method get">GET</span>
+                        <span class="endpoint-path">/api/range/&lt;cidr&gt;/scan</span>
+                    </h3>
+                    <p class="endpoint-description">Scan an IP range in CIDR notation with authentication-based limits.</p>
+
+                    <h4>Path Parameters</h4>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>cidr</code></td>
+                                <td>string</td>
+                                <td>CIDR notation (e.g., 192.168.1.0/24)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Query Parameters</h4>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Default</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>max_ips</code></td>
+                                <td>integer</td>
+                                <td>256</td>
+                                <td>Maximum IPs to scan (authenticated users: up to 65536)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Access Control</h4>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>User Type</th>
+                                <th>Maximum Range</th>
+                                <th>Max IPs</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Anonymous</strong></td>
+                                <td>/24 or smaller</td>
+                                <td>256</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Authenticated</strong></td>
+                                <td>/16 or smaller</td>
+                                <td>65,536</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Example Requests</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code># Anonymous users - /24 or smaller
+curl "https://dnsscience.com/api/range/8.8.8.0%2F24/scan"
+
+# Authenticated users can scan larger ranges
+curl -H "Authorization: Bearer YOUR_API_KEY" \
+     "https://dnsscience.com/api/range/8.8.0.0%2F20/scan?max_ips=4096"</code></pre>
+                    </div>
+
+                    <h4>Example Response</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code>{
+  "cidr": "8.8.8.0/29",
+  "total_ips": 8,
+  "scanned_ips": 6,
+  "results": [
+    {
+      "ip": "8.8.8.1",
+      "geolocation": {...},
+      "network": {...},
+      "reputation": {...}
+    },
+    ...
+  ],
+  "summary": {
+    "alive_ips": 6,
+    "threat_ips": 0,
+    "blacklisted_ips": 0,
+    "countries": {"US": 6},
+    "asns": {15169: 6}
+  }
+}</code></pre>
+                    </div>
+
+                    <div class="alert warning">
+                        <strong>Note:</strong> Range scanning limits are enforced based on authentication status. Anonymous users are limited to /24 (256 IPs) to prevent abuse. <a href="/login">Login</a> to scan larger ranges.
+                    </div>
+                </div>
+
+                <!-- Get ASN Information -->
+                <div id="get-asn" class="endpoint">
+                    <h3>
+                        <span class="method get">GET</span>
+                        <span class="endpoint-path">/api/asn/&lt;asn&gt;</span>
+                    </h3>
+                    <p class="endpoint-description">Get Autonomous System information by ASN number.</p>
+
+                    <h4>Example Request</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code>curl https://dnsscience.com/api/asn/15169</code></pre>
+                    </div>
+
+                    <h4>Example Response</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code>{
+  "asn": 15169,
+  "name": "GOOGLE",
+  "description": "Google LLC",
+  "country": "US",
+  "announced_prefixes": 256,
+  "prefixes": [
+    "8.8.8.0/24",
+    "8.8.4.0/24",
+    ...
+  ]
+}</code></pre>
+                    </div>
+                </div>
+
+                <!-- Get High-Risk IPs -->
+                <div id="high-risk-ips" class="endpoint">
+                    <h3>
+                        <span class="method get">GET</span>
+                        <span class="endpoint-path">/api/ips/high-risk</span>
+                    </h3>
+                    <p class="endpoint-description">Get list of IPs with high abuse confidence scores.</p>
+
+                    <h4>Query Parameters</h4>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Default</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>limit</code></td>
+                                <td>integer</td>
+                                <td>100</td>
+                                <td>Number of IPs to return</td>
+                            </tr>
+                            <tr>
+                                <td><code>min_confidence</code></td>
+                                <td>integer</td>
+                                <td>75</td>
+                                <td>Minimum abuse confidence score (0-100)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Example Response</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code>{
+  "total": 42,
+  "ips": [
+    {
+      "ip": "185.220.101.15",
+      "abuse_confidence": 100,
+      "total_reports": 543,
+      "country": "NL",
+      "asn": 206898,
+      "last_seen": "2025-11-12T07:30:00Z"
+    },
+    ...
+  ]
+}</code></pre>
+                    </div>
+                </div>
+
+                <div class="alert info">
+                    <strong>Data Sources:</strong> IP intelligence data is aggregated from multiple sources including IPinfo, AbuseIPDB, RIPEstat, BGPView, and 10+ DNS-based blacklists. Results are cached for 6-24 hours depending on data type.
+                </div>
+            </section>
+
+            <!-- Authentication Endpoints -->
+            <section id="auth-endpoints">
+                <h2>Authentication Endpoints</h2>
+
+                <div class="endpoint">
+                    <h3>
+                        <span class="method post">POST</span>
+                        <span class="endpoint-path">/api/auth/register</span>
+                    </h3>
+                    <p class="endpoint-description">Register a new user account.</p>
+
+                    <h4>Request Body</h4>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>email</code></td>
+                                <td>string</td>
+                                <td><span class="badge required">Required</span></td>
+                                <td>User email address</td>
+                            </tr>
+                            <tr>
+                                <td><code>password</code></td>
+                                <td>string</td>
+                                <td><span class="badge required">Required</span></td>
+                                <td>User password (min 8 characters)</td>
+                            </tr>
+                            <tr>
+                                <td><code>first_name</code></td>
+                                <td>string</td>
+                                <td><span class="badge optional">Optional</span></td>
+                                <td>User first name</td>
+                            </tr>
+                            <tr>
+                                <td><code>last_name</code></td>
+                                <td>string</td>
+                                <td><span class="badge optional">Optional</span></td>
+                                <td>User last name</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Example Request</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code class="language-bash">curl -X POST https://dnsscience.com/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "securepassword123",
+    "first_name": "John",
+    "last_name": "Doe"
+  }'</code></pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <h3>
+                        <span class="method post">POST</span>
+                        <span class="endpoint-path">/api/auth/login</span>
+                    </h3>
+                    <p class="endpoint-description">Authenticate and receive a JWT token.</p>
+
+                    <h4>Request Body</h4>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>email</code></td>
+                                <td>string</td>
+                                <td><span class="badge required">Required</span></td>
+                                <td>User email address</td>
+                            </tr>
+                            <tr>
+                                <td><code>password</code></td>
+                                <td>string</td>
+                                <td><span class="badge required">Required</span></td>
+                                <td>User password</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Example Response</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code class="language-json">{
+  "success": true,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": 123,
+    "email": "user@example.com",
+    "first_name": "John"
+  }
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Statistics Endpoints -->
+            <section id="stats-endpoints">
+                <h2>Statistics Endpoints</h2>
+
+                <div class="endpoint">
+                    <h3>
+                        <span class="method get">GET</span>
+                        <span class="endpoint-path">/api/stats/live</span>
+                    </h3>
+                    <p class="endpoint-description">Get real-time platform statistics including total domains, SSL certificates, and threat intelligence data.</p>
+
+                    <h4>Example Response</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code class="language-json">{
+  "total_domains": 125000,
+  "ssl_certificates": 87500,
+  "email_records": 156000,
+  "drift_monitoring": 42000,
+  "ips_tracked": 98000,
+  "active_feeds": 20,
+  "last_updated": "2025-11-09T10:30:00Z"
+}</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Premium Endpoints -->
+            <section id="premium-endpoints">
+                <h2>Premium Endpoints <span class="badge premium">PREMIUM</span></h2>
+
+                <div class="alert warning">
+                    <strong>Premium Features:</strong> The following endpoints require a premium subscription and API authentication.
+                </div>
+
+                <!-- DNS Config Validation -->
+                <div id="dns-validation" class="endpoint">
+                    <h3>
+                        <span class="method post">POST</span>
+                        <span class="endpoint-path">/api/validate/dns-config</span>
+                        <span class="badge premium">PREMIUM</span>
+                    </h3>
+                    <p class="endpoint-description">Validate uploaded DNS configuration files (BIND9, Unbound, NSD, djbdns).</p>
+
+                    <h4>Request (multipart/form-data)</h4>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>file</code></td>
+                                <td>file</td>
+                                <td>DNS configuration file</td>
+                            </tr>
+                            <tr>
+                                <td><code>server_type</code></td>
+                                <td>string</td>
+                                <td>Server type (bind9, unbound, nsd, djbdns) - optional, auto-detected</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Example Request</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code class="language-bash">curl -X POST https://dnsscience.com/api/validate/dns-config \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@named.conf" \
+  -F "server_type=bind9"</code></pre>
+                    </div>
+                </div>
+
+                <!-- Certificate Chain Resolver -->
+                <div id="cert-chain" class="endpoint">
+                    <h3>
+                        <span class="method post">POST</span>
+                        <span class="endpoint-path">/api/cert/resolve-chain</span>
+                        <span class="badge premium">PREMIUM</span>
+                    </h3>
+                    <p class="endpoint-description">Automatically resolve and download complete certificate chain from a leaf certificate.</p>
+
+                    <h4>Request (multipart/form-data)</h4>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>file</code></td>
+                                <td>file</td>
+                                <td>Certificate file (PEM, DER, CRT)</td>
+                            </tr>
+                            <tr>
+                                <td><code>export_format</code></td>
+                                <td>string</td>
+                                <td>Export format (pem, der, pkcs7) - optional</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Example Request</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code class="language-bash">curl -X POST https://dnsscience.com/api/cert/resolve-chain \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@certificate.pem" \
+  -F "export_format=pem"</code></pre>
+                    </div>
+                </div>
+
+                <!-- JKS Validation -->
+                <div id="jks-tools" class="endpoint">
+                    <h3>
+                        <span class="method post">POST</span>
+                        <span class="endpoint-path">/api/jks/validate</span>
+                        <span class="badge premium">PREMIUM</span>
+                    </h3>
+                    <p class="endpoint-description">Validate Java KeyStore (JKS) files and check certificate chain integrity.</p>
+
+                    <h4>Request (multipart/form-data)</h4>
+                    <table class="parameter-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>file</code></td>
+                                <td>file</td>
+                                <td>JKS keystore file</td>
+                            </tr>
+                            <tr>
+                                <td><code>password</code></td>
+                                <td>string</td>
+                                <td>Keystore password</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Example Request</h4>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                        <pre><code class="language-bash">curl -X POST https://dnsscience.com/api/jks/validate \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@keystore.jks" \
+  -F "password=changeit"</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Code Examples -->
+            <section id="code-examples">
+                <h2>Code Examples</h2>
+
+                <h3>Python</h3>
+                <div class="code-block">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code class="language-python">import requests
+
+# Scan a domain
+response = requests.post(
+    'https://dnsscience.com/api/scan',
+    json={'domain': 'example.com', 'check_ssl': True}
+)
+
+result = response.json()
+print(f"DNSSEC Enabled: {result['dnssec_enabled']}")
+print(f"SPF Valid: {result['spf_valid']}")
+
+# Get domain history with authentication
+headers = {'Authorization': 'Bearer YOUR_API_KEY'}
+response = requests.get(
+    'https://dnsscience.com/api/domain/example.com/history',
+    params={'limit': 10},
+    headers=headers
+)
+
+history = response.json()
+print(f"Found {history['count']} historical scans")</code></pre>
+                </div>
+
+                <h3>JavaScript (Node.js)</h3>
+                <div class="code-block">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code class="language-javascript">const axios = require('axios');
+
+// Scan a domain
+async function scanDomain(domain) {
+  try {
+    const response = await axios.post('https://dnsscience.com/api/scan', {
+      domain: domain,
+      check_ssl: true
+    });
+
+    console.log('DNSSEC Enabled:', response.data.dnssec_enabled);
+    console.log('SPF Valid:', response.data.spf_valid);
+    return response.data;
+  } catch (error) {
+    console.error('Error:', error.response.data);
+  }
+}
+
+// Get domain history with authentication
+async function getDomainHistory(domain) {
+  try {
+    const response = await axios.get(
+      `https://dnsscience.com/api/domain/${domain}/history`,
+      {
+        params: { limit: 10 },
+        headers: { 'Authorization': 'Bearer YOUR_API_KEY' }
+      }
+    );
+
+    console.log(`Found ${response.data.count} historical scans`);
+    return response.data;
+  } catch (error) {
+    console.error('Error:', error.response.data);
+  }
+}
+
+scanDomain('example.com');</code></pre>
+                </div>
+
+                <h3>cURL</h3>
+                <div class="code-block">
+                    <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    <pre><code class="language-bash"># Scan a domain
+curl -X POST https://dnsscience.com/api/scan \
+  -H "Content-Type: application/json" \
+  -d '{"domain": "example.com", "check_ssl": true}'
+
+# Get domain information
+curl https://dnsscience.com/api/domain/example.com
+
+# Search domains
+curl "https://dnsscience.com/api/search?q=google"
+
+# Get domain history (authenticated)
+curl https://dnsscience.com/api/domain/example.com/history?limit=10 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+
+# Upload and validate DNS config (premium)
+curl -X POST https://dnsscience.com/api/validate/dns-config \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@named.conf" \
+  -F "server_type=bind9"</code></pre>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        // Copy Code Function
+        function copyCode(button) {
+            const codeBlock = button.nextElementSibling;
+            const code = codeBlock.textContent;
+
+            navigator.clipboard.writeText(code).then(() => {
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Search Documentation
+        function searchDocs() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const sections = document.querySelectorAll('.endpoint, section');
+
+            sections.forEach(section => {
+                const text = section.textContent.toLowerCase();
+                if (text.includes(searchTerm) || searchTerm === '') {
+                    section.style.display = '';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        }
+
+        // Syntax highlighting
+        hljs.highlightAll();
+    </script>
+</body>
+</html>

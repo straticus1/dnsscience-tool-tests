@@ -1,0 +1,166 @@
+
+[0;34m======================================================================
+DNS SCIENCE - COMPLETE VISUAL TRACEROUTE DEPLOYMENT
+======================================================================[0m
+
+[0;36mDeploying: Templates + Static Files + Routes + Everything[0m
+
+
+[0;34m======================================================================
+STEP 1: Uploading ALL Files to S3
+======================================================================[0m
+
+[0;36m[09:01:13] INFO:[0m Uploading templates/visualtrace.html...
+[0;36m[09:01:13] INFO:[0m Uploading static/js/visualtrace.js...
+[0;36m[09:01:13] INFO:[0m Uploading static/data/root_servers.json...
+[0;36m[09:01:13] INFO:[0m Uploading visual_traceroute.py...
+[0;32m[09:01:14][0m All files uploaded to S3
+
+
+[0;34m======================================================================
+STEP 2: Downloading Files on Instance
+======================================================================[0m
+
+[0;36m[09:01:14] INFO:[0m Downloading all deployment files from S3
+Completed 18.8 KiB/44.0 KiB (220.3 KiB/s) with 4 file(s) remainingCompleted 30.8 KiB/44.0 KiB (359.7 KiB/s) with 4 file(s) remainingCompleted 40.2 KiB/44.0 KiB (458.9 KiB/s) with 4 file(s) remainingdownload: s3://dnsscience-deployment/complete_visual_trace/20251115_090113/static/js/visualtrace.js to static/js/visualtrace.js
+Completed 40.2 KiB/44.0 KiB (458.9 KiB/s) with 3 file(s) remainingdownload: s3://dnsscience-deployment/complete_visual_trace/20251115_090113/templates/visualtrace.html to templates/visualtrace.html
+Completed 40.2 KiB/44.0 KiB (458.9 KiB/s) with 2 file(s) remainingdownload: s3://dnsscience-deployment/complete_visual_trace/20251115_090113/visual_traceroute.py to ./visual_traceroute.py
+Completed 40.2 KiB/44.0 KiB (458.9 KiB/s) with 1 file(s) remainingCompleted 44.0 KiB/44.0 KiB (483.3 KiB/s) with 1 file(s) remainingdownload: s3://dnsscience-deployment/complete_visual_trace/20251115_090113/static/data/root_servers.json to static/data/root_servers.json
+./visual_traceroute.py
+./templates/visualtrace.html
+./static/js/visualtrace.js
+./static/data/root_servers.json
+Files downloaded
+
+
+[0;34m======================================================================
+STEP 3: Deploying visualtrace.html Template
+======================================================================[0m
+
+[0;36m[09:01:17] INFO:[0m Deploying visualtrace.html template
+-rw-r--r-- 1 www-data www-data 12K Nov 15 14:01 templates/visualtrace.html
+
+
+[0;34m======================================================================
+STEP 4: Deploying Static Files (JS, Data)
+======================================================================[0m
+
+[0;36m[09:01:20] INFO:[0m Deploying static files
+-rw-r--r-- 1 www-data www-data 19K Nov 15 14:01 static/js/visualtrace.js
+-rw-r--r-- 1 www-data www-data 3.8K Nov 15 14:01 static/data/root_servers.json
+
+
+[0;34m======================================================================
+STEP 5: Adding Visual Traceroute Link to Tools Page
+======================================================================[0m
+
+[0;36m[09:01:23] INFO:[0m Adding Visual Traceroute to tools page
+Visual Traceroute card added to tools.html
+
+
+[0;34m======================================================================
+STEP 6: Adding Flask Routes for Visual Traceroute
+======================================================================[0m
+
+[0;36m[09:01:26] INFO:[0m Adding Flask routes
+Visual traceroute routes added to app.py
+def visualtrace():
+    Visual
+if __name__ == '__main__':
+    # Start WebSocket background tasks
+    ws_manager.start_background_tasks()
+
+
+
+[0;34m======================================================================
+STEP 7: Deploying Traceroute API Backend
+======================================================================[0m
+
+[0;36m[09:01:29] INFO:[0m Deploying traceroute API
+Traceroute blueprint registered
+-rw-r--r-- 1 www-data www-data 9.5K Nov 15 14:01 visual_traceroute.py
+
+
+[0;34m======================================================================
+STEP 8: Restarting Apache
+======================================================================[0m
+
+[0;36m[09:01:33] INFO:[0m Restarting Apache
+● apache2.service - The Apache HTTP Server
+     Loaded: loaded (/lib/systemd/system/apache2.service; enabled; vendor preset: enabled)
+     Active: active (running) since Sat 2025-11-15 14:01:33 UTC; 2s ago
+       Docs: https://httpd.apache.org/docs/2.4/
+    Process: 27954 ExecStart=/usr/sbin/apachectl start (code=exited, status=0/SUCCESS)
+   Main PID: 27960 (apache2)
+      Tasks: 63 (limit: 4580)
+     Memory: 38.9M
+        CPU: 397ms
+     CGroup: /system.slice/apache2.service
+
+
+[0;34m======================================================================
+STEP 9: DEPLOYMENT VERIFICATION
+======================================================================[0m
+
+[0;36m[09:01:36] INFO:[0m Checking visualtrace.html exists...
+[0;36m[09:01:36] INFO:[0m Verify template exists
+-rw-r--r-- 1 www-data www-data 12K Nov 15 14:01 /var/www/dnsscience/templates/visualtrace.html
+
+[0;36m[09:01:39] INFO:[0m Checking static files...
+[0;36m[09:01:39] INFO:[0m Verify static files
+-rw-r--r-- 1 www-data www-data 19K Nov 15 14:01 /var/www/dnsscience/static/js/visualtrace.js
+-rw-r--r-- 1 www-data www-data 3.8K Nov 15 14:01 /var/www/dnsscience/static/data/root_servers.json
+
+[0;36m[09:01:42] INFO:[0m Checking tools.html has Visual Traceroute link...
+[0;36m[09:01:42] INFO:[0m Verify tools page link
+[0;36m[09:01:45] INFO:[0m Checking Flask routes...
+[0;36m[09:01:45] INFO:[0m Verify Flask route
+def visualtrace():
+    Visual
+if __name__ == '__main__':
+    # Start WebSocket background tasks
+
+
+[0;34m======================================================================
+DEPLOYMENT COMPLETE!
+======================================================================[0m
+
+
+[0;32mSummary of Deployment:[0m
+----------------------
+[0;32m✓[0m Template: visualtrace.html deployed
+[0;32m✓[0m Static JS: visualtrace.js with router/firewall icons deployed
+[0;32m✓[0m Static Data: root_servers.json deployed
+[0;32m✓[0m Tools Page: Visual Traceroute card added
+[0;32m✓[0m Flask Routes: /visualtrace endpoint added
+[0;32m✓[0m API Endpoints: /api/remote-locations added
+[0;32m✓[0m Apache: Restarted
+
+[0;36mTest URLs:[0m
+----------
+1. Tools page (should show Visual Traceroute card):
+   [0;34mhttps://www.dnsscience.io/tools[0m
+
+2. Visual Traceroute page (should load):
+   [0;34mhttps://www.dnsscience.io/visualtrace[0m
+
+[0;36mFeatures Deployed:[0m
+------------------
+• Interactive world map with dark theme
+• DNS root servers (A-M) marked in red
+• Router hop markers with color gradient (green → yellow → red)
+• Brick wall icons (🧱) for packet filter / timeout hops
+• Live traceroute execution
+• GeoIP location mapping
+• Export results as JSON
+• Copy results to clipboard
+
+[1;33mIf /visualtrace returns 404:[0m
+---------------------------
+The Flask route may need manual verification. Check:
+1. app.py has the @app.route('/visualtrace') decorator
+2. Apache WSGI is configured correctly
+3. Apache error logs: sudo tail -50 /var/log/apache2/error.log
+
+[0;32mDEPLOYMENT SUCCESSFUL![0m
+

@@ -1,0 +1,166 @@
+
+[0;34m======================================================================
+DNS SCIENCE - VISUAL TRACEROUTE ENHANCEMENTS
+======================================================================[0m
+
+[0;36mDeploying: Home Navigation + Router Hop Markers + Packet Filter Icons[0m
+
+
+[0;34m======================================================================
+STEP 1: Uploading Files to S3
+======================================================================[0m
+
+[0;36m[08:53:01] INFO:[0m Uploading static/js/visualtrace.js...
+[0;36m[08:53:01] INFO:[0m Uploading templates/visualtrace.html...
+[0;36m[08:53:02] INFO:[0m Uploading visual_traceroute.py...
+[0;32m[08:53:02][0m All files uploaded to S3
+
+
+[0;34m======================================================================
+STEP 2: Downloading Files on Instance
+======================================================================[0m
+
+[0;36m[08:53:02] INFO:[0m Downloading deployment files from S3
+Completed 9.4 KiB/40.2 KiB (120.2 KiB/s) with 3 file(s) remainingdownload: s3://dnsscience-deployment/visual_traceroute_fixes/20251115_085301/visual_traceroute.py to ./visual_traceroute.py
+Completed 9.4 KiB/40.2 KiB (120.2 KiB/s) with 2 file(s) remainingCompleted 28.2 KiB/40.2 KiB (344.2 KiB/s) with 2 file(s) remainingCompleted 40.2 KiB/40.2 KiB (489.1 KiB/s) with 2 file(s) remainingdownload: s3://dnsscience-deployment/visual_traceroute_fixes/20251115_085301/visualtrace.js to ./visualtrace.js
+Completed 40.2 KiB/40.2 KiB (489.1 KiB/s) with 1 file(s) remainingdownload: s3://dnsscience-deployment/visual_traceroute_fixes/20251115_085301/visualtrace.html to ./visualtrace.html
+total 52K
+drwxr-xr-x  2 root root 4.0K Nov 15 13:53 .
+drwxrwxrwt 18 root root 4.0K Nov 15 13:53 ..
+-rw-r--r--  1 root root 9.5K Nov 15 13:53 visual_traceroute.py
+-rw-r--r--  1 root root  12K Nov 15 13:53 visualtrace.html
+-rw-r--r--  1 root root  19K Nov 15 13:53 visualtrace.js
+
+[0;32m[08:53:05][0m Files downloaded
+
+
+[0;34m======================================================================
+STEP 3: Fixing Tools Page Navigation
+======================================================================[0m
+
+[0;36m[08:53:05] INFO:[0m Adding home link to tools page navigation
+=== Navigation Bar Preview ===
+        <div class="nav-bar">
+        <a href="/" class="nav-button">🏠 Home</a>
+            <a href="/about" class="nav-button">About Us</a>
+            <div class="nav-dropdown">
+
+Home link added successfully
+
+[0;32m[08:53:08][0m Tools page navigation updated
+
+
+[0;34m======================================================================
+STEP 4: Deploying Enhanced Visual Traceroute Script
+======================================================================[0m
+
+[0;36m[08:53:08] INFO:[0m Deploying enhanced visualtrace.js with router and firewall icons
+No existing visualtrace.js to backup
+-rw-r--r-- 1 www-data www-data 19K Nov 15 13:53 visualtrace.js
+Preview of new features:
+        const routerIcon = createRouterIcon(hopColor);
+
+        const marker = L.marker([hop.location.lat, hop.location.lon], { icon: routerIcon })
+            .bindPopup(`
+                <div style="padding: 10px;">
+                    <h4 style="color: ${hopColor};">🔀 Hop ${hop.hop}</h4>
+
+[0;32m[08:53:11][0m Enhanced visualtrace.js deployed
+
+
+[0;34m======================================================================
+STEP 5: Deploying Updated Traceroute Backend
+======================================================================[0m
+
+[0;36m[08:53:11] INFO:[0m Deploying updated traceroute backend
+No existing visual_traceroute.py to backup
+-rw-r--r-- 1 www-data www-data 9.5K Nov 15 13:53 visual_traceroute.py
+Backend updated
+
+[0;32m[08:53:15][0m Traceroute backend updated
+
+
+[0;34m======================================================================
+STEP 6: Restarting Apache
+======================================================================[0m
+
+[0;36m[08:53:15] INFO:[0m Restarting Apache to apply changes
+● apache2.service - The Apache HTTP Server
+     Loaded: loaded (/lib/systemd/system/apache2.service; enabled; vendor preset: enabled)
+     Active: active (running) since Sat 2025-11-15 13:53:15 UTC; 2s ago
+       Docs: https://httpd.apache.org/docs/2.4/
+    Process: 27666 ExecStart=/usr/sbin/apachectl start (code=exited, status=0/SUCCESS)
+   Main PID: 27671 (apache2)
+      Tasks: 63 (limit: 4580)
+     Memory: 50.6M
+        CPU: 593ms
+     CGroup: /system.slice/apache2.service
+
+[0;32m[08:53:18][0m Apache restarted successfully
+
+
+[0;34m======================================================================
+STEP 7: DEPLOYMENT VERIFICATION
+======================================================================[0m
+
+[0;36m[08:53:18] INFO:[0m Checking tools.html navigation...
+[0;36m[08:53:18] INFO:[0m Verifying home link in tools page
+        <div class="nav-bar">
+        <a href="/" class="nav-button">🏠 Home</a>
+
+[0;36m[08:53:21] INFO:[0m Checking visualtrace.js enhancements...
+[0;36m[08:53:21] INFO:[0m Verifying new icon definitions
+Router icon definition:
+        const routerIcon = createRouterIcon(hopColor);
+
+        const marker = L.marker([hop.location.lat, hop.location.lon], { icon: routerIcon })
+            .bindPopup(`
+                <div style="padding: 10px;">
+
+Firewall icon definition:
+const firewallIcon = L.divIcon({
+    className: 'firewall-marker',
+    html: '<div style="font-size: 28px; text-shadow: 0 0 4px rgba(0,0,0,0.8); filter: drop-shadow(0 0 2px white);" title="Packet Filter / Firewall">🧱</div>',
+--
+                const marker = L.marker([lat, lon], { icon: firewallIcon })
+
+
+[0;34m======================================================================
+DEPLOYMENT COMPLETE!
+======================================================================[0m
+
+
+[0;32mSummary of Changes:[0m
+-------------------
+[0;32m✓[0m Tools Page: Home link added to navigation bar
+[0;32m✓[0m Visual Traceroute: Router icon markers for each hop
+[0;32m✓[0m Visual Traceroute: Gradient color coding (green → yellow → red)
+[0;32m✓[0m Visual Traceroute: Brick wall icons for packet filter (*) hops
+[0;32m✓[0m Apache: Restarted to clear cache
+
+[0;36mNew Features:[0m
+--------------
+• [1;33mRouter Icons:[0m Each traceroute hop now displays a router icon on the map
+• [1;33mColor Gradient:[0m Hops color-coded from source (green) to destination (red)
+• [1;33mPacket Filters:[0m Timeouts (*) display brick wall 🧱 icon
+• [1;33mHome Navigation:[0m Tools page now has direct link back to homepage
+
+[0;36mTest URLs:[0m
+-----------
+1. Tools page with home link:
+   [0;34mhttps://www.dnsscience.io/tools[0m
+
+2. Visual traceroute with new icons:
+   [0;34mhttps://www.dnsscience.io/visualtrace[0m
+
+[0;36mNext Steps:[0m
+-----------
+1. Test the tools page - verify home link works
+2. Run a traceroute on /visualtrace and verify:
+   - Each hop shows a router icon
+   - Hops are color-coded (green → red gradient)
+   - Any * (timeout) hops show brick wall icon
+3. Test navigation flow between pages
+
+[0;32mDEPLOYMENT SUCCESSFUL![0m
+

@@ -1,0 +1,148 @@
+---
+# DNS Science Complete Deployment Playbook
+# Production-grade Ansible deployment for DNS Science platform
+# Version: 1.0.0
+# Author: DNS Science DevOps Team
+
+- name: Deploy DNS Science Platform
+  hosts: dnsscience_production
+  gather_facts: yes
+  become: yes
+  vars_files:
+    - group_vars/all.yml
+    - group_vars/production.yml
+
+  pre_tasks:
+    - name: Validate deployment prerequisites
+      include_tasks: playbooks/validate-prerequisites.yml
+      tags: [always, validate]
+
+    - name: Create deployment backup
+      include_tasks: playbooks/backup-current.yml
+      when: create_backup | default(true)
+      tags: [backup]
+
+    - name: Set deployment timestamp
+      set_fact:
+        deploy_timestamp: "{{ ansible_date_time.epoch }}"
+        deploy_id: "{{ ansible_date_time.epoch }}-{{ 99999 | random }}"
+      tags: [always]
+
+    - name: Log deployment start
+      lineinfile:
+        path: /var/log/dnsscience/deployments.log
+        line: "[{{ ansible_date_time.iso8601 }}] Deployment {{ deploy_id }} started by {{ ansible_user_id | default('ansible') }}"
+        create: yes
+        mode: '0644'
+      tags: [always]
+
+  roles:
+    # Core system dependencies
+    - role: python-deps
+      tags: [dependencies, python]
+      when: deploy_python_deps | default(true)
+
+    # Database setup and migrations
+    - role: database
+      tags: [database, migrations]
+      when: deploy_database | default(true)
+
+    # Flask application deployment
+    - role: flask-app
+      tags: [application, flask]
+      when: deploy_flask_app | default(true)
+
+    # Template deployment
+    - role: templates
+      tags: [templates, frontend]
+      when: deploy_templates | default(true)
+
+    # Static files deployment
+    - role: static-files
+      tags: [static, assets]
+      when: deploy_static_files | default(true)
+
+    # Apache configuration
+    - role: apache
+      tags: [apache, webserver]
+      when: deploy_apache | default(true)
+
+    # Health check setup
+    - role: health-check
+      tags: [monitoring, health]
+      when: deploy_health_check | default(true)
+
+  post_tasks:
+    - name: Run smoke tests
+      include_tasks: playbooks/smoke-tests.yml
+      tags: [test, validate]
+
+    - name: Validate deployment
+      include_tasks: playbooks/validate-deployment.yml
+      tags: [validate]
+
+    - name: Clean up old deployments
+      include_tasks: playbooks/cleanup-old.yml
+      when: cleanup_old_deployments | default(false)
+      tags: [cleanup]
+
+    - name: Log deployment completion
+      lineinfile:
+        path: /var/log/dnsscience/deployments.log
+        line: "[{{ ansible_date_time.iso8601 }}] Deployment {{ deploy_id }} completed successfully"
+      tags: [always]
+
+    - name: Send deployment notification
+      uri:
+        url: "{{ slack_webhook_url | default('') }}"
+        method: POST
+        body_format: json
+        body:
+          text: "DNS Science deployment {{ deploy_id }} completed successfully on {{ inventory_hostname }}"
+      when: slack_webhook_url is defined and slack_webhook_url != ''
+      ignore_errors: yes
+      tags: [notification]
+
+  handlers:
+    - name: restart apache
+      systemd:
+        name: httpd
+        state: restarted
+        daemon_reload: yes
+      listen: "restart apache"
+
+    - name: restart daemons
+      systemd:
+        name: "{{ item }}"
+        state: restarted
+        daemon_reload: yes
+      loop:
+        - arpad-daemon
+        - email-scheduler-daemon
+        - domain-expiry-daemon
+        - rdap-daemon
+      listen: "restart daemons"
+      ignore_errors: yes
+
+    - name: clear cache
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /var/cache/dnsscience
+        - /tmp/dnsscience-cache
+      listen: "clear cache"
+      ignore_errors: yes
+
+# Rollback playbook included
+- name: Rollback DNS Science Deployment
+  hosts: dnsscience_production
+  gather_facts: no
+  become: yes
+  vars_files:
+    - group_vars/all.yml
+  tasks:
+    - name: Rollback to previous version
+      include_tasks: playbooks/rollback.yml
+      when: rollback | default(false)
+  tags: [never, rollback]

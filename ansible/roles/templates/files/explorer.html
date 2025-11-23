@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Explorer - DNS Science</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 50px;
+            padding: 10px 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        body.dark-mode .theme-toggle { background: #2d2d2d; }
+        .theme-toggle .sun { font-size: 20px; }
+        .theme-toggle .moon { font-size: 20px; display: none; }
+        body.dark-mode .theme-toggle .sun { display: none; }
+        body.dark-mode .theme-toggle .moon { display: block; }
+
+        .container { max-width: 1600px; margin: 0 auto; }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        body.dark-mode header { background: #2d2d2d; color: #e0e0e0; }
+
+        h1 { color: #667eea; margin-bottom: 10px; }
+        body.dark-mode h1 { color: #8b9cff; }
+
+        .nav-bar {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .nav-button {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .nav-button:hover { background: #5568d3; }
+        .nav-button.secondary { background: #f0f0f0; color: #333; }
+        body.dark-mode .nav-button.secondary { background: #444; color: #e0e0e0; }
+
+        .explorer-grid {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .sidebar {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            height: fit-content;
+        }
+
+        body.dark-mode .sidebar { background: #2d2d2d; color: #e0e0e0; }
+
+        .filter-section {
+            margin-bottom: 20px;
+        }
+
+        .filter-section h3 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        body.dark-mode .filter-section h3 { color: #8b9cff; }
+
+        .filter-option {
+            padding: 8px;
+            margin: 5px 0;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .filter-option:hover { background: #f0f0f0; }
+        body.dark-mode .filter-option:hover { background: #3a3a3a; }
+        .filter-option.active { background: #667eea; color: white; }
+
+        .main-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        body.dark-mode .main-content { background: #2d2d2d; color: #e0e0e0; }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        body.dark-mode .search-bar input {
+            background: #1a1a1a;
+            border-color: #444;
+            color: #e0e0e0;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        body.dark-mode th, body.dark-mode td { border-color: #444; }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        body.dark-mode th { background: #1a1a1a; }
+
+        tr:hover { background: #f8f9fa; }
+        body.dark-mode tr:hover { background: #2a2a2a; }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .badge.success { background: #d4edda; color: #155724; }
+        .badge.warning { background: #fff3cd; color: #856404; }
+        .badge.danger { background: #f8d7da; color: #721c24; }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .page-btn {
+            padding: 8px 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .page-btn:hover { background: #5568d3; }
+        .page-btn.disabled { background: #ccc; cursor: not-allowed; }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        /* Stats Banner */
+        .stats-banner {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+
+        body.dark-mode .stats-banner {
+            background: #2d2d2d;
+            border-left-color: #8b9cff;
+        }
+
+        .stats-title {
+            margin-top: 0;
+            color: #007bff;
+        }
+
+        body.dark-mode .stats-title {
+            color: #8b9cff;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        body.dark-mode .stats-grid {
+            color: #e0e0e0;
+        }
+
+        .text-danger {
+            color: #dc3545;
+        }
+
+        .text-success {
+            color: #28a745;
+        }
+
+        body.dark-mode .text-danger {
+            color: #ff6b6b;
+        }
+
+        body.dark-mode .text-success {
+            color: #51cf66;
+        }
+    </style>
+</head>
+<body>
+    <div id="themeToggle" class="theme-toggle">
+        <span class="sun">☀️</span>
+        <span class="moon">🌙</span>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>🔍 Data Explorer</h1>
+            <p>Browse and analyze scanned domains, certificates, and threat intelligence</p>
+            <div class="nav-bar">
+                <a href="/" class="nav-button secondary">← Home</a>
+                <a href="/docs/api" class="nav-button secondary">API Docs</a>
+            </div>
+        </header>
+
+        <div class="stats-row" id="statsRow">
+            <div class="stat-card">
+                <div class="stat-value" id="totalDomains">-</div>
+                <div class="stat-label">Total Domains</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalScans">-</div>
+                <div class="stat-label">Total Scans</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalCerts">-</div>
+                <div class="stat-label">SSL Certificates</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalThreats">-</div>
+                <div class="stat-label">Threats Detected</div>
+            </div>
+        </div>
+
+        <div class="explorer-grid">
+            <div class="sidebar">
+                <div class="filter-section">
+                    <h3>Data Type</h3>
+                    <div class="filter-option active" data-type="domains">Domains</div>
+                    <div class="filter-option" data-type="scans">Scan History</div>
+                    <div class="filter-option" data-type="certificates">SSL Certificates</div>
+                    <div class="filter-option" data-type="reverse-dns">Reverse DNS</div>
+                    <div class="filter-option" data-type="web3-domains">Web3 Domains</div>
+                    <div class="filter-option" data-type="rdap">RDAP Data</div>
+                    <div class="filter-option" data-type="enrichment">Enrichment Data</div>
+                    <div class="filter-option" data-type="threats">Threats</div>
+                </div>
+
+                <div class="filter-section">
+                    <h3>Status Filter</h3>
+                    <div class="filter-option" data-filter="all">All</div>
+                    <div class="filter-option" data-filter="secure">Secure</div>
+                    <div class="filter-option" data-filter="issues">Has Issues</div>
+                    <div class="filter-option" data-filter="expired">Expired</div>
+                </div>
+
+                <div class="filter-section">
+                    <h3>Time Range</h3>
+                    <div class="filter-option" data-time="24h">Last 24 Hours</div>
+                    <div class="filter-option" data-time="7d">Last 7 Days</div>
+                    <div class="filter-option" data-time="30d">Last 30 Days</div>
+                    <div class="filter-option active" data-time="all">All Time</div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search domains, IPs, or certificates...">
+                    <button class="nav-button" onclick="performSearch()">Search</button>
+                    <button class="nav-button secondary" onclick="exportData()">Export CSV</button>
+                </div>
+
+                <div id="dataDisplay">
+                    <div class="loading">Loading data...</div>
+                </div>
+
+                <div class="pagination" id="pagination"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentType = 'domains';
+        let currentFilter = 'all';
+        let currentTime = 'all';
+        let currentPage = 1;
+        let totalPages = 1;
+
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') body.classList.add('dark-mode');
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+
+        // Load stats
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats/live');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const stats = await response.json();
+
+                // Update DOM elements with null checks
+                const totalDomainsEl = document.getElementById('totalDomains');
+                const totalScansEl = document.getElementById('totalScans');
+                const totalCertsEl = document.getElementById('totalCerts');
+                const totalThreatsEl = document.getElementById('totalThreats');
+
+                if (totalDomainsEl) totalDomainsEl.textContent = stats.total_domains || 0;
+                if (totalScansEl) totalScansEl.textContent = stats.drift_monitoring || 0;
+                if (totalCertsEl) totalCertsEl.textContent = stats.ssl_certificates || 0;
+                if (totalThreatsEl) totalThreatsEl.textContent = '0'; // Will implement
+
+                console.log('Stats loaded successfully:', stats);
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                // Set error indicators
+                const elements = ['totalDomains', 'totalScans', 'totalCerts', 'totalThreats'];
+                elements.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && el.textContent === '-') el.textContent = '0';
+                });
+            }
+        }
+
+        // Load data based on current filters
+        async function loadData() {
+            const display = document.getElementById('dataDisplay');
+            display.innerHTML = '<div class="loading">Loading...</div>';
+
+            try {
+                let url = `/api/${currentType}?page=${currentPage}&limit=50`;
+                if (currentFilter !== 'all') url += `&filter=${currentFilter}`;
+                if (currentTime !== 'all') url += `&time=${currentTime}`;
+
+                const search = document.getElementById('searchInput').value;
+                if (search) url += `&search=${encodeURIComponent(search)}`;
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (currentType === 'domains') {
+                    displayDomains(data.domains || data);
+                } else if (currentType === 'scans') {
+                    displayScans(data.scans || data);
+                } else if (currentType === 'certificates') {
+                    displayCertificates(data.certificates || data);
+                } else if (currentType === 'reverse-dns') {
+                    displayReverseDNS(data.ptr_records || data.records || data);
+                } else if (currentType === 'web3-domains') {
+                    displayWeb3Domains(data.web3_domains || data);
+                } else if (currentType === 'rdap') {
+                    displayRDAP(data.rdap_data || data);
+                } else if (currentType === 'enrichment') {
+                    displayEnrichment(data.enrichment_data || data, data.statistics);
+                } else if (currentType === 'threats') {
+                    displayThreats(data.threats || data);
+                }
+
+                updatePagination(data.total_pages || 1);
+            } catch (error) {
+                display.innerHTML = `<div class="loading">Error loading data: ${error.message}</div>`;
+            }
+        }
+
+        function displayDomains(domains) {
+            if (!domains || domains.length === 0) {
+                document.getElementById('dataDisplay').innerHTML = '<div class="loading">No domains found</div>';
+                return;
+            }
+
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Domain</th>
+                            <th>Scans</th>
+                            <th>First Checked</th>
+                            <th>Last Checked</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${domains.map(d => `
+                            <tr>
+                                <td><strong>${d.domain_name || d.domain}</strong></td>
+                                <td><span class="badge ${(d.scan_count || 0) > 3 ? 'success' : 'warning'}">${d.scan_count || 0}×</span></td>
+                                <td>${d.first_checked ? new Date(d.first_checked).toLocaleDateString() : 'N/A'}</td>
+                                <td>${d.last_checked ? new Date(d.last_checked).toLocaleDateString() : 'N/A'}</td>
+                                <td><span class="badge success">Active</span></td>
+                                <td>
+                                    <button class="nav-button" onclick="viewDomain('${d.domain_name || d.domain}')">View</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('dataDisplay').innerHTML = html;
+        }
+
+        function displayScans(scans) {
+            if (!scans || scans.length === 0) {
+                document.getElementById('dataDisplay').innerHTML = '<div class="loading">No scan history found.</div>';
+                return;
+            }
+
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Domain</th>
+                            <th>Scan Time</th>
+                            <th>DNSSEC</th>
+                            <th>SPF</th>
+                            <th>DMARC</th>
+                            <th>MTA-STS</th>
+                            <th>TLS-RPT</th>
+                            <th>SMTP TLS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${scans.map(s => {
+                            const scanData = s.scan_data || {};
+                            const hasMtaSts = scanData.has_mta_sts || scanData.mta_sts_enabled || false;
+                            const hasTlsRpt = scanData.has_tls_rpt || scanData.tls_rpt_enabled || false;
+                            const smtpTls = scanData.smtp_tls_available || scanData.smtp_starttls || false;
+
+                            return `
+                            <tr>
+                                <td><strong>${s.domain_name}</strong></td>
+                                <td>${s.scan_timestamp ? new Date(s.scan_timestamp).toLocaleString() : 'N/A'}</td>
+                                <td><span class="badge ${s.dnssec_enabled ? 'success' : 'danger'}">${s.dnssec_enabled ? 'Yes' : 'No'}</span></td>
+                                <td><span class="badge ${s.spf_record ? 'success' : 'warning'}">${s.spf_record ? 'Yes' : 'No'}</span></td>
+                                <td><span class="badge ${s.dmarc_record ? 'success' : 'warning'}">${s.dmarc_record ? 'Yes' : 'No'}</span></td>
+                                <td><span class="badge ${hasMtaSts ? 'success' : 'warning'}">${hasMtaSts ? 'Yes' : 'No'}</span></td>
+                                <td><span class="badge ${hasTlsRpt ? 'success' : 'warning'}">${hasTlsRpt ? 'Yes' : 'No'}</span></td>
+                                <td><span class="badge ${smtpTls ? 'success' : 'danger'}">${smtpTls ? 'Yes' : 'No'}</span></td>
+                            </tr>
+                        `}).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('dataDisplay').innerHTML = html;
+        }
+
+        function displayCertificates(certs) {
+            if (!certs || certs.length === 0) {
+                document.getElementById('dataDisplay').innerHTML = '<div class="loading">No SSL certificates found. The SSL scanner daemon is actively discovering certificates.</div>';
+                return;
+            }
+
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Domain</th>
+                            <th>Common Name</th>
+                            <th>Issuer</th>
+                            <th>Valid From</th>
+                            <th>Valid Until</th>
+                            <th>Status</th>
+                            <th>Last Checked</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${certs.map(c => {
+                            const validUntil = new Date(c.valid_until);
+                            const now = new Date();
+                            const daysUntilExpiry = Math.floor((validUntil - now) / (1000 * 60 * 60 * 24));
+                            const isExpiringSoon = daysUntilExpiry <= 30 && daysUntilExpiry > 0;
+                            const isExpired = daysUntilExpiry <= 0;
+
+                            return `
+                            <tr>
+                                <td><strong>${c.domain_name}</strong></td>
+                                <td>${c.common_name || 'N/A'}</td>
+                                <td>${c.issuer || 'Unknown'}</td>
+                                <td>${c.valid_from ? new Date(c.valid_from).toLocaleDateString() : 'N/A'}</td>
+                                <td>${c.valid_until ? new Date(c.valid_until).toLocaleDateString() : 'N/A'}</td>
+                                <td><span class="badge ${isExpired ? 'danger' : isExpiringSoon ? 'warning' : 'success'}">
+                                    ${isExpired ? 'Expired' : isExpiringSoon ? `Expires in ${daysUntilExpiry}d` : 'Valid'}
+                                </span></td>
+                                <td>${c.scan_timestamp ? new Date(c.scan_timestamp).toLocaleDateString() : 'N/A'}</td>
+                            </tr>
+                        `}).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('dataDisplay').innerHTML = html;
+        }
+
+        function displayReverseDNS(records) {
+            if (!records || records.length === 0) {
+                document.getElementById('dataDisplay').innerHTML = '<div class="loading">No reverse DNS records found. The ARPA daemon is actively scanning domains.</div>';
+                return;
+            }
+
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>IP Address</th>
+                            <th>PTR Record</th>
+                            <th>Domain</th>
+                            <th>Version</th>
+                            <th>Valid</th>
+                            <th>FCrDNS</th>
+                            <th>Last Checked</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${records.map(r => `
+                            <tr>
+                                <td><strong>${r.ip_address}</strong></td>
+                                <td>${r.ptr_value || '<em>No PTR</em>'}</td>
+                                <td>${r.domain_name || 'N/A'}</td>
+                                <td><span class="badge ${r.ip_version == 6 ? 'success' : 'warning'}">IPv${r.ip_version}</span></td>
+                                <td><span class="badge ${r.is_valid ? 'success' : 'danger'}">${r.is_valid ? 'Valid' : 'Invalid'}</span></td>
+                                <td><span class="badge ${r.forward_matches ? 'success' : 'danger'}">${r.forward_matches ? 'Match' : 'No Match'}</span></td>
+                                <td>${r.scan_timestamp ? new Date(r.scan_timestamp).toLocaleDateString() : 'N/A'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('dataDisplay').innerHTML = html;
+        }
+
+        function displayThreats(threats) {
+            if (!threats || threats.length === 0) {
+                document.getElementById('dataDisplay').innerHTML = '<div class="loading">No active threats found. The threat intelligence daemon is actively monitoring domains.</div>';
+                return;
+            }
+
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Domain</th>
+                            <th>Threat Type</th>
+                            <th>Severity</th>
+                            <th>Description</th>
+                            <th>Source</th>
+                            <th>First Seen</th>
+                            <th>Last Seen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${threats.map(t => `
+                            <tr>
+                                <td><strong>${t.domain_name}</strong></td>
+                                <td>${t.threat_type || 'Unknown'}</td>
+                                <td><span class="badge ${
+                                    t.severity === 'critical' ? 'danger' :
+                                    t.severity === 'high' ? 'danger' :
+                                    t.severity === 'medium' ? 'warning' :
+                                    'info'
+                                }">${t.severity ? t.severity.toUpperCase() : 'UNKNOWN'}</span></td>
+                                <td>${t.description || 'No description'}</td>
+                                <td>${t.source || 'Unknown'}</td>
+                                <td>${t.first_seen ? new Date(t.first_seen).toLocaleDateString() : 'N/A'}</td>
+                                <td>${t.last_seen ? new Date(t.last_seen).toLocaleDateString() : 'N/A'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('dataDisplay').innerHTML = html;
+        }
+
+        function displayWeb3Domains(domains) {
+            if (!domains || domains.length === 0) {
+                document.getElementById('dataDisplay').innerHTML = '<div class="loading">No Web3 domains found. The web3d daemon is actively indexing ENS, SNS, and other blockchain domains.</div>';
+                return;
+            }
+
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Domain</th>
+                            <th>TLD</th>
+                            <th>Registry</th>
+                            <th>Network</th>
+                            <th>Owner</th>
+                            <th>Transfers</th>
+                            <th>Value (USD)</th>
+                            <th>Expires</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${domains.map(d => {
+                            const expiresAt = d.expires_at ? new Date(d.expires_at) : null;
+                            const now = new Date();
+                            const isExpired = expiresAt && expiresAt < now;
+                            const daysUntilExpiry = expiresAt ? Math.floor((expiresAt - now) / (1000 * 60 * 60 * 24)) : null;
+
+                            return `
+                            <tr>
+                                <td><strong>${d.domain_name}</strong></td>
+                                <td><span class="badge ${
+                                    d.tld === 'eth' ? 'success' :
+                                    d.tld === 'sol' ? 'warning' :
+                                    'info'
+                                }">.${d.tld}</span></td>
+                                <td>${d.registry_name || 'Unknown'}</td>
+                                <td>${d.network_name || 'Unknown'}</td>
+                                <td title="${d.owner_address}"><code>${d.owner_address ? d.owner_address.substring(0, 10) + '...' : 'N/A'}</code></td>
+                                <td>${d.transfer_count || 0}</td>
+                                <td>${d.last_sale_price_usd ? '$' + d.last_sale_price_usd.toLocaleString() : d.estimated_value_usd ? '~$' + d.estimated_value_usd.toLocaleString() : 'N/A'}</td>
+                                <td>${
+                                    expiresAt ?
+                                    `<span class="badge ${isExpired ? 'danger' : daysUntilExpiry < 30 ? 'warning' : 'success'}">
+                                        ${isExpired ? 'Expired' : daysUntilExpiry + 'd'}
+                                    </span>` :
+                                    '<span class="badge success">Permanent</span>'
+                                }</td>
+                            </tr>
+                        `}).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('dataDisplay').innerHTML = html;
+        }
+
+        function displayRDAP(rdapData) {
+            if (!rdapData || rdapData.length === 0) {
+                document.getElementById('dataDisplay').innerHTML = '<div class="loading">No RDAP data found. The rdap_daemon is actively querying domain registration data.</div>';
+                return;
+            }
+
+            // Cache the data for filtering/sorting
+            rdapDataCache = rdapData;
+            activeFilters = {};
+
+            // Use the filtered display function
+            displayRDAPFiltered(rdapData);
+        }
+
+        // Keep old displayRDAP for reference but renamed
+        function displayRDAP_OLD(rdapData) {
+            const html = `
+                <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; border-left: 4px solid #667eea;">
+                    <strong>💡 Tip:</strong> Click on column headers to filter data
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th onclick="sortRDAPTable('domain')" style="cursor: pointer; user-select: none;" title="Click to sort">Domain ⇅</th>
+                            <th onclick="filterRDAPColumn('registrar')" style="cursor: pointer; user-select: none;" title="Click to filter">Registrar 🔍</th>
+                            <th onclick="sortRDAPTable('registered')" style="cursor: pointer; user-select: none;" title="Click to sort">Registered ⇅</th>
+                            <th onclick="sortRDAPTable('expires')" style="cursor: pointer; user-select: none;" title="Click to sort">Expires ⇅</th>
+                            <th onclick="filterRDAPColumn('status')" style="cursor: pointer; user-select: none;" title="Click to filter">Status 🔍</th>
+                            <th onclick="filterRDAPColumn('dnssec')" style="cursor: pointer; user-select: none;" title="Click to filter">DNSSEC 🔍</th>
+                            <th onclick="filterRDAPColumn('nameservers')" style="cursor: pointer; user-select: none;" title="Click to filter">Nameservers 🔍</th>
+                            <th onclick="filterRDAPColumn('contact')" style="cursor: pointer; user-select: none;" title="Click to filter">Contact 🔍</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rdapData.map(r => {
+                            const registered = r.registration_date ? new Date(r.registration_date) : null;
+                            const expires = r.expiration_date ? new Date(r.expiration_date) : null;
+                            const now = new Date();
+                            const daysUntilExpiry = expires ? Math.floor((expires - now) / (1000 * 60 * 60 * 24)) : null;
+                            const isExpired = expires && expires < now;
+                            const isExpiring = daysUntilExpiry !== null && daysUntilExpiry > 0 && daysUntilExpiry < 90;
+
+                            // Parse status array
+                            const statusArray = Array.isArray(r.status) ? r.status : [];
+                            const statusBadges = statusArray.slice(0, 2).map(s => {
+                                const statusClean = s.replace(/([a-z])([A-Z])/g, '$1 $2');
+                                const badgeClass = s.includes('ok') ? 'success' :
+                                                  s.includes('Hold') || s.includes('pending') ? 'danger' :
+                                                  s.includes('Prohibited') ? 'warning' : 'info';
+                                return `<span class="badge ${badgeClass}" title="${s}">${statusClean}</span>`;
+                            }).join(' ');
+
+                            // Parse nameservers
+                            const nameservers = Array.isArray(r.nameservers) ? r.nameservers : [];
+                            const nsDisplay = nameservers.length > 0 ?
+                                `<span title="${nameservers.join(', ')}">${nameservers.length} NS</span>` :
+                                'N/A';
+
+                            return `
+                            <tr>
+                                <td><strong>${r.domain_name}</strong></td>
+                                <td>${r.registrar_name || 'Unknown'}</td>
+                                <td>${registered ? registered.toLocaleDateString() : 'N/A'}</td>
+                                <td>
+                                    ${expires ?
+                                        `<span class="badge ${isExpired ? 'danger' : isExpiring ? 'warning' : 'success'}">
+                                            ${isExpired ? 'Expired' : daysUntilExpiry + 'd'}
+                                        </span>` :
+                                        'N/A'
+                                    }
+                                </td>
+                                <td>${statusBadges || '<span class="badge info">Unknown</span>'}</td>
+                                <td>
+                                    <span class="badge ${r.secure_dns_delegated ? 'success' : 'warning'}">
+                                        ${r.secure_dns_delegated ? 'Enabled' : 'Disabled'}
+                                    </span>
+                                </td>
+                                <td>${nsDisplay}</td>
+                                <td>
+                                    ${r.registrar_abuse_email ?
+                                        `<a href="mailto:${r.registrar_abuse_email}" title="${r.registrar_abuse_email}">✉️</a>` :
+                                        'N/A'
+                                    }
+                                </td>
+                            </tr>
+                        `}).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('dataDisplay').innerHTML = html;
+        }
+
+        function displayEnrichment(enrichmentData, statistics) {
+            if (!enrichmentData || enrichmentData.length === 0) {
+                document.getElementById('dataDisplay').innerHTML = '<div class="loading">No enrichment data found. The enrichment daemon is actively analyzing domain security postures.</div>';
+                return;
+            }
+
+            // Display statistics banner if available
+            let statsHtml = '';
+            if (statistics) {
+                statsHtml = `
+                    <div class="stats-banner">
+                        <h3 class="stats-title">📊 Enrichment Statistics</h3>
+                        <div class="stats-grid">
+                            <div><strong>Total Domains:</strong> ${statistics.total_domains?.toLocaleString() || 0}</div>
+                            <div><strong>Enriched:</strong> ${statistics.enriched_domains?.toLocaleString() || 0}</div>
+                            <div><strong>Avg Security Score:</strong> ${statistics.avg_security_score || 0}/100</div>
+                            <div><strong>DNSSEC Enabled:</strong> ${statistics.dnssec_count?.toLocaleString() || 0}</div>
+                            <div><strong>SPF Valid:</strong> ${statistics.spf_count?.toLocaleString() || 0}</div>
+                            <div><strong>DMARC Enabled:</strong> ${statistics.dmarc_count?.toLocaleString() || 0}</div>
+                            <div><strong>SSL Enabled:</strong> ${statistics.ssl_count?.toLocaleString() || 0}</div>
+                            <div><strong>SSL Expired:</strong> <span class="${statistics.ssl_expired_count > 0 ? 'text-danger' : 'text-success'}">${statistics.ssl_expired_count?.toLocaleString() || 0}</span></div>
+                            <div><strong>Malicious:</strong> <span class="${statistics.malicious_count > 0 ? 'text-danger' : 'text-success'}">${statistics.malicious_count?.toLocaleString() || 0}</span></div>
+                            <div><strong>Blacklisted:</strong> <span class="${statistics.blacklisted_count > 0 ? 'text-danger' : 'text-success'}">${statistics.blacklisted_count?.toLocaleString() || 0}</span></div>
+                            <div><strong>High Security (≥80):</strong> ${statistics.high_security_count?.toLocaleString() || 0}</div>
+                            <div><strong>Medium Security (50-79):</strong> ${statistics.medium_security_count?.toLocaleString() || 0}</div>
+                            <div><strong>Low Security (<50):</strong> ${statistics.low_security_count?.toLocaleString() || 0}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const html = statsHtml + `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Domain</th>
+                            <th>Security Score</th>
+                            <th>DNSSEC</th>
+                            <th>SPF</th>
+                            <th>DMARC</th>
+                            <th>SSL</th>
+                            <th>Threats</th>
+                            <th>Last Enriched</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${enrichmentData.map(e => {
+                            const score = e.security_score || 0;
+                            const scoreClass = score >= 80 ? 'success' : score >= 50 ? 'warning' : 'danger';
+                            const lastEnriched = e.last_enriched ? new Date(e.last_enriched) : null;
+                            const enrichedAgo = lastEnriched ?
+                                Math.floor((new Date() - lastEnriched) / (1000 * 60)) + 'm ago' :
+                                'Never';
+
+                            let threatBadges = '';
+                            if (e.is_malicious) {
+                                threatBadges += '<span class="badge danger" title="Flagged as malicious">🚨 Malicious</span> ';
+                            }
+                            if (e.is_blacklisted) {
+                                threatBadges += '<span class="badge danger" title="Listed on blacklists">🚫 Blacklisted</span>';
+                            }
+                            if (!e.is_malicious && !e.is_blacklisted) {
+                                threatBadges = '<span class="badge success">✓ Clean</span>';
+                            }
+
+                            return `
+                            <tr>
+                                <td><strong>${e.domain_name}</strong><br><small style="color: #666;">.${e.tld}</small></td>
+                                <td>
+                                    <span class="badge ${scoreClass}" style="font-size: 16px; font-weight: bold;">
+                                        ${score}/100
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge ${e.dnssec_enabled ? 'success' : 'warning'}">
+                                        ${e.dnssec_enabled ? '🔒 Yes' : '❌ No'}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge ${e.spf_valid ? 'success' : 'warning'}">
+                                        ${e.spf_valid ? '✓ Valid' : '❌ Invalid'}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge ${e.dmarc_enabled ? 'success' : 'warning'}">
+                                        ${e.dmarc_enabled ? '✓ Yes' : '❌ No'}
+                                    </span>
+                                </td>
+                                <td>
+                                    ${e.ssl_enabled ?
+                                        `<span class="badge ${e.ssl_expired ? 'danger' : 'success'}">
+                                            ${e.ssl_expired ? '⚠️ Expired' : '✓ Valid'}
+                                        </span>` :
+                                        '<span class="badge warning">❌ None</span>'
+                                    }
+                                </td>
+                                <td>${threatBadges}</td>
+                                <td><small>${enrichedAgo}</small></td>
+                            </tr>
+                        `}).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('dataDisplay').innerHTML = html;
+        }
+
+        function updatePagination(pages) {
+            totalPages = pages;
+            const pagination = document.getElementById('pagination');
+            let html = '';
+
+            if (currentPage > 1) {
+                html += `<button class="page-btn" onclick="changePage(${currentPage - 1})">← Previous</button>`;
+            }
+
+            html += `<span class="page-btn disabled">Page ${currentPage} of ${totalPages}</span>`;
+
+            if (currentPage < totalPages) {
+                html += `<button class="page-btn" onclick="changePage(${currentPage + 1})">Next →</button>`;
+            }
+
+            pagination.innerHTML = html;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            loadData();
+        }
+
+        function performSearch() {
+            currentPage = 1;
+            loadData();
+        }
+
+        function viewDomain(domain) {
+            window.location.href = `/?domain=${domain}`;
+        }
+
+        function exportData() {
+            alert('Export functionality - Coming soon');
+        }
+
+        // Filter click handlers
+        document.querySelectorAll('[data-type]').forEach(el => {
+            el.addEventListener('click', () => {
+                document.querySelectorAll('[data-type]').forEach(e => e.classList.remove('active'));
+                el.classList.add('active');
+                currentType = el.dataset.type;
+                currentPage = 1;
+                loadData();
+            });
+        });
+
+        document.querySelectorAll('[data-filter]').forEach(el => {
+            el.addEventListener('click', () => {
+                document.querySelectorAll('[data-filter]').forEach(e => e.classList.remove('active'));
+                el.classList.add('active');
+                currentFilter = el.dataset.filter;
+                currentPage = 1;
+                loadData();
+            });
+        });
+
+        document.querySelectorAll('[data-time]').forEach(el => {
+            el.addEventListener('click', () => {
+                document.querySelectorAll('[data-time]').forEach(e => e.classList.remove('active'));
+                el.classList.add('active');
+                currentTime = el.dataset.time;
+                currentPage = 1;
+                loadData();
+            });
+        });
+
+        // Column filtering and sorting for RDAP table
+        let rdapDataCache = [];
+        let activeFilters = {};
+
+        function filterRDAPColumn(columnName) {
+            if (!rdapDataCache || rdapDataCache.length === 0) return;
+
+            // Get unique values for this column
+            const uniqueValues = new Set();
+            rdapDataCache.forEach(r => {
+                let value = '';
+                switch(columnName) {
+                    case 'registrar':
+                        value = r.registrar_name || 'Unknown';
+                        break;
+                    case 'status':
+                        const statusArray = Array.isArray(r.status) ? r.status : [];
+                        statusArray.forEach(s => uniqueValues.add(s));
+                        return; // Skip the add below
+                    case 'dnssec':
+                        value = r.secure_dns_delegated ? 'Enabled' : 'Disabled';
+                        break;
+                    case 'nameservers':
+                        const ns = Array.isArray(r.nameservers) ? r.nameservers : [];
+                        ns.forEach(n => uniqueValues.add(n));
+                        return;
+                    case 'contact':
+                        value = r.registrar_abuse_email || 'N/A';
+                        break;
+                }
+                uniqueValues.add(value);
+            });
+
+            // Create filter dialog
+            const values = Array.from(uniqueValues).sort();
+            const options = values.map(v =>
+                `<label style="display: block; padding: 5px; cursor: pointer;">
+                    <input type="checkbox" value="${v}" checked> ${v}
+                </label>`
+            ).join('');
+
+            const dialog = `
+                <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                            background: white; padding: 20px; border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                            z-index: 10000; max-height: 400px; overflow-y: auto; min-width: 300px;">
+                    <h3 style="margin-top: 0;">Filter by ${columnName}</h3>
+                    <div id="filterOptions">${options}</div>
+                    <div style="margin-top: 15px; display: flex; gap: 10px;">
+                        <button class="nav-button" onclick="applyRDAPFilter('${columnName}')">Apply</button>
+                        <button class="nav-button secondary" onclick="closeFilterDialog()">Cancel</button>
+                    </div>
+                </div>
+                <div onclick="closeFilterDialog()" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                            background: rgba(0,0,0,0.5); z-index: 9999;"></div>
+            `;
+
+            const dialogEl = document.createElement('div');
+            dialogEl.id = 'filterDialog';
+            dialogEl.innerHTML = dialog;
+            document.body.appendChild(dialogEl);
+        }
+
+        function applyRDAPFilter(columnName) {
+            const checkboxes = document.querySelectorAll('#filterOptions input[type="checkbox"]');
+            const selectedValues = Array.from(checkboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.value);
+
+            activeFilters[columnName] = selectedValues;
+            closeFilterDialog();
+
+            // Re-render table with filters
+            let filteredData = rdapDataCache.filter(r => {
+                for (let [col, values] of Object.entries(activeFilters)) {
+                    let rowValue = '';
+                    switch(col) {
+                        case 'registrar':
+                            rowValue = r.registrar_name || 'Unknown';
+                            break;
+                        case 'dnssec':
+                            rowValue = r.secure_dns_delegated ? 'Enabled' : 'Disabled';
+                            break;
+                        case 'contact':
+                            rowValue = r.registrar_abuse_email || 'N/A';
+                            break;
+                        case 'status':
+                            const statusArray = Array.isArray(r.status) ? r.status : [];
+                            return values.some(v => statusArray.includes(v));
+                        case 'nameservers':
+                            const ns = Array.isArray(r.nameservers) ? r.nameservers : [];
+                            return values.some(v => ns.includes(v));
+                    }
+                    if (!values.includes(rowValue)) return false;
+                }
+                return true;
+            });
+
+            displayRDAPFiltered(filteredData);
+        }
+
+        function closeFilterDialog() {
+            const dialog = document.getElementById('filterDialog');
+            if (dialog) dialog.remove();
+        }
+
+        function sortRDAPTable(columnName) {
+            if (!rdapDataCache || rdapDataCache.length === 0) return;
+
+            let sortedData = [...rdapDataCache].sort((a, b) => {
+                let valA, valB;
+                switch(columnName) {
+                    case 'domain':
+                        valA = a.domain_name || '';
+                        valB = b.domain_name || '';
+                        return valA.localeCompare(valB);
+                    case 'registered':
+                        valA = a.registration_date ? new Date(a.registration_date) : new Date(0);
+                        valB = b.registration_date ? new Date(b.registration_date) : new Date(0);
+                        return valB - valA; // Newest first
+                    case 'expires':
+                        valA = a.expiration_date ? new Date(a.expiration_date) : new Date(0);
+                        valB = b.expiration_date ? new Date(b.expiration_date) : new Date(0);
+                        return valA - valB; // Soonest first
+                }
+                return 0;
+            });
+
+            displayRDAPFiltered(sortedData);
+        }
+
+        function displayRDAPFiltered(data) {
+            const filtered = data.map(r => {
+                const registered = r.registration_date ? new Date(r.registration_date) : null;
+                const expires = r.expiration_date ? new Date(r.expiration_date) : null;
+                const now = new Date();
+                const daysUntilExpiry = expires ? Math.floor((expires - now) / (1000 * 60 * 60 * 24)) : null;
+                const isExpired = expires && expires < now;
+                const isExpiring = daysUntilExpiry !== null && daysUntilExpiry > 0 && daysUntilExpiry < 90;
+
+                const statusArray = Array.isArray(r.status) ? r.status : [];
+                const statusBadges = statusArray.slice(0, 2).map(s => {
+                    const statusClean = s.replace(/([a-z])([A-Z])/g, '$1 $2');
+                    const badgeClass = s.includes('ok') ? 'success' :
+                                      s.includes('Hold') || s.includes('pending') ? 'danger' :
+                                      s.includes('Prohibited') ? 'warning' : 'info';
+                    return `<span class="badge ${badgeClass}" title="${s}">${statusClean}</span>`;
+                }).join(' ');
+
+                const nameservers = Array.isArray(r.nameservers) ? r.nameservers : [];
+                const nsDisplay = nameservers.length > 0 ?
+                    `<span title="${nameservers.join(', ')}">${nameservers.length} NS</span>` :
+                    'N/A';
+
+                return `
+                <tr>
+                    <td><strong>${r.domain_name}</strong></td>
+                    <td>${r.registrar_name || 'Unknown'}</td>
+                    <td>${registered ? registered.toLocaleDateString() : 'N/A'}</td>
+                    <td>
+                        ${expires ?
+                            `<span class="badge ${isExpired ? 'danger' : isExpiring ? 'warning' : 'success'}">
+                                ${isExpired ? 'Expired' : daysUntilExpiry + 'd'}
+                            </span>` :
+                            'N/A'
+                        }
+                    </td>
+                    <td>${statusBadges || '<span class="badge info">Unknown</span>'}</td>
+                    <td>
+                        <span class="badge ${r.secure_dns_delegated ? 'success' : 'warning'}">
+                            ${r.secure_dns_delegated ? 'Enabled' : 'Disabled'}
+                        </span>
+                    </td>
+                    <td>${nsDisplay}</td>
+                    <td>
+                        ${r.registrar_abuse_email ?
+                            `<a href="mailto:${r.registrar_abuse_email}" title="${r.registrar_abuse_email}">✉️</a>` :
+                            'N/A'
+                        }
+                    </td>
+                </tr>
+                `;
+            }).join('');
+
+            // Show active filters
+            const filterBadges = Object.entries(activeFilters).map(([col, values]) =>
+                `<span class="badge" style="background: #667eea; color: white; margin: 5px;">${col}: ${values.length} selected <span onclick="removeFilter('${col}')" style="cursor: pointer; font-weight: bold;"> ✕</span></span>`
+            ).join('');
+
+            const html = `
+                <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; border-left: 4px solid #667eea;">
+                    <strong>💡 Tip:</strong> Click on column headers to filter data
+                    ${filterBadges ? '<br><div style="margin-top: 10px;"><strong>Active Filters:</strong> ' + filterBadges + ' <button class="nav-button secondary" style="margin-left: 10px; padding: 4px 8px; font-size: 12px;" onclick="clearAllFilters()">Clear All</button></div>' : ''}
+                </div>
+                <div style="margin-bottom: 10px;"><strong>Showing ${data.length} of ${rdapDataCache.length} domains</strong></div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th onclick="sortRDAPTable('domain')" style="cursor: pointer; user-select: none;" title="Click to sort">Domain ⇅</th>
+                            <th onclick="filterRDAPColumn('registrar')" style="cursor: pointer; user-select: none;" title="Click to filter">Registrar 🔍</th>
+                            <th onclick="sortRDAPTable('registered')" style="cursor: pointer; user-select: none;" title="Click to sort">Registered ⇅</th>
+                            <th onclick="sortRDAPTable('expires')" style="cursor: pointer; user-select: none;" title="Click to sort">Expires ⇅</th>
+                            <th onclick="filterRDAPColumn('status')" style="cursor: pointer; user-select: none;" title="Click to filter">Status 🔍</th>
+                            <th onclick="filterRDAPColumn('dnssec')" style="cursor: pointer; user-select: none;" title="Click to filter">DNSSEC 🔍</th>
+                            <th onclick="filterRDAPColumn('nameservers')" style="cursor: pointer; user-select: none;" title="Click to filter">Nameservers 🔍</th>
+                            <th onclick="filterRDAPColumn('contact')" style="cursor: pointer; user-select: none;" title="Click to filter">Contact 🔍</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filtered}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('dataDisplay').innerHTML = html;
+        }
+
+        function removeFilter(columnName) {
+            delete activeFilters[columnName];
+            let filteredData = rdapDataCache.filter(r => {
+                for (let [col, values] of Object.entries(activeFilters)) {
+                    let rowValue = '';
+                    switch(col) {
+                        case 'registrar':
+                            rowValue = r.registrar_name || 'Unknown';
+                            break;
+                        case 'dnssec':
+                            rowValue = r.secure_dns_delegated ? 'Enabled' : 'Disabled';
+                            break;
+                        case 'contact':
+                            rowValue = r.registrar_abuse_email || 'N/A';
+                            break;
+                    }
+                    if (!values.includes(rowValue)) return false;
+                }
+                return true;
+            });
+            displayRDAPFiltered(filteredData);
+        }
+
+        function clearAllFilters() {
+            activeFilters = {};
+            displayRDAPFiltered(rdapDataCache);
+        }
+
+        // Initial load - wrap in DOMContentLoaded to ensure DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('DOM loaded, initializing...');
+                loadStats();
+                loadData();
+                setInterval(loadStats, 30000);
+            });
+        } else {
+            // DOM already loaded
+            console.log('DOM already ready, initializing...');
+            loadStats();
+            loadData();
+            setInterval(loadStats, 30000);
+        }
+    </script>
+</body>
+</html>

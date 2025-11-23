@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - DNS Science</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .pricing-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .pricing-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .pricing-header h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .pricing-header p {
+            font-size: 1.3em;
+            color: #666;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Billing Toggle */
+        .billing-toggle {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 50px;
+        }
+
+        .billing-toggle label {
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #ddd;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #667eea;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s;
+        }
+
+        .toggle-switch.active::after {
+            left: 32px;
+        }
+
+        .savings-badge {
+            background: #10b981;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        /* Pricing Grid */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 80px;
+        }
+
+        .pricing-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 40px 30px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .pricing-card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
+        }
+
+        .pricing-card.featured {
+            border-color: #667eea;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+            transform: scale(1.05);
+        }
+
+        .pricing-card.featured::before {
+            content: '⭐ MOST POPULAR';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 20px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .tier-name {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #1f2937;
+        }
+
+        .tier-description {
+            color: #6b7280;
+            margin-bottom: 25px;
+            min-height: 50px;
+        }
+
+        .pricing {
+            margin-bottom: 30px;
+        }
+
+        .price {
+            font-size: 3.5em;
+            font-weight: 800;
+            color: #667eea;
+            line-height: 1;
+        }
+
+        .price-currency {
+            font-size: 0.5em;
+            vertical-align: super;
+        }
+
+        .price-period {
+            font-size: 0.3em;
+            color: #6b7280;
+            font-weight: 400;
+        }
+
+        .price-annual {
+            display: none;
+        }
+
+        .billing-toggle.annual .price-monthly {
+            display: none;
+        }
+
+        .billing-toggle.annual .price-annual {
+            display: block;
+        }
+
+        .annual-savings {
+            color: #10b981;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .cta-button {
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 30px;
+        }
+
+        .cta-button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .cta-button.secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .cta-button.secondary:hover {
+            background: #f3f4f6;
+        }
+
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .features-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #4b5563;
+        }
+
+        .features-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-icon {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .feature-icon.disabled {
+            color: #d1d5db;
+        }
+
+        .feature-highlight {
+            background: #f0fdf4;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        /* Comparison Table */
+        .comparison-section {
+            margin-top: 80px;
+            padding: 60px 20px;
+            background: #f9fafb;
+            border-radius: 20px;
+        }
+
+        .comparison-section h2 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 40px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .comparison-table th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table .feature-name {
+            text-align: left;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .comparison-table .category-header {
+            background: #f3f4f6;
+            font-weight: 700;
+            color: #374151;
+            text-align: left;
+        }
+
+        /* Services Section */
+        .services-section {
+            margin-top: 80px;
+            text-align: center;
+        }
+
+        .services-section h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .services-section p {
+            font-size: 1.2em;
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+
+        .services-button {
+            display: inline-block;
+            padding: 18px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .services-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Dark Mode */
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        body.dark-mode .pricing-container {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .pricing-card {
+            background: #2d2d2d;
+            border-color: #404040;
+        }
+
+        body.dark-mode .pricing-card:hover {
+            border-color: #667eea;
+        }
+
+        body.dark-mode .tier-name {
+            color: #8b9cff;
+        }
+
+        body.dark-mode .tier-description {
+            color: #b0b0b0;
+        }
+
+        body.dark-mode .features-list li {
+            color: #e0e0e0;
+            border-bottom-color: #404040;
+        }
+
+        body.dark-mode .comparison-section {
+            background: #2d2d2d;
+        }
+
+        body.dark-mode .comparison-table {
+            background: #2d2d2d;
+        }
+
+        body.dark-mode .comparison-table td {
+            color: #e0e0e0;
+            border-bottom-color: #404040;
+        }
+
+        body.dark-mode .comparison-table .category-header {
+            background: #404040;
+            color: #8b9cff;
+        }
+
+        body.dark-mode .comparison-table .feature-name {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .cta-button.secondary {
+            background: #404040;
+            border-color: #667eea;
+            color: white;
+        }
+
+        body.dark-mode .pricing-header p,
+        body.dark-mode .services-section p {
+            color: #b0b0b0;
+        }
+
+        body.dark-mode .pricing-header h1 {
+            color: #8b9cff;
+            background: none;
+            -webkit-text-fill-color: #8b9cff;
+        }
+
+        body.dark-mode .services-section h2,
+        body.dark-mode .comparison-section h2 {
+            color: #8b9cff;
+        }
+
+        @media (max-width: 768px) {
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-card.featured {
+                transform: scale(1);
+            }
+
+            .comparison-table {
+                font-size: 0.85em;
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                padding: 10px;
+            }
+        }
+    </style>
+    <style>
+        .nav-bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .nav-button {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        .nav-button:hover { background: rgba(255,255,255,0.2); }
+        .nav-button.primary { background: rgba(255,255,255,0.3); font-weight: 600; }
+        .nav-dropdown { position: relative; }
+        .nav-dropdown-content {
+            display: none;
+            position: absolute;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-radius: 5px;
+            min-width: 150px;
+            z-index: 1000;
+        }
+        .nav-dropdown:hover .nav-dropdown-content { display: block; }
+        .nav-dropdown-content a {
+            display: block;
+            padding: 10px 15px;
+            color: #333;
+            text-decoration: none;
+        }
+        .nav-dropdown-content a:hover { background: #f0f0f0; }
+        .user-plan {
+            background: rgba(255,255,255,0.3);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation Bar -->
+        <div class="nav-bar">
+            <a href="/" class="nav-button">← Home</a>
+            <a href="/about" class="nav-button">About Us</a>
+            <a href="/explorer" class="nav-button">Data Explorer</a>
+            <a href="/registrar" class="nav-button">Registrar</a>
+            <a href="/pricing" class="nav-button">Pricing</a>
+            <div class="nav-dropdown">
+                <span class="nav-button">Docs</span>
+                <div class="nav-dropdown-content">
+                    <a href="/docs/api">API Docs</a>
+                    <a href="/docs/cli">CLI Docs</a>
+                </div>
+            </div>
+            <a href="/login" class="nav-button" id="nav-login">Login</a>
+            <a href="/signup" class="nav-button primary" id="nav-signup">Sign Up</a>
+            <div id="nav-user-info" style="display: none; margin-left: auto; align-items: center; gap: 10px;">
+                <span id="nav-user-email" style="color: white; font-size: 14px;"></span>
+                <span class="user-plan" id="nav-user-plan"></span>
+                <button onclick="showAccountDashboard()" class="nav-button" style="padding: 6px 12px; font-size: 12px;">Account</button>
+                <button onclick="logoutUser()" class="nav-button" style="padding: 6px 12px; font-size: 12px; background: #dc3545;">Logout</button>
+            </div>
+        </div>
+
+
+    <div class="pricing-container">
+        <!-- Header -->
+        <div class="pricing-header">
+            <h1>Simple, Transparent Pricing</h1>
+            <p>Choose the plan that fits your needs. All plans include core DNS intelligence features with no hidden fees.</p>
+        </div>
+
+        <!-- Billing Toggle -->
+        <div class="billing-toggle" id="billingToggle">
+            <label>Monthly</label>
+            <div class="toggle-switch" id="toggleSwitch"></div>
+            <label>Annual</label>
+            <span class="savings-badge">Save up to 20%</span>
+        </div>
+
+        <!-- Pricing Cards -->
+        <div class="pricing-grid">
+            <!-- Free Tier -->
+            <div class="pricing-card">
+                <div class="tier-name">Free</div>
+                <div class="tier-description">Perfect for personal projects and testing</div>
+                <div class="pricing">
+                    <div class="price">
+                        <span class="price-currency">$</span>0
+                    </div>
+                    <div class="price-period">forever</div>
+                </div>
+                <button class="cta-button secondary" onclick="window.location.href='/signup'">Get Started</button>
+                <ul class="features-list">
+                    <li><span class="feature-icon">✓</span> 1,500 requests/month</li>
+                    <li><span class="feature-icon">✓</span> 100 requests/hour</li>
+                    <li><span class="feature-icon">✓</span> 10 domains tracked</li>
+                    <li><span class="feature-icon">✓</span> 1 API key</li>
+                    <li><span class="feature-icon">✓</span> 90-day history</li>
+                    <li><span class="feature-icon">✓</span> Basic DNS intelligence</li>
+                    <li><span class="feature-icon disabled">✗</span> Webhooks</li>
+                    <li><span class="feature-icon disabled">✗</span> Email alerts</li>
+                </ul>
+            </div>
+
+            <!-- Essentials Tier -->
+            <div class="pricing-card">
+                <div class="tier-name">Essentials</div>
+                <div class="tier-description">For small teams and growing businesses</div>
+                <div class="pricing">
+                    <div class="price price-monthly">
+                        <span class="price-currency">$</span>29<span class="price-period">/month</span>
+                    </div>
+                    <div class="price price-annual">
+                        <span class="price-currency">$</span>23<span class="price-period">/month</span>
+                    </div>
+                    <div class="annual-savings" style="display: none;">$278/year (save $70)</div>
+                </div>
+                <button class="cta-button" onclick="window.location.href='/signup?tier=essentials'">Start Free Trial</button>
+                <ul class="features-list">
+                    <li><span class="feature-icon">✓</span> 10,000 requests/month</li>
+                    <li><span class="feature-icon">✓</span> 500 requests/hour</li>
+                    <li><span class="feature-icon">✓</span> 50 domains tracked</li>
+                    <li><span class="feature-icon">✓</span> 3 API keys</li>
+                    <li><span class="feature-icon">✓</span> 1-year history</li>
+                    <li><span class="feature-icon">✓</span> <span class="feature-highlight">Webhooks</span></li>
+                    <li><span class="feature-icon">✓</span> Advanced DNS intelligence</li>
+                    <li><span class="feature-icon disabled">✗</span> Slack integration</li>
+                </ul>
+            </div>
+
+            <!-- Professional Tier (Featured) -->
+            <div class="pricing-card featured">
+                <div class="tier-name">Professional</div>
+                <div class="tier-description">For serious teams requiring scale and support</div>
+                <div class="pricing">
+                    <div class="price price-monthly">
+                        <span class="price-currency">$</span>99<span class="price-period">/month</span>
+                    </div>
+                    <div class="price price-annual">
+                        <span class="price-currency">$</span>79<span class="price-period">/month</span>
+                    </div>
+                    <div class="annual-savings" style="display: none;">$950/year (save $238)</div>
+                </div>
+                <button class="cta-button" onclick="window.location.href='/signup?tier=professional'">Start Free Trial</button>
+                <ul class="features-list">
+                    <li><span class="feature-icon">✓</span> 50,000 requests/month</li>
+                    <li><span class="feature-icon">✓</span> 2,000 requests/hour</li>
+                    <li><span class="feature-icon">✓</span> 500 domains tracked</li>
+                    <li><span class="feature-icon">✓</span> 10 API keys</li>
+                    <li><span class="feature-icon">✓</span> 3-year history</li>
+                    <li><span class="feature-icon">✓</span> <span class="feature-highlight">Slack integration</span></li>
+                    <li><span class="feature-icon">✓</span> <span class="feature-highlight">Email alerts</span></li>
+                    <li><span class="feature-icon">✓</span> <span class="feature-highlight">Data export</span></li>
+                    <li><span class="feature-icon">✓</span> <span class="feature-highlight">Priority support</span></li>
+                </ul>
+            </div>
+
+            <!-- Commercial Tier -->
+            <div class="pricing-card">
+                <div class="tier-name">Commercial</div>
+                <div class="tier-description">For enterprises with high-volume needs</div>
+                <div class="pricing">
+                    <div class="price price-monthly">
+                        <span class="price-currency">$</span>299<span class="price-period">/month</span>
+                    </div>
+                    <div class="price price-annual">
+                        <span class="price-currency">$</span>239<span class="price-period">/month</span>
+                    </div>
+                    <div class="annual-savings" style="display: none;">$2,870/year (save $718)</div>
+                </div>
+                <button class="cta-button" onclick="window.location.href='/signup?tier=commercial'">Contact Sales</button>
+                <ul class="features-list">
+                    <li><span class="feature-icon">✓</span> 250,000 requests/month</li>
+                    <li><span class="feature-icon">✓</span> 10,000 requests/hour</li>
+                    <li><span class="feature-icon">✓</span> 5,000 domains tracked</li>
+                    <li><span class="feature-icon">✓</span> 50 API keys</li>
+                    <li><span class="feature-icon">✓</span> 5-year history</li>
+                    <li><span class="feature-icon">✓</span> <span class="feature-highlight">White-label</span></li>
+                    <li><span class="feature-icon">✓</span> All Professional features</li>
+                    <li><span class="feature-icon">✓</span> Dedicated account manager</li>
+                </ul>
+            </div>
+
+            <!-- Research Tier -->
+            <div class="pricing-card">
+                <div class="tier-name">Research</div>
+                <div class="tier-description">Academic & non-profit organizations</div>
+                <div class="pricing">
+                    <div class="price price-monthly">
+                        <span class="price-currency">$</span>199<span class="price-period">/month</span>
+                    </div>
+                    <div class="price price-annual">
+                        <span class="price-currency">$</span>159<span class="price-period">/month</span>
+                    </div>
+                    <div class="annual-savings" style="display: none;">$1,910/year (save $478)</div>
+                </div>
+                <button class="cta-button" onclick="window.location.href='/signup?tier=research'">Apply Now</button>
+                <ul class="features-list">
+                    <li><span class="feature-icon">✓</span> <span class="feature-highlight">Unlimited web requests</span></li>
+                    <li><span class="feature-icon">✓</span> 100,000 API requests/month</li>
+                    <li><span class="feature-icon">✓</span> 5,000 requests/hour</li>
+                    <li><span class="feature-icon">✓</span> 1,000 domains tracked</li>
+                    <li><span class="feature-icon">✓</span> 20 API keys</li>
+                    <li><span class="feature-icon">✓</span> 10-year history</li>
+                    <li><span class="feature-icon">✓</span> All Professional features</li>
+                    <li><span class="feature-icon">✓</span> Research collaboration tools</li>
+                </ul>
+            </div>
+
+            <!-- Enterprise Tier -->
+            <div class="pricing-card">
+                <div class="tier-name">Enterprise</div>
+                <div class="tier-description">Custom solutions for large organizations</div>
+                <div class="pricing">
+                    <div class="price">
+                        Custom
+                    </div>
+                    <div class="price-period">tailored to your needs</div>
+                </div>
+                <button class="cta-button" onclick="window.location.href='/contact?subject=enterprise'">Contact Us</button>
+                <ul class="features-list">
+                    <li><span class="feature-icon">✓</span> <span class="feature-highlight">Unlimited everything</span></li>
+                    <li><span class="feature-icon">✓</span> SSO/SAML integration</li>
+                    <li><span class="feature-icon">✓</span> Custom SLA (99.9%+)</li>
+                    <li><span class="feature-icon">✓</span> Dedicated infrastructure</li>
+                    <li><span class="feature-icon">✓</span> API priority queues</li>
+                    <li><span class="feature-icon">✓</span> 24/7 dedicated support</li>
+                    <li><span class="feature-icon">✓</span> Custom integrations</li>
+                    <li><span class="feature-icon">✓</span> On-premises deployment option</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="comparison-section">
+            <h2>Feature Comparison</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Free</th>
+                        <th>Essentials</th>
+                        <th>Professional</th>
+                        <th>Commercial</th>
+                        <th>Research</th>
+                        <th>Enterprise</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="category-header" colspan="7">Usage Limits</td>
+                    </tr>
+                    <tr>
+                        <td class="feature-name">Web Requests/Month</td>
+                        <td>1,500</td>
+                        <td>10,000</td>
+                        <td>50,000</td>
+                        <td>250,000</td>
+                        <td>Unlimited</td>
+                        <td>Unlimited</td>
+                    </tr>
+                    <tr>
+                        <td class="feature-name">API Requests/Month</td>
+                        <td>1,500</td>
+                        <td>10,000</td>
+                        <td>50,000</td>
+                        <td>250,000</td>
+                        <td>100,000</td>
+                        <td>Unlimited</td>
+                    </tr>
+                    <tr>
+                        <td class="feature-name">Requests/Hour</td>
+                        <td>100</td>
+                        <td>500</td>
+                        <td>2,000</td>
+                        <td>10,000</td>
+                        <td>5,000</td>
+                        <td>Unlimited</td>
+                    </tr>
+                    <tr>
+                        <td class="category-header" colspan="7">Resources</td>
+                    </tr>
+                    <tr>
+                        <td class="feature-name">Domains Tracked</td>
+                        <td>10</td>
+                        <td>50</td>
+                        <td>500</td>
+                        <td>5,000</td>
+                        <td>1,000</td>
+                        <td>Unlimited</td>
+                    </tr>
+                    <tr>
+                        <td class="feature-name">API Keys</td>
+                        <td>1</td>
+                        <td>3</td>
+                        <td>10</td>
+                        <td>50</td>
+                        <td>20</td>
+                        <td>Unlimited</td>
+                    </tr>
+                    <tr>
+                        <td class="feature-name">History Retention</td>
+                        <td>90 days</td>
+                        <td>1 year</td>
+                        <td>3 years</td>
+                        <td>5 years</td>
+                        <td>10 years</td>
+                        <td>Unlimited</td>
+                    </tr>
+                    <tr>
+                        <td class="category-header" colspan="7">Features</td>
+                    </tr>
+                    <tr>
+                        <td class="feature-name">Webhooks</td>
+                        <td>✗</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                    </tr>
+                    <tr>
+                        <td class="feature-name">Slack Integration</td>
+                        <td>✗</td>
+                        <td>✗</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                    </tr>
+                    <tr>
+                        <td class="feature-name">Email Alerts</td>
+                        <td>✗</td>
+                        <td>✗</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                    </tr>
+                    <tr>
+                        <td class="feature-name">Data Export</td>
+                        <td>✗</td>
+                        <td>✗</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                    </tr>
+                    <tr>
+                        <td class="feature-name">White-label</td>
+                        <td>✗</td>
+                        <td>✗</td>
+                        <td>✗</td>
+                        <td>✓</td>
+                        <td>✗</td>
+                        <td>✓</td>
+                    </tr>
+                    <tr>
+                        <td class="feature-name">SSO/SAML</td>
+                        <td>✗</td>
+                        <td>✗</td>
+                        <td>✗</td>
+                        <td>✗</td>
+                        <td>✗</td>
+                        <td>✓</td>
+                    </tr>
+                    <tr>
+                        <td class="category-header" colspan="7">Support</td>
+                    </tr>
+                    <tr>
+                        <td class="feature-name">Community Support</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                    </tr>
+                    <tr>
+                        <td class="feature-name">Priority Support</td>
+                        <td>✗</td>
+                        <td>✗</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td>✗</td>
+                        <td>✓</td>
+                    </tr>
+                    <tr>
+                        <td class="feature-name">Dedicated Support</td>
+                        <td>✗</td>
+                        <td>✗</td>
+                        <td>✗</td>
+                        <td>✗</td>
+                        <td>✗</td>
+                        <td>✓</td>
+                    </tr>
+                    <tr>
+                        <td class="feature-name">Custom SLA</td>
+                        <td>✗</td>
+                        <td>✗</td>
+                        <td>✗</td>
+                        <td>✗</td>
+                        <td>✗</td>
+                        <td>✓</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Professional Services -->
+        <div class="services-section">
+            <h2>Need Professional Services?</h2>
+            <p>We offer migration, training, and consulting services to help you get the most out of DNS Science.</p>
+            <a href="/services" class="services-button">View Professional Services</a>
+        </div>
+    </div>
+
+    <script>
+        // Dark mode initialization
+        const body = document.body;
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            body.classList.remove('dark-mode');
+        } else {
+            body.classList.add('dark-mode');
+        }
+
+        // Billing toggle functionality
+        const toggleSwitch = document.getElementById('toggleSwitch');
+        const billingToggle = document.getElementById('billingToggle');
+        const annualSavings = document.querySelectorAll('.annual-savings');
+
+        toggleSwitch.addEventListener('click', function() {
+            toggleSwitch.classList.toggle('active');
+            billingToggle.classList.toggle('annual');
+
+            // Show/hide annual savings
+            annualSavings.forEach(saving => {
+                saving.style.display = toggleSwitch.classList.contains('active') ? 'block' : 'none';
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,240 @@
+---
+# Global variables for DNS Science deployment
+# These variables apply to all environments
+
+# Application Configuration
+app_name: dnsscience
+app_version: "{{ lookup('env', 'APP_VERSION') | default('latest', true) }}"
+app_domain: dnsscience.io
+
+# Directory Structure
+base_dir: /var/www/dnsscience
+app_dir: "{{ base_dir }}/app"
+template_dir: "{{ base_dir }}/templates"
+static_dir: "{{ base_dir }}/static"
+log_dir: /var/log/dnsscience
+backup_dir: /var/backups/dnsscience
+config_dir: "{{ base_dir }}/config"
+
+# Python Configuration
+python_executable: python3
+pip_executable: pip3
+virtualenv_command: "{{ python_executable }} -m venv"
+requirements_file: "{{ base_dir }}/requirements.txt"
+
+# Flask Configuration
+flask_app: app.py
+flask_env: production
+flask_debug: false
+flask_host: 0.0.0.0
+flask_port: 5000
+flask_workers: 4
+
+# Database Configuration
+db_type: postgresql
+db_host: "{{ lookup('env', 'DB_HOST') | default('localhost', true) }}"
+db_port: "{{ lookup('env', 'DB_PORT') | default('5432', true) }}"
+db_name: "{{ lookup('env', 'DB_NAME') | default('dnsscience', true) }}"
+db_user: "{{ lookup('env', 'DB_USER') | default('dnsscience', true) }}"
+db_password: "{{ lookup('env', 'DB_PASSWORD') }}"
+db_pool_size: 20
+db_max_overflow: 40
+db_pool_timeout: 30
+
+# Redis Configuration (for caching/sessions)
+redis_host: "{{ lookup('env', 'REDIS_HOST') | default('localhost', true) }}"
+redis_port: "{{ lookup('env', 'REDIS_PORT') | default('6379', true) }}"
+redis_db: 0
+redis_password: "{{ lookup('env', 'REDIS_PASSWORD') | default('', true) }}"
+
+# AWS Configuration
+aws_region: us-east-1
+aws_account_id: "{{ lookup('env', 'AWS_ACCOUNT_ID') }}"
+s3_deployment_bucket: dnsscience-deployment
+s3_backup_bucket: dnsscience-backups
+cloudfront_distribution_id: "{{ lookup('env', 'CLOUDFRONT_DISTRIBUTION_ID') | default('', true) }}"
+
+# API Keys and Secrets
+stripe_secret_key: "{{ lookup('env', 'STRIPE_SECRET_KEY') }}"
+stripe_publishable_key: "{{ lookup('env', 'STRIPE_PUBLISHABLE_KEY') }}"
+stripe_webhook_secret: "{{ lookup('env', 'STRIPE_WEBHOOK_SECRET') }}"
+opensrs_api_key: "{{ lookup('env', 'OPENSRS_API_KEY') }}"
+opensrs_reseller_username: "{{ lookup('env', 'OPENSRS_RESELLER_USERNAME') }}"
+google_maps_api_key: "{{ lookup('env', 'GOOGLE_MAPS_API_KEY') }}"
+secret_key: "{{ lookup('env', 'SECRET_KEY') | default('generate-strong-secret-key', true) }}"
+
+# Email Configuration
+smtp_host: "{{ lookup('env', 'SMTP_HOST') | default('smtp.gmail.com', true) }}"
+smtp_port: "{{ lookup('env', 'SMTP_PORT') | default('587', true) }}"
+smtp_user: "{{ lookup('env', 'SMTP_USER') }}"
+smtp_password: "{{ lookup('env', 'SMTP_PASSWORD') }}"
+smtp_use_tls: true
+email_from: "{{ lookup('env', 'EMAIL_FROM') | default('noreply@dnsscience.io', true) }}"
+
+# Apache Configuration
+apache_modules:
+  - wsgi
+  - ssl
+  - rewrite
+  - headers
+  - deflate
+  - expires
+apache_vhost_template: dnsscience.conf.j2
+apache_ssl_cert: /etc/pki/tls/certs/dnsscience.crt
+apache_ssl_key: /etc/pki/tls/private/dnsscience.key
+apache_ssl_chain: /etc/pki/tls/certs/dnsscience-chain.crt
+
+# Security Configuration
+allowed_hosts:
+  - dnsscience.io
+  - www.dnsscience.io
+  - 54.221.150.32
+cors_origins:
+  - https://dnsscience.io
+  - https://www.dnsscience.io
+rate_limit_per_minute: 60
+max_content_length: 16777216  # 16MB
+
+# Monitoring and Logging
+log_level: INFO
+log_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+log_rotation: daily
+log_retention_days: 30
+sentry_dsn: "{{ lookup('env', 'SENTRY_DSN') | default('', true) }}"
+datadog_api_key: "{{ lookup('env', 'DATADOG_API_KEY') | default('', true) }}"
+
+# Deployment Configuration
+deployment_strategy: blue_green  # Options: rolling, blue_green, canary
+deployment_timeout: 300
+health_check_grace_period: 60
+rollback_on_failure: true
+notify_on_deployment: true
+slack_webhook_url: "{{ lookup('env', 'SLACK_WEBHOOK_URL') | default('', true) }}"
+
+# Performance Tuning
+max_request_size: 10485760  # 10MB
+request_timeout: 30
+worker_class: gevent
+worker_connections: 1000
+keepalive: 2
+
+# Feature Flags
+enable_debug_mode: false
+enable_maintenance_mode: false
+enable_rate_limiting: true
+enable_caching: true
+enable_compression: true
+enable_ssl: true
+enable_monitoring: true
+enable_backups: true
+
+# Templates to Deploy
+template_files:
+  - index.php
+  - explorer.html
+  - tools.html
+  - api_docs.html
+  - cli_docs.html
+  - pricing.html
+  - services.html
+  - registrar.html
+  - acquisition.html
+  - dashboard/index.html
+  - dashboard/settings.html
+  - marketplace/browse.html
+  - marketplace/listing.html
+  - tools/autolookup.html
+  - tools/visualtrace.html
+  - tools/whois.html
+  - tools/dns.html
+  - tools/rdap.html
+
+# Static Files Configuration
+static_dirs:
+  - css
+  - js
+  - images
+  - fonts
+  - data
+  - vendor
+
+# Python Dependencies
+python_packages:
+  - flask==2.3.3
+  - flask-cors==4.0.0
+  - flask-limiter==3.5.0
+  - psycopg2-binary==2.9.7
+  - redis==5.0.0
+  - requests==2.31.0
+  - stripe==6.5.0
+  - boto3==1.28.57
+  - python-whois==0.8.0
+  - dnspython==2.4.2
+  - pyOpenSSL==23.2.0
+  - cryptography==41.0.4
+  - beautifulsoup4==4.12.2
+  - lxml==4.9.3
+  - python-dateutil==2.8.2
+  - pytz==2023.3
+  - gunicorn==21.2.0
+  - gevent==23.9.1
+  - celery==5.3.4
+  - sqlalchemy==2.0.21
+  - alembic==1.12.0
+  - pydantic==2.4.2
+  - python-dotenv==1.0.0
+  - jinja2==3.1.2
+  - markupsafe==2.1.3
+  - werkzeug==2.3.7
+  - click==8.1.7
+  - itsdangerous==2.1.2
+
+# System Packages
+system_packages:
+  - python3
+  - python3-pip
+  - python3-devel
+  - gcc
+  - postgresql-devel
+  - redis
+  - httpd
+  - mod_wsgi
+  - mod_ssl
+  - git
+  - curl
+  - wget
+  - vim
+  - htop
+  - nmap
+  - traceroute
+  - bind-utils
+  - openssl
+  - certbot
+
+# Cron Jobs
+cron_jobs:
+  - name: "Domain expiry check"
+    minute: "0"
+    hour: "2"
+    job: "{{ venv_path }}/bin/python {{ app_dir }}/daemons/domain_expiry_daemon.py"
+  - name: "Certificate monitoring"
+    minute: "*/30"
+    hour: "*"
+    job: "{{ venv_path }}/bin/python {{ app_dir }}/certificate_alerts.py"
+  - name: "Database backup"
+    minute: "0"
+    hour: "3"
+    job: "/usr/local/bin/backup-database.sh"
+  - name: "Clean old logs"
+    minute: "0"
+    hour: "4"
+    weekday: "0"
+    job: "find {{ log_dir }} -type f -mtime +30 -delete"
+
+# Tags for Organization
+default_tags:
+  Environment: "{{ environment | default('production') }}"
+  Application: "{{ app_name }}"
+  ManagedBy: ansible
+  Owner: devops
+  CostCenter: engineering

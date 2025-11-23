@@ -1,0 +1,109 @@
+---
+# Template Deployment Role
+
+- name: Create template directories
+  file:
+    path: "{{ template_dir }}/{{ item }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0755'
+  loop:
+    - dashboard
+    - marketplace
+    - tools
+
+- name: Check for local template files
+  stat:
+    path: "{{ playbook_dir }}/../templates"
+  delegate_to: localhost
+  register: local_templates_dir
+
+- name: Deploy templates from local if available
+  copy:
+    src: "{{ playbook_dir }}/../templates/{{ item }}"
+    dest: "{{ template_dir }}/{{ item }}"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0644'
+    backup: yes
+  loop: "{{ template_files }}"
+  when: local_templates_dir.stat.exists
+  ignore_errors: yes
+  register: local_template_deploy
+
+- name: Sync templates from S3 bucket
+  aws_s3:
+    bucket: "{{ s3_deployment_bucket }}"
+    object: "{{ s3_template_prefix }}{{ item }}"
+    dest: "{{ template_dir }}/{{ item }}"
+    mode: get
+  loop: "{{ template_files }}"
+  when: not local_templates_dir.stat.exists or local_template_deploy is failed
+  ignore_errors: yes
+  register: s3_template_deploy
+
+- name: Ensure critical templates exist
+  stat:
+    path: "{{ template_dir }}/{{ item }}"
+  loop:
+    - index.php
+    - explorer.html
+    - tools.html
+    - api_docs.html
+  register: critical_templates
+  failed_when: not critical_templates.stat.exists
+
+- name: Fix template permissions
+  file:
+    path: "{{ template_dir }}"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0755'
+    recurse: yes
+
+- name: Process PHP templates with correct includes
+  replace:
+    path: "{{ template_dir }}/{{ item }}"
+    regexp: 'include\s*\(\s*["'']\.\.\/config\.php["'']\s*\)'
+    replace: "include('{{ app_dir }}/config.php')"
+    backup: yes
+  loop:
+    - index.php
+  when: item in template_files
+  ignore_errors: yes
+
+- name: Update template paths in configuration
+  lineinfile:
+    path: "{{ app_dir }}/config.py"
+    regexp: "^TEMPLATE_DIR.*"
+    line: "TEMPLATE_DIR = '{{ template_dir }}'"
+    create: yes
+    backup: yes
+  notify: restart apache
+
+- name: Validate PHP syntax in templates
+  command: "php -l {{ template_dir }}/{{ item }}"
+  loop:
+    - index.php
+  when: item in template_files and item.endswith('.php')
+  register: php_syntax_check
+  changed_when: false
+  failed_when: "'Parse error' in php_syntax_check.stdout"
+  ignore_errors: yes
+
+- name: Create template cache directory
+  file:
+    path: /var/cache/dnsscience/templates
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0755'
+
+- name: Generate template manifest
+  template:
+    src: template_manifest.json.j2
+    dest: "{{ template_dir }}/manifest.json"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0644'

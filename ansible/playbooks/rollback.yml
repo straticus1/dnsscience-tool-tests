@@ -1,0 +1,107 @@
+---
+# Rollback Deployment Playbook
+
+- name: Check for backup availability
+  stat:
+    path: "{{ backup_dir }}"
+  register: backup_dir_check
+
+- name: List available backups
+  find:
+    paths: "{{ backup_dir }}"
+    patterns: "backup_*.tar.gz"
+    file_type: file
+  register: backup_files
+  when: backup_dir_check.stat.exists
+
+- name: Fail if no backups found
+  fail:
+    msg: "No backups found in {{ backup_dir }}"
+  when: backup_files.files | length == 0
+
+- name: Select most recent backup
+  set_fact:
+    latest_backup: "{{ backup_files.files | sort(attribute='mtime') | last }}"
+  when: backup_files.files | length > 0
+
+- name: Display backup to restore
+  debug:
+    msg: "Restoring from: {{ latest_backup.path }}"
+
+- name: Stop Apache service
+  systemd:
+    name: httpd
+    state: stopped
+
+- name: Create rollback directory
+  tempfile:
+    state: directory
+    prefix: rollback_
+  register: rollback_temp
+
+- name: Backup current deployment
+  archive:
+    path: "{{ app_dir }}"
+    dest: "{{ rollback_temp.path }}/current_{{ ansible_date_time.epoch }}.tar.gz"
+    format: gz
+
+- name: Clear application directory
+  file:
+    path: "{{ app_dir }}"
+    state: absent
+
+- name: Recreate application directory
+  file:
+    path: "{{ app_dir }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0755'
+
+- name: Extract backup
+  unarchive:
+    src: "{{ latest_backup.path }}"
+    dest: "{{ app_dir }}"
+    remote_src: yes
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+
+- name: Restore database backup if exists
+  postgresql_db:
+    name: "{{ db_name }}"
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_password: "{{ db_password }}"
+    port: "{{ db_port }}"
+    state: restore
+    target: "{{ backup_dir }}/database_latest.sql"
+  when: restore_database | default(false)
+  ignore_errors: yes
+
+- name: Start Apache service
+  systemd:
+    name: httpd
+    state: started
+
+- name: Wait for services to stabilize
+  pause:
+    seconds: 10
+
+- name: Test rollback success
+  uri:
+    url: "http://{{ ansible_default_ipv4.address | default('127.0.0.1') }}/health"
+    method: GET
+    status_code: 200
+    timeout: 30
+  register: rollback_test
+  retries: 3
+  delay: 5
+
+- name: Display rollback status
+  debug:
+    msg: "Rollback completed successfully. Service is {{ 'healthy' if rollback_test is succeeded else 'unhealthy' }}"
+
+- name: Clean up temp directory
+  file:
+    path: "{{ rollback_temp.path }}"
+    state: absent

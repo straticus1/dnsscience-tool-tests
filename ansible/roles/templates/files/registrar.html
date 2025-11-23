@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domain Registrar - DNS Science</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 0;
+            padding-top: 80px;
+        }
+
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            padding: 15px 30px;
+            background: rgba(30, 30, 50, 0.98);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(139, 156, 255, 0.2);
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-button {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .nav-button.secondary {
+            background: rgba(139, 156, 255, 0.2);
+            color: #8b9cff;
+        }
+
+        .nav-button.secondary:hover {
+            background: rgba(139, 156, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            color: #8b9cff;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #b0b0b0;
+            font-size: 1.1em;
+        }
+
+        /* Mode Selection */
+        .mode-selection {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .mode-btn {
+            padding: 20px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        /* Search Section */
+        .search-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(139, 156, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #8b9cff;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .search-btn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .search-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* TLD Suggestions */
+        .tld-suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .tld-chip {
+            padding: 8px 15px;
+            background: rgba(139, 156, 255, 0.2);
+            border: 1px solid rgba(139, 156, 255, 0.4);
+            border-radius: 20px;
+            color: #8b9cff;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tld-chip:hover {
+            background: rgba(139, 156, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        /* Results Section */
+        .results-section {
+            display: none;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .primary-result {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 2px solid rgba(139, 156, 255, 0.3);
+        }
+
+        .domain-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+            gap: 20px;
+            flex-wrap: nowrap;
+        }
+
+        .domain-card.available {
+            border-left-color: #4caf50;
+        }
+
+        .domain-card.taken {
+            border-left-color: #f44336;
+        }
+
+        .domain-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .domain-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .domain-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #8b9cff;
+            margin-bottom: 5px;
+            word-break: break-all;
+        }
+
+        .domain-status {
+            font-size: 0.9em;
+            color: #b0b0b0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .status-badge.available {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+        }
+
+        .status-badge.taken {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+
+        .domain-price {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #4caf50;
+            margin: 0;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .domain-action {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .add-cart-btn, .request-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            min-width: 120px;
+        }
+
+        .add-cart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .request-btn {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            min-width: 160px;
+        }
+
+        .request-btn:hover {
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        /* Suggestions Grid */
+        .suggestions-section {
+            margin-top: 30px;
+        }
+
+        .suggestions-section h3 {
+            color: #8b9cff;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .suggestions-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Shopping Cart */
+        .cart-section {
+            position: fixed;
+            right: 20px;
+            top: 100px;
+            width: 350px;
+            background: rgba(30, 30, 50, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(139, 156, 255, 0.2);
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+        }
+
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(139, 156, 255, 0.3);
+        }
+
+        .cart-header h3 {
+            color: #8b9cff;
+            font-size: 1.3em;
+        }
+
+        .cart-count {
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .cart-items {
+            margin-bottom: 20px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .cart-item-name {
+            color: #e0e0e0;
+            font-weight: 500;
+        }
+
+        .cart-item-price {
+            color: #4caf50;
+            font-weight: 700;
+        }
+
+        .remove-item {
+            background: none;
+            border: none;
+            color: #f44336;
+            cursor: pointer;
+            font-size: 1.2em;
+            padding: 0 8px;
+        }
+
+        .cart-total {
+            border-top: 2px solid rgba(139, 156, 255, 0.3);
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .total-amount {
+            color: #4caf50;
+            font-size: 1.5em;
+            font-weight: 700;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .checkout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .checkout-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* SSL Section */
+        .ssl-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+
+        .ssl-section h3 {
+            color: #8b9cff;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .ssl-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .ssl-card {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid rgba(139, 156, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .ssl-card:hover {
+            border-color: #8b9cff;
+            transform: translateY(-5px);
+        }
+
+        .ssl-type {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #8b9cff;
+            margin-bottom: 10px;
+        }
+
+        .ssl-features {
+            list-style: none;
+            margin: 15px 0;
+            padding: 0;
+        }
+
+        .ssl-features li {
+            padding: 8px 0;
+            color: #b0b0b0;
+            font-size: 0.95em;
+        }
+
+        .ssl-features li:before {
+            content: "✓ ";
+            color: #4caf50;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .ssl-price {
+            font-size: 1.8em;
+            color: #4caf50;
+            font-weight: 700;
+            margin: 15px 0;
+        }
+
+        .ssl-price span {
+            font-size: 0.6em;
+            color: #b0b0b0;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid rgba(139, 156, 255, 0.2);
+            border-top: 4px solid #8b9cff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Transfer Domain Section */
+        .transfer-info {
+            background: rgba(255, 152, 0, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #ff9800;
+            margin-bottom: 20px;
+        }
+
+        .transfer-info h4 {
+            color: #ff9800;
+            margin-bottom: 10px;
+        }
+
+        .auth-code-input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 152, 0, 0.3);
+            border-radius: 8px;
+            color: white;
+            margin-top: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .cart-section {
+                position: static;
+                width: 100%;
+                margin-top: 30px;
+            }
+
+            .mode-selection {
+                flex-direction: column;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div class="nav-bar">
+        <a href="/" class="nav-button secondary">← Home</a>
+        <a href="/about" class="nav-button secondary">About Us</a>
+        <a href="/explorer" class="nav-button secondary">Data Explorer</a>
+        <a href="/pricing" class="nav-button secondary">Pricing</a>
+        <a href="/docs/api" class="nav-button secondary">API Docs</a>
+        <a href="/docs/cli" class="nav-button secondary">CLI Docs</a>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🌐 Domain Registrar</h1>
+            <p>Register domains, transfer domains, and purchase SSL certificates</p>
+        </div>
+
+        <!-- Mode Selection -->
+        <div class="mode-selection">
+            <button class="mode-btn active" id="registerBtn" onclick="setMode('register')">
+                📝 Register Domain
+            </button>
+            <button class="mode-btn" id="transferBtn" onclick="setMode('transfer')">
+                🔄 Transfer Domain
+            </button>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <div id="registerMode" class="mode-content">
+                <h3 style="color: #8b9cff; margin-bottom: 15px;">Search for Available Domains</h3>
+                <div class="search-box">
+                    <input type="text" id="domainSearch" class="search-input" 
+                           placeholder="Enter domain name (e.g., mybusiness, example)" 
+                           onkeypress="handleSearchEnter(event)">
+                    <button class="search-btn" onclick="searchDomains()" id="searchButton">
+                        🔍 Search Domains
+                    </button>
+                </div>
+                <div class="tld-suggestions">
+                    <span style="color: #b0b0b0; margin-right: 10px;">Popular TLDs:</span>
+                    <div class="tld-chip" onclick="addTLD('.com')">.com</div>
+                    <div class="tld-chip" onclick="addTLD('.net')">.net</div>
+                    <div class="tld-chip" onclick="addTLD('.org')">.org</div>
+                    <div class="tld-chip" onclick="addTLD('.io')">.io</div>
+                    <div class="tld-chip" onclick="addTLD('.ai')">.ai</div>
+                    <div class="tld-chip" onclick="addTLD('.co')">.co</div>
+                    <div class="tld-chip" onclick="addTLD('.app')">.app</div>
+                    <div class="tld-chip" onclick="addTLD('.dev')">.dev</div>
+                </div>
+            </div>
+
+            <div id="transferMode" class="mode-content" style="display: none;">
+                <div class="transfer-info">
+                    <h4>Transfer Your Domain to DNS Science</h4>
+                    <p style="color: #b0b0b0; margin-top: 10px;">
+                        To transfer your domain, you'll need the authorization (EPP) code from your current registrar.
+                        Transfers typically take 5-7 days to complete.
+                    </p>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="transferDomainSearch" class="search-input" 
+                           placeholder="Enter domain to transfer (e.g., example.com)" 
+                           onkeypress="handleTransferEnter(event)">
+                    <button class="search-btn" onclick="searchTransferDomain()">
+                        🔍 Check Transfer Eligibility
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loadingSpinner">
+            <div class="spinner"></div>
+            <p style="color: #8b9cff;">Searching domains...</p>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection">
+            <!-- Primary Result -->
+            <div id="primaryResult"></div>
+
+            <!-- Suggestions -->
+            <div class="suggestions-section">
+                <h3>💡 Related Suggestions</h3>
+                <div class="suggestions-grid" id="suggestionsGrid"></div>
+            </div>
+        </div>
+
+        <!-- SSL Certificate Section -->
+        <div class="ssl-section">
+            <h3>🔒 SSL Certificates</h3>
+            <p style="color: #b0b0b0; margin-bottom: 20px;">Secure your domain with SSL/TLS certificates. We support CAA and TLSA records.</p>
+            <div class="ssl-options">
+                <div class="ssl-card">
+                    <div class="ssl-type">Standard SSL</div>
+                    <ul class="ssl-features">
+                        <li>Single Domain</li>
+                        <li>Domain Validation (DV)</li>
+                        <li>Issued in minutes</li>
+                        <li>99.9% Browser Trust</li>
+                        <li>CAA Record Support</li>
+                    </ul>
+                    <div class="ssl-price">$49<span>/year</span></div>
+                    <button class="add-cart-btn" onclick="addSSLToCart('standard', 49)">Add to Cart</button>
+                </div>
+
+                <div class="ssl-card">
+                    <div class="ssl-type">Wildcard SSL</div>
+                    <ul class="ssl-features">
+                        <li>Unlimited Subdomains</li>
+                        <li>Domain Validation (DV)</li>
+                        <li>*.yourdomain.com</li>
+                        <li>99.9% Browser Trust</li>
+                        <li>CAA & TLSA Support</li>
+                    </ul>
+                    <div class="ssl-price">$149<span>/year</span></div>
+                    <button class="add-cart-btn" onclick="addSSLToCart('wildcard', 149)">Add to Cart</button>
+                </div>
+
+                <div class="ssl-card">
+                    <div class="ssl-type">Organization SSL (OV)</div>
+                    <ul class="ssl-features">
+                        <li>Organization Validation</li>
+                        <li>Business Verification</li>
+                        <li>Enhanced Trust</li>
+                        <li>99.9% Browser Trust</li>
+                        <li>Full DNSSEC Support</li>
+                    </ul>
+                    <div class="ssl-price">$299<span>/year</span></div>
+                    <button class="add-cart-btn" onclick="addSSLToCart('organization', 299)">Add to Cart</button>
+                </div>
+
+                <div class="ssl-card">
+                    <div class="ssl-type">Extended Validation (EV)</div>
+                    <ul class="ssl-features">
+                        <li>Green Address Bar</li>
+                        <li>Extended Validation</li>
+                        <li>Maximum Trust</li>
+                        <li>$1.5M Warranty</li>
+                        <li>TLSA/DANE Records</li>
+                    </ul>
+                    <div class="ssl-price">$599<span>/year</span></div>
+                    <button class="add-cart-btn" onclick="addSSLToCart('ev', 599)">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shopping Cart -->
+    <div class="cart-section">
+        <div class="cart-header">
+            <h3>🛒 Cart</h3>
+            <span class="cart-count" id="cartCount">0</span>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <p style="color: #b0b0b0; text-align: center;">Your cart is empty</p>
+        </div>
+        <div class="cart-total">
+            <div class="total-row">
+                <span style="color: #b0b0b0;">Subtotal:</span>
+                <span class="total-amount" id="cartTotal">$0.00</span>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn" onclick="checkout()" disabled>
+                Proceed to Checkout
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'register';
+        let cart = [];
+        let userAuthenticated = false;
+        let currentUser = null;
+
+        // Check authentication status on page load
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/check');
+                if (response.ok) {
+                    const data = await response.json();
+                    userAuthenticated = data.authenticated;
+                    currentUser = data.user;
+                    updateAuthUI();
+                }
+            } catch (error) {
+                console.log('Auth check failed:', error);
+                userAuthenticated = false;
+            }
+        }
+
+        // Update UI based on authentication status
+        function updateAuthUI() {
+            // You can add visual indicators here if needed
+            if (userAuthenticated && currentUser) {
+                console.log('User logged in:', currentUser.username);
+            }
+        }
+
+        // Check if user needs to login before proceeding
+        function requireAuth(action) {
+            if (!userAuthenticated) {
+                const shouldLogin = confirm('You need to be logged in to purchase domains.\n\nWould you like to login or create an account?');
+                if (shouldLogin) {
+                    // Save cart to localStorage before redirecting
+                    localStorage.setItem('pendingCart', JSON.stringify(cart));
+                    localStorage.setItem('pendingAction', action);
+                    window.location.href = '/login?redirect=/registrar';
+                    return false;
+                }
+                return false;
+            }
+            return true;
+        }
+
+        // Restore cart from localStorage if user just logged in
+        function restoreCart() {
+            const pendingCart = localStorage.getItem('pendingCart');
+            if (pendingCart) {
+                cart = JSON.parse(pendingCart);
+                updateCart();
+                localStorage.removeItem('pendingCart');
+
+                const pendingAction = localStorage.getItem('pendingAction');
+                if (pendingAction) {
+                    localStorage.removeItem('pendingAction');
+                    // Show message that they can now proceed
+                    setTimeout(() => {
+                        alert('Welcome back! Your cart has been restored. You can now proceed with your purchase.');
+                    }, 500);
+                }
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            restoreCart();
+        });
+
+        // Mode switching
+        function setMode(mode) {
+            currentMode = mode;
+            
+            // Update buttons
+            document.getElementById('registerBtn').classList.toggle('active', mode === 'register');
+            document.getElementById('transferBtn').classList.toggle('active', mode === 'transfer');
+            
+            // Update sections
+            document.getElementById('registerMode').style.display = mode === 'register' ? 'block' : 'none';
+            document.getElementById('transferMode').style.display = mode === 'transfer' ? 'block' : 'none';
+            
+            // Clear results
+            document.getElementById('resultsSection').classList.remove('active');
+        }
+
+        // Add TLD to search
+        function addTLD(tld) {
+            const input = document.getElementById('domainSearch');
+            let value = input.value.trim();
+            
+            // Remove existing TLD if present
+            value = value.replace(/\.(com|net|org|io|ai|co|app|dev)$/i, '');
+            
+            input.value = value + tld;
+            input.focus();
+        }
+
+        // Handle enter key
+        function handleSearchEnter(event) {
+            if (event.key === 'Enter') {
+                searchDomains();
+            }
+        }
+
+        function handleTransferEnter(event) {
+            if (event.key === 'Enter') {
+                searchTransferDomain();
+            }
+        }
+
+        // Search domains
+        async function searchDomains() {
+            const input = document.getElementById('domainSearch').value.trim();
+            
+            if (!input) {
+                alert('Please enter a domain name');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loadingSpinner').classList.add('active');
+            document.getElementById('resultsSection').classList.remove('active');
+            document.getElementById('searchButton').disabled = true;
+
+            try {
+                // Prepare domain list
+                let domains = [];
+                
+                // If user typed a full domain
+                if (input.includes('.')) {
+                    domains.push(input.toLowerCase());
+                    
+                    // Add alternative TLDs
+                    const baseName = input.split('.')[0];
+                    const tlds = ['com', 'net', 'org', 'io', 'ai', 'co', 'app', 'dev'];
+                    tlds.forEach(tld => {
+                        const altDomain = `${baseName}.${tld}`;
+                        if (!domains.includes(altDomain)) {
+                            domains.push(altDomain);
+                        }
+                    });
+                } else {
+                    // Just a name, add common TLDs
+                    const tlds = ['com', 'net', 'org', 'io', 'ai', 'co', 'app', 'dev', 'tech', 'online'];
+                    domains = tlds.map(tld => `${input.toLowerCase()}.${tld}`);
+                }
+
+                // Search via API (use public endpoint for unauthenticated users)
+                const response = await fetch('/api/domains/search/public', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ domains: domains.slice(0, 10) })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({error: 'Unknown error'}));
+                    alert('Error: ' + (errorData.error || `HTTP ${response.status}`));
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+
+                if (!data.results || data.results.length === 0) {
+                    alert('No results found. Please try different search terms.');
+                    return;
+                }
+
+                displayResults(data.results, input);
+
+            } catch (error) {
+                console.error('Search error:', error);
+                alert('Failed to search domains. Please try again.');
+            } finally {
+                document.getElementById('loadingSpinner').classList.remove('active');
+                document.getElementById('searchButton').disabled = false;
+            }
+        }
+
+        // Display search results
+        function displayResults(results, searchTerm) {
+            const resultsSection = document.getElementById('resultsSection');
+            const primaryResult = document.getElementById('primaryResult');
+            const suggestionsGrid = document.getElementById('suggestionsGrid');
+
+            // Clear previous results
+            primaryResult.innerHTML = '';
+            suggestionsGrid.innerHTML = '';
+
+            // Find the exact match (user's search term) for primary display
+            let primaryDomain = results.find(r => r.domain.toLowerCase() === searchTerm.toLowerCase());
+
+            // If no exact match, use first result
+            if (!primaryDomain && results.length > 0) {
+                primaryDomain = results[0];
+            }
+
+            // Display primary result (the domain user searched for)
+            if (primaryDomain) {
+                primaryResult.innerHTML = createDomainCard(primaryDomain, true);
+            }
+
+            // Filter suggestions - ONLY show available domains
+            // Don't show taken domains as suggestions (user can only acquire what they specifically searched)
+            const availableSuggestions = results.filter(r => {
+                // Exclude the primary domain
+                if (primaryDomain && r.domain === primaryDomain.domain) return false;
+                // ONLY include available domains
+                return r.available === true;
+            });
+
+            // Sort available suggestions by TLD preference
+            availableSuggestions.sort((a, b) => {
+                const preferredTLDs = ['com', 'net', 'org', 'io', 'ai'];
+                const aTLD = a.domain.split('.').pop();
+                const bTLD = b.domain.split('.').pop();
+                const aIndex = preferredTLDs.indexOf(aTLD);
+                const bIndex = preferredTLDs.indexOf(bTLD);
+
+                if (aIndex !== -1 && bIndex === -1) return -1;
+                if (aIndex === -1 && bIndex !== -1) return 1;
+                if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+                return 0;
+            });
+
+            // Display available suggestions
+            availableSuggestions.forEach(result => {
+                suggestionsGrid.innerHTML += createDomainCard(result, false);
+            });
+
+            // If no available suggestions, show a helpful message
+            if (availableSuggestions.length === 0 && primaryDomain && !primaryDomain.available) {
+                suggestionsGrid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #b0b0b0;">
+                        <p style="font-size: 1.2em; margin-bottom: 10px;">No available alternatives found for "${searchTerm}"</p>
+                        <p>Try searching with a different name or use our acquisition service for the domain above.</p>
+                    </div>
+                `;
+            }
+
+            resultsSection.classList.add('active');
+        }
+
+        // Create domain card HTML
+        function createDomainCard(domain, isPrimary) {
+            const statusClass = domain.available ? 'available' : 'taken';
+            const statusText = domain.available ? 'Available' : 'Taken';
+            const price = domain.price || getDefaultPrice(domain.domain);
+
+            // Format appraisal value if available
+            let appraisalHTML = '';
+            if (domain.appraisal && domain.appraisal.estimated_value) {
+                const estimatedValue = domain.appraisal.estimated_value;
+                const confidence = Math.round(domain.appraisal.confidence * 100);
+                const valueRange = domain.appraisal.value_range;
+
+                appraisalHTML = `
+                    <div style="margin-top: 8px; padding: 8px; background: rgba(139, 156, 255, 0.1); border-radius: 5px; border-left: 3px solid #8b9cff;">
+                        <div style="font-size: 0.85em; color: #8b9cff; font-weight: 600;">💎 Estimated Value</div>
+                        <div style="font-size: 1.1em; color: #4caf50; font-weight: 700; margin-top: 3px;">
+                            $${estimatedValue.toLocaleString()}
+                        </div>
+                        ${valueRange && valueRange.min && valueRange.max ? `
+                            <div style="font-size: 0.75em; color: #b0b0b0; margin-top: 2px;">
+                                Range: $${valueRange.min.toLocaleString()} - $${valueRange.max.toLocaleString()}
+                            </div>
+                        ` : ''}
+                        <div style="font-size: 0.75em; color: #b0b0b0; margin-top: 2px;">
+                            ${confidence}% confidence
+                        </div>
+                    </div>
+                `;
+            }
+
+            let actionHTML = '';
+            if (domain.available) {
+                actionHTML = `
+                    <div class="domain-action">
+                        <button class="add-cart-btn" onclick='addToCart(${JSON.stringify(domain.domain)}, ${price})'>
+                            Add to Cart
+                        </button>
+                    </div>
+                `;
+            } else {
+                actionHTML = `
+                    <div class="domain-action">
+                        <button class="request-btn" onclick='requestAcquisition("${domain.domain}")'>
+                            Request Acquisition
+                        </button>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="domain-card ${statusClass}">
+                    <div class="domain-info">
+                        <div class="domain-name">${domain.domain}</div>
+                        <div class="domain-status">
+                            Status: <span class="status-badge ${statusClass}">${statusText}</span>
+                        </div>
+                        ${appraisalHTML}
+                    </div>
+                    ${domain.available ? `<div class="domain-price">$${price.toFixed(2)}</div>` : ''}
+                    ${actionHTML}
+                </div>
+            `;
+        }
+
+        // Get default pricing based on TLD
+        function getDefaultPrice(domain) {
+            const tld = domain.split('.').pop();
+            const pricing = {
+                'com': 12.99,
+                'net': 14.99,
+                'org': 14.99,
+                'io': 39.99,
+                'ai': 99.99,
+                'co': 29.99,
+                'app': 19.99,
+                'dev': 19.99,
+                'tech': 24.99,
+                'online': 9.99
+            };
+            return pricing[tld] || 19.99;
+        }
+
+        // Transfer domain search
+        async function searchTransferDomain() {
+            const input = document.getElementById('transferDomainSearch').value.trim();
+            
+            if (!input || !input.includes('.')) {
+                alert('Please enter a complete domain name (e.g., example.com)');
+                return;
+            }
+
+            document.getElementById('loadingSpinner').classList.add('active');
+            
+            try {
+                // Check transfer eligibility
+                const response = await fetch('/api/domains/transfer/check', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ domain: input.toLowerCase() })
+                });
+
+                const data = await response.json();
+
+                if (data.eligible) {
+                    showTransferDialog(data);
+                } else {
+                    alert('Transfer Error: ' + (data.reason || 'Domain not eligible for transfer'));
+                }
+
+            } catch (error) {
+                console.error('Transfer check error:', error);
+                alert('Failed to check transfer eligibility. Please try again.');
+            } finally {
+                document.getElementById('loadingSpinner').classList.remove('active');
+            }
+        }
+
+        // Show transfer dialog
+        function showTransferDialog(transferData) {
+            const authCode = prompt(`Transfer ${transferData.domain}\n\nPrice: $${transferData.price}\n\nPlease enter your authorization (EPP) code:`);
+            
+            if (authCode) {
+                addTransferToCart(transferData.domain, transferData.price, authCode);
+            }
+        }
+
+        // Add to cart
+        function addToCart(domain, price) {
+            cart.push({
+                type: 'domain',
+                name: domain,
+                price: price
+            });
+            
+            updateCart();
+            
+            // Show confirmation
+            alert(`✓ ${domain} added to cart!`);
+        }
+
+        // Add transfer to cart
+        function addTransferToCart(domain, price, authCode) {
+            cart.push({
+                type: 'transfer',
+                name: domain,
+                price: price,
+                authCode: authCode
+            });
+            
+            updateCart();
+            alert(`✓ ${domain} transfer added to cart!`);
+        }
+
+        // Add SSL to cart
+        function addSSLToCart(sslType, price) {
+            const domain = prompt('Enter the domain for this SSL certificate:');
+            
+            if (domain) {
+                cart.push({
+                    type: 'ssl',
+                    name: `${sslType.toUpperCase()} SSL for ${domain}`,
+                    domain: domain,
+                    sslType: sslType,
+                    price: price
+                });
+                
+                updateCart();
+                alert(`✓ ${sslType.toUpperCase()} SSL certificate added to cart!`);
+            }
+        }
+
+        // Request acquisition
+        function requestAcquisition(domain) {
+            if (confirm(`This domain is already taken. Would you like to request our acquisition service?\n\n$75 investigation fee + 20% of acquisition cost\n\nDomain: ${domain}`)) {
+                window.location.href = `/acquisition?domain=${domain}`;
+            }
+        }
+
+        // Update cart display
+        function updateCart() {
+            const cartItems = document.getElementById('cartItems');
+            const cartCount = document.getElementById('cartCount');
+            const cartTotal = document.getElementById('cartTotal');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p style="color: #b0b0b0; text-align: center;">Your cart is empty</p>';
+                cartCount.textContent = '0';
+                cartTotal.textContent = '$0.00';
+                checkoutBtn.disabled = true;
+                return;
+            }
+
+            // Update count
+            cartCount.textContent = cart.length;
+
+            // Update items
+            cartItems.innerHTML = cart.map((item, index) => `
+                <div class="cart-item">
+                    <div>
+                        <div class="cart-item-name">${item.name}</div>
+                        <div style="color: #888; font-size: 0.85em;">${item.type}</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="cart-item-price">$${item.price.toFixed(2)}</span>
+                        <button class="remove-item" onclick="removeFromCart(${index})">×</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Update total
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            cartTotal.textContent = `$${total.toFixed(2)}`;
+            
+            checkoutBtn.disabled = false;
+        }
+
+        // Remove from cart
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCart();
+        }
+
+        // Checkout
+        async function checkout() {
+            if (cart.length === 0) {
+                alert('Your cart is empty');
+                return;
+            }
+
+            // Require authentication before checkout
+            if (!requireAuth('checkout')) {
+                return;
+            }
+
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            checkoutBtn.disabled = true;
+            checkoutBtn.textContent = 'Processing...';
+
+            try {
+                const response = await fetch('/api/domains/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ items: cart })
+                });
+
+                const data = await response.json();
+
+                if (response.status === 401) {
+                    // User not authenticated (session expired)
+                    alert('Your session has expired. Please log in again.');
+                    localStorage.setItem('pendingCart', JSON.stringify(cart));
+                    window.location.href = '/login?redirect=/registrar';
+                    return;
+                }
+
+                if (data.checkout_url) {
+                    // Clear cart before redirecting to Stripe
+                    // Cart will be restored from Stripe session if payment fails
+                    localStorage.setItem('checkoutInProgress', 'true');
+                    // Redirect to Stripe Checkout
+                    window.location.href = data.checkout_url;
+                } else {
+                    alert('Error: ' + (data.error || 'Checkout failed'));
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.textContent = 'Proceed to Checkout';
+                }
+
+            } catch (error) {
+                console.error('Checkout error:', error);
+                alert('Checkout failed. Please try again.');
+                checkoutBtn.disabled = false;
+                checkoutBtn.textContent = 'Proceed to Checkout';
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if there's a domain in URL params
+            const urlParams = new URLSearchParams(window.location.search);
+            const domainParam = urlParams.get('domain');
+            
+            if (domainParam) {
+                document.getElementById('domainSearch').value = domainParam;
+                searchDomains();
+            }
+        });
+    </script>
+</body>
+</html>

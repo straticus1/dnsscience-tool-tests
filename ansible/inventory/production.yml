@@ -1,0 +1,90 @@
+---
+# DNS Science Production Inventory
+# Uses AWS SSM for connection (no SSH required)
+
+all:
+  children:
+    dnsscience_production:
+      hosts:
+        dnsscience-prod-1:
+          ansible_host: i-0609352c5884a48ee
+          ansible_connection: aws_ssm
+          ansible_aws_ssm_bucket_name: dnsscience-ssm-output
+          ansible_aws_ssm_region: us-east-1
+          ansible_python_interpreter: /usr/bin/python3
+          public_ip: 54.221.150.32
+          environment: production
+          deployment_user: ec2-user
+
+      vars:
+        # AWS SSM Connection Settings
+        ansible_aws_ssm_plugin: community.aws.aws_ssm
+        ansible_aws_ssm_timeout: 60
+        ansible_aws_ssm_retries: 3
+
+        # Application Settings
+        app_name: dnsscience
+        app_home: /var/www/dnsscience
+        app_user: apache
+        app_group: apache
+
+        # Python Settings
+        python_version: "3.9"
+        venv_path: /var/www/dnsscience/venv
+
+        # Apache Settings
+        apache_user: apache
+        apache_group: apache
+        apache_document_root: /var/www/dnsscience
+        apache_server_name: dnsscience.io
+        apache_server_admin: admin@dnsscience.io
+
+        # Database Settings
+        db_host: "{{ vault_db_host }}"
+        db_port: 5432
+        db_name: dnsscience
+        db_user: "{{ vault_db_user }}"
+        db_password: "{{ vault_db_password }}"
+
+        # S3 Settings
+        s3_bucket: dnsscience-deployment
+        s3_region: us-east-1
+        s3_template_prefix: templates/
+        s3_static_prefix: static/
+
+        # Deployment Settings
+        deployment_strategy: rolling
+        keep_releases: 5
+        create_backup: true
+        cleanup_old_deployments: true
+
+        # Monitoring Settings
+        health_check_endpoint: /health
+        health_check_port: 80
+        health_check_interval: 30
+
+        # Feature Flags
+        deploy_python_deps: true
+        deploy_database: true
+        deploy_flask_app: true
+        deploy_templates: true
+        deploy_static_files: true
+        deploy_apache: true
+        deploy_health_check: true
+
+        # Service Ports
+        flask_port: 5000
+        apache_port: 80
+        apache_ssl_port: 443
+
+    dnsscience_staging:
+      hosts:
+        # Add staging servers here when needed
+      vars:
+        environment: staging
+
+    dnsscience_development:
+      hosts:
+        # Add development servers here when needed
+      vars:
+        environment: development

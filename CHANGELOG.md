@@ -5,6 +5,62 @@ All notable changes to DNSScience Utility will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2025-11-18
+
+### Added - IP Intelligence & Analysis
+
+#### Comprehensive IP Analysis Features
+- **IP Scan**: New `--ip-scan` command for comprehensive IP address intelligence
+  - Geolocation data (country, city, coordinates)
+  - Network information (ASN, organization, ISP)
+  - Privacy detection (VPN, proxy, Tor, hosting)
+  - BGP routing information
+  - Reputation and blacklist checking
+  - Advanced analysis mode with detailed threat intelligence
+  - Multiple output formats (text, JSON, table)
+  - Usage: `./dnsscience-util.py --ip-scan 8.8.8.8`
+  - Advanced mode: `./dnsscience-util.py --ip-scan 1.1.1.1 --ip-advanced`
+
+- **IP Reputation Lookup**: Dedicated reputation checking via `--ip-reputation`
+  - Multiple blacklist database queries
+  - Threat intelligence integration
+  - Risk scoring and categorization
+  - Usage: `./dnsscience-util.py --ip-reputation 45.33.32.156`
+
+- **BGP Information**: BGP routing data via `--ip-bgp`
+  - Autonomous System (AS) information
+  - Network prefix details
+  - Routing path analysis
+  - Usage: `./dnsscience-util.py --ip-bgp 8.8.8.8`
+
+- **IP Range Analysis**: CIDR range scanning via `--ip-range`
+  - Bulk IP address analysis
+  - Network block intelligence
+  - Configurable scan limits (default: 256 IPs)
+  - Usage: `./dnsscience-util.py --ip-range 192.168.1.0/24`
+
+- **ASN Lookup**: Autonomous System information via `--ip-asn`
+  - AS details and organization information
+  - IP prefix lists
+  - Network relationships
+  - Usage: `./dnsscience-util.py --ip-asn 15169`
+
+#### IP Intelligence Options
+- `--ip-api-url`: Custom API endpoint (default: https://www.dnsscience.io)
+- `--ip-output`: Output format selection (text, json, table)
+- `--ip-force`: Force refresh, bypass cache
+- `--ip-advanced`: Enable advanced analysis features
+- `--ip-max-ips`: Maximum IPs to scan in range (default: 256)
+
+### Enhanced
+- API client extended with IP intelligence endpoints
+- Improved error handling for IP analysis operations
+- Better output formatting for IP data visualization
+
+### Documentation
+- Added IP Intelligence examples to CLI help
+- Updated usage documentation with IP analysis workflows
+
 ## [3.1.0] - 2025-11-11
 
 ### Added - DNSScience.io Platform API Enhancements

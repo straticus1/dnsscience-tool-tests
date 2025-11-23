@@ -1,0 +1,91 @@
+---
+# Health Check Setup Role
+
+- name: Create health check script
+  template:
+    src: health_check.py.j2
+    dest: "{{ app_dir }}/health_check.py"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0755'
+
+- name: Set up health check endpoint in Apache
+  lineinfile:
+    path: /etc/httpd/conf.d/dnsscience.conf
+    line: |
+      ProxyPass /health http://127.0.0.1:{{ flask_port }}/health
+      ProxyPassReverse /health http://127.0.0.1:{{ flask_port }}/health
+    backup: yes
+  notify: restart apache
+
+- name: Create monitoring script
+  template:
+    src: monitor.sh.j2
+    dest: /usr/local/bin/dnsscience-monitor.sh
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Set up health check cron job
+  cron:
+    name: "DNS Science Health Check"
+    minute: "*/5"
+    job: "/usr/local/bin/dnsscience-monitor.sh"
+    user: "{{ app_user }}"
+    state: present
+
+- name: Test health endpoint
+  uri:
+    url: "http://{{ ansible_default_ipv4.address | default('127.0.0.1') }}{{ health_check_endpoint }}"
+    method: GET
+    status_code: [200, 503]
+    timeout: 10
+  register: health_check_result
+  retries: 3
+  delay: 5
+  until: health_check_result.status == 200
+  ignore_errors: yes
+
+- name: Create CloudWatch alarm for health check
+  ec2_metric_alarm:
+    name: "dnsscience-health-check-{{ environment }}"
+    metric: StatusCheckFailed
+    namespace: AWS/EC2
+    statistic: Maximum
+    comparison: GreaterThanThreshold
+    threshold: 0
+    period: 300
+    evaluation_periods: 2
+    unit: Count
+    description: "DNS Science health check alarm"
+    dimensions:
+      InstanceId: "{{ ansible_ec2_instance_id | default('i-unknown') }}"
+    alarm_actions:
+      - "{{ sns_topic_arn | default('') }}"
+    region: "{{ aws_region }}"
+  when: cloudwatch_monitoring | default(false)
+  ignore_errors: yes
+
+- name: Configure application monitoring
+  template:
+    src: monitoring.yml.j2
+    dest: "{{ config_dir }}/monitoring.yml"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0644'
+
+- name: Set up log aggregation
+  template:
+    src: filebeat.yml.j2
+    dest: /etc/filebeat/filebeat.yml
+    owner: root
+    group: root
+    mode: '0600'
+  when: enable_log_aggregation | default(false)
+  notify: restart filebeat
+  ignore_errors: yes
+
+- name: Display health check status
+  debug:
+    msg: "Health check endpoint {{ health_check_result.status | default('unknown') }}: {{ health_check_result.json | default({}) }}"
+  when: health_check_result is defined

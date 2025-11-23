@@ -1,0 +1,211 @@
+---
+# Static Files Deployment Role
+
+- name: Create static directories
+  file:
+    path: "{{ static_dir }}/{{ item }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0755'
+  loop: "{{ static_dirs }}"
+
+- name: Check for local static files
+  stat:
+    path: "{{ playbook_dir }}/../static"
+  delegate_to: localhost
+  register: local_static_dir
+
+- name: Deploy static files from local if available
+  synchronize:
+    src: "{{ playbook_dir }}/../static/"
+    dest: "{{ static_dir }}/"
+    archive: yes
+    compress: yes
+    delete: no
+    recursive: yes
+    rsync_opts:
+      - "--exclude=*.swp"
+      - "--exclude=.DS_Store"
+      - "--exclude=Thumbs.db"
+  when: local_static_dir.stat.exists
+  register: local_static_deploy
+
+- name: Sync static files from S3 bucket
+  command: |
+    aws s3 sync s3://{{ s3_deployment_bucket }}/{{ s3_static_prefix }} {{ static_dir }}/ \
+      --region {{ aws_region }} \
+      --delete \
+      --exclude "*.swp" \
+      --exclude ".DS_Store"
+  when: not local_static_dir.stat.exists or local_static_deploy is failed
+  register: s3_static_sync
+  changed_when: "'download:' in s3_static_sync.stdout"
+
+- name: Deploy critical CSS files
+  copy:
+    content: |
+      /* DNS Science Main Stylesheet */
+      :root {
+        --primary-color: #1a73e8;
+        --secondary-color: #34a853;
+        --danger-color: #ea4335;
+        --warning-color: #fbbc04;
+        --dark-bg: #202124;
+        --light-bg: #ffffff;
+        --text-primary: #202124;
+        --text-secondary: #5f6368;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.6;
+        color: var(--text-primary);
+        background-color: var(--light-bg);
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+
+      /* Add more styles as needed */
+    dest: "{{ static_dir }}/css/main.css"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0644'
+  when: not local_static_dir.stat.exists
+
+- name: Deploy critical JavaScript files
+  copy:
+    content: |
+      // DNS Science Main JavaScript
+      (function() {
+        'use strict';
+
+        // Initialize application
+        window.DNSScience = {
+          version: '1.0.0',
+          apiEndpoint: '{{ api_endpoint | default("") }}',
+
+          init: function() {
+            console.log('DNS Science initialized');
+            this.setupEventListeners();
+            this.loadComponents();
+          },
+
+          setupEventListeners: function() {
+            // Add event listeners
+          },
+
+          loadComponents: function() {
+            // Load dynamic components
+          },
+
+          // API helper methods
+          api: {
+            get: function(endpoint, callback) {
+              fetch(DNSScience.apiEndpoint + endpoint)
+                .then(response => response.json())
+                .then(callback)
+                .catch(console.error);
+            },
+
+            post: function(endpoint, data, callback) {
+              fetch(DNSScience.apiEndpoint + endpoint, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+              })
+              .then(response => response.json())
+              .then(callback)
+              .catch(console.error);
+            }
+          }
+        };
+
+        // Initialize on DOM ready
+        document.addEventListener('DOMContentLoaded', function() {
+          DNSScience.init();
+        });
+      })();
+    dest: "{{ static_dir }}/js/main.js"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0644'
+  when: not local_static_dir.stat.exists
+
+- name: Deploy Bootstrap and jQuery from CDN fallback
+  get_url:
+    url: "{{ item.url }}"
+    dest: "{{ static_dir }}/{{ item.dest }}"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0644'
+  loop:
+    - url: https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css
+      dest: vendor/bootstrap.min.css
+    - url: https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js
+      dest: vendor/bootstrap.bundle.min.js
+    - url: https://code.jquery.com/jquery-3.7.0.min.js
+      dest: vendor/jquery.min.js
+  when: not local_static_dir.stat.exists
+  ignore_errors: yes
+
+- name: Optimize images
+  command: |
+    find {{ static_dir }}/images -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" \) \
+      -exec optipng -o5 {} \; 2>/dev/null || true
+  when: enable_compression | default(true)
+  ignore_errors: yes
+  changed_when: false
+
+- name: Set correct permissions for static files
+  file:
+    path: "{{ static_dir }}"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0755'
+    recurse: yes
+
+- name: Create static files manifest
+  shell: |
+    find {{ static_dir }} -type f -exec md5sum {} \; > {{ static_dir }}/manifest.txt
+  changed_when: false
+
+- name: Configure Apache alias for static files
+  lineinfile:
+    path: /etc/httpd/conf.d/dnsscience.conf
+    line: "Alias /static {{ static_dir }}"
+    create: yes
+    backup: yes
+  notify: restart apache
+
+- name: Set cache headers for static files
+  copy:
+    content: |
+      <Directory "{{ static_dir }}">
+        Options -Indexes +FollowSymLinks
+        AllowOverride None
+        Require all granted
+
+        # Enable compression
+        <IfModule mod_deflate.c>
+          AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json
+        </IfModule>
+
+        # Set cache headers
+        <IfModule mod_expires.c>
+          ExpiresActive On
+          ExpiresByType image/jpeg "access plus 1 month"
+          ExpiresByType image/png "access plus 1 month"
+          ExpiresByType text/css "access plus 1 week"
+          ExpiresByType application/javascript "access plus 1 week"
+        </IfModule>
+      </Directory>
+    dest: /etc/httpd/conf.d/static-files.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart apache

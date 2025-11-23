@@ -1,0 +1,179 @@
+---
+# Flask Application Deployment Role
+
+- name: Check if deployment source exists
+  stat:
+    path: "{{ playbook_dir }}/../app.py"
+  delegate_to: localhost
+  register: local_app_file
+
+- name: Create temporary deployment directory
+  tempfile:
+    state: directory
+    prefix: dnsscience_deploy_
+  register: temp_deploy_dir
+  when: local_app_file.stat.exists
+
+- name: Copy application files to temp directory
+  copy:
+    src: "{{ item }}"
+    dest: "{{ temp_deploy_dir.path }}/"
+    mode: '0644'
+  delegate_to: localhost
+  loop:
+    - "{{ playbook_dir }}/../app.py"
+    - "{{ playbook_dir }}/../auth.py"
+    - "{{ playbook_dir }}/../config.py"
+    - "{{ playbook_dir }}/../database.py"
+    - "{{ playbook_dir }}/../checkers.py"
+    - "{{ playbook_dir }}/../stripe_integration.py"
+    - "{{ playbook_dir }}/../trial_manager.py"
+    - "{{ playbook_dir }}/../rate_limiting.py"
+    - "{{ playbook_dir }}/../email_system.py"
+    - "{{ playbook_dir }}/../domain_valuation.py"
+    - "{{ playbook_dir }}/../ip_intelligence.py"
+    - "{{ playbook_dir }}/../darkweb_monitor.py"
+    - "{{ playbook_dir }}/../opensrs_integration.py"
+    - "{{ playbook_dir }}/../deliverability_scoring.py"
+    - "{{ playbook_dir }}/../certificate_alerts.py"
+  when: local_app_file.stat.exists
+  ignore_errors: yes
+
+- name: Sync application files from S3 if local files don't exist
+  aws_s3:
+    bucket: "{{ s3_deployment_bucket }}"
+    object: "app/{{ item }}"
+    dest: "{{ app_dir }}/{{ item }}"
+    mode: get
+  loop:
+    - app.py
+    - auth.py
+    - config.py
+    - database.py
+    - checkers.py
+    - stripe_integration.py
+    - trial_manager.py
+  when: not local_app_file.stat.exists
+  ignore_errors: yes
+
+- name: Deploy application files to server
+  copy:
+    src: "{{ temp_deploy_dir.path }}/{{ item | basename }}"
+    dest: "{{ app_dir }}/{{ item | basename }}"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0644'
+    backup: yes
+  loop:
+    - app.py
+    - auth.py
+    - config.py
+    - database.py
+    - checkers.py
+    - stripe_integration.py
+    - trial_manager.py
+  when: local_app_file.stat.exists
+  notify: restart apache
+  register: app_deployed
+
+- name: Deploy WSGI file
+  template:
+    src: dnsscience.wsgi.j2
+    dest: "{{ app_dir }}/dnsscience.wsgi"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0644'
+    backup: yes
+  notify: restart apache
+
+- name: Create .env file from template
+  template:
+    src: env.j2
+    dest: "{{ app_dir }}/.env"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0600'
+    backup: yes
+  notify: restart apache
+
+- name: Create .env.production file
+  template:
+    src: env.production.j2
+    dest: "{{ app_dir }}/.env.production"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0600'
+    backup: yes
+  notify: restart apache
+
+- name: Deploy daemon scripts
+  copy:
+    src: "{{ playbook_dir }}/../daemons/{{ item }}"
+    dest: "{{ app_dir }}/daemons/{{ item }}"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0755'
+    backup: yes
+  loop:
+    - arpad_daemon.py
+    - domain_expiry_daemon.py
+    - email_scheduler_daemon.py
+    - rdap_daemon.py
+    - domain_discovery_daemon.py
+    - auto_renewal_daemon.py
+  ignore_errors: yes
+  notify: restart daemons
+
+- name: Deploy CLI tools
+  copy:
+    src: "{{ playbook_dir }}/../cli/{{ item }}"
+    dest: "{{ app_dir }}/cli/{{ item }}"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0755'
+    backup: yes
+  loop:
+    - dnsscience-cli.py
+    - dnsscience-email.py
+  ignore_errors: yes
+
+- name: Create application log file
+  file:
+    path: "{{ log_dir }}/{{ item }}"
+    state: touch
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0664'
+  loop:
+    - app.log
+    - error.log
+    - access.log
+    - deployment.log
+
+- name: Set SELinux context for application directory
+  command: "chcon -R -t httpd_sys_content_t {{ app_dir }}"
+  when: ansible_selinux.status == "enabled"
+  ignore_errors: yes
+
+- name: Set SELinux context for log directory
+  command: "chcon -R -t httpd_log_t {{ log_dir }}"
+  when: ansible_selinux.status == "enabled"
+  ignore_errors: yes
+
+- name: Test Flask application syntax
+  command: "{{ venv_path }}/bin/python -m py_compile {{ app_dir }}/{{ item }}"
+  loop:
+    - app.py
+    - auth.py
+    - config.py
+    - database.py
+  register: syntax_check
+  changed_when: false
+  failed_when: syntax_check.rc != 0
+
+- name: Clean up temporary deployment directory
+  file:
+    path: "{{ temp_deploy_dir.path }}"
+    state: absent
+  when: temp_deploy_dir is defined
+  delegate_to: localhost

@@ -1,0 +1,195 @@
+---
+# Comprehensive Deployment Validation
+
+- name: Set validation timestamp
+  set_fact:
+    validation_start: "{{ ansible_date_time.epoch }}"
+
+- name: Initialize validation results
+  set_fact:
+    validation_results: {}
+    validation_passed: true
+
+# Service Checks
+- name: Validate Apache is running
+  systemd:
+    name: httpd
+  register: apache_check
+  failed_when: false
+
+- name: Record Apache status
+  set_fact:
+    validation_results: "{{ validation_results | combine({'apache_service': apache_check.status.ActiveState == 'active'}) }}"
+    validation_passed: "{{ validation_passed and apache_check.status.ActiveState == 'active' }}"
+
+# Endpoint Tests
+- name: Test critical endpoints
+  uri:
+    url: "http://{{ ansible_default_ipv4.address | default('127.0.0.1') }}{{ item.path }}"
+    method: GET
+    status_code: "{{ item.expected_status }}"
+    timeout: 10
+  loop:
+    - { path: "/", expected_status: 200, name: "home" }
+    - { path: "/health", expected_status: 200, name: "health" }
+    - { path: "/tools", expected_status: 200, name: "tools" }
+    - { path: "/api/v1/status", expected_status: [200, 401], name: "api" }
+    - { path: "/explorer", expected_status: [200, 500], name: "explorer" }
+    - { path: "/static/css/main.css", expected_status: 200, name: "static" }
+  register: endpoint_tests
+  failed_when: false
+
+- name: Process endpoint results
+  set_fact:
+    validation_results: "{{ validation_results | combine({item.item.name + '_endpoint': item.status in item.item.expected_status}) }}"
+    validation_passed: "{{ validation_passed and (item.status in item.item.expected_status) }}"
+  loop: "{{ endpoint_tests.results }}"
+
+# Database Connectivity
+- name: Test database connection
+  postgresql_ping:
+    db: "{{ db_name }}"
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_password: "{{ db_password }}"
+    port: "{{ db_port }}"
+  register: db_test
+  failed_when: false
+
+- name: Record database status
+  set_fact:
+    validation_results: "{{ validation_results | combine({'database_connection': db_test is succeeded}) }}"
+    validation_passed: "{{ validation_passed and db_test is succeeded }}"
+
+# File System Checks
+- name: Verify critical files exist
+  stat:
+    path: "{{ item }}"
+  loop:
+    - "{{ app_dir }}/app.py"
+    - "{{ app_dir }}/dnsscience.wsgi"
+    - "{{ template_dir }}/index.php"
+    - "{{ venv_path }}/bin/python"
+  register: file_checks
+  failed_when: false
+
+- name: Process file check results
+  set_fact:
+    validation_results: "{{ validation_results | combine({item.item | basename | replace('.', '_'): item.stat.exists | default(false)}) }}"
+    validation_passed: "{{ validation_passed and (item.stat.exists | default(false)) }}"
+  loop: "{{ file_checks.results }}"
+
+# Performance Metrics
+- name: Check system resources
+  shell: |
+    echo "cpu_usage:$(top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1}')"
+    echo "memory_usage:$(free -m | awk 'NR==2{printf "%.2f", $3*100/$2}')"
+    echo "disk_usage:$(df {{ base_dir }} | awk 'NR==2{print $5}' | sed 's/%//')"
+  register: system_metrics
+  changed_when: false
+
+- name: Parse system metrics
+  set_fact:
+    cpu_usage: "{{ system_metrics.stdout_lines[0].split(':')[1] | float }}"
+    memory_usage: "{{ system_metrics.stdout_lines[1].split(':')[1] | float }}"
+    disk_usage: "{{ system_metrics.stdout_lines[2].split(':')[1] | int }}"
+  when: system_metrics.stdout_lines | length >= 3
+
+- name: Validate system resources
+  set_fact:
+    validation_results: "{{ validation_results | combine({
+      'cpu_acceptable': cpu_usage | default(0) < 90,
+      'memory_acceptable': memory_usage | default(0) < 90,
+      'disk_acceptable': disk_usage | default(0) < 85
+    }) }}"
+
+# Application Log Checks
+- name: Check for critical errors in logs
+  shell: |
+    tail -100 {{ log_dir }}/error.log 2>/dev/null | grep -E "(FATAL|CRITICAL|ERROR)" | wc -l
+  register: error_count
+  changed_when: false
+  failed_when: false
+
+- name: Record error status
+  set_fact:
+    validation_results: "{{ validation_results | combine({'no_critical_errors': error_count.stdout | int == 0}) }}"
+
+# Response Time Test
+- name: Measure response time
+  shell: |
+    curl -o /dev/null -s -w "%{time_total}\n" http://{{ ansible_default_ipv4.address | default('127.0.0.1') }}/
+  register: response_time
+  changed_when: false
+  failed_when: false
+
+- name: Validate response time
+  set_fact:
+    validation_results: "{{ validation_results | combine({'response_time_acceptable': response_time.stdout | float < 2.0}) }}"
+  when: response_time.stdout | regex_search('[0-9.]+')
+
+# SSL Certificate Check (if enabled)
+- name: Check SSL certificate expiry
+  shell: |
+    echo | openssl s_client -connect {{ ansible_default_ipv4.address }}:443 2>/dev/null | openssl x509 -noout -dates | grep notAfter
+  register: ssl_check
+  when: enable_ssl | default(false)
+  failed_when: false
+  changed_when: false
+
+# Generate Report
+- name: Calculate validation duration
+  set_fact:
+    validation_duration: "{{ (ansible_date_time.epoch | int) - (validation_start | int) }}"
+
+- name: Generate validation report
+  set_fact:
+    validation_report:
+      timestamp: "{{ ansible_date_time.iso8601 }}"
+      duration_seconds: "{{ validation_duration }}"
+      overall_status: "{{ 'PASSED' if validation_passed else 'FAILED' }}"
+      environment: "{{ environment }}"
+      host: "{{ inventory_hostname }}"
+      results: "{{ validation_results }}"
+      metrics:
+        cpu_usage: "{{ cpu_usage | default('N/A') }}%"
+        memory_usage: "{{ memory_usage | default('N/A') }}%"
+        disk_usage: "{{ disk_usage | default('N/A') }}%"
+        response_time: "{{ response_time.stdout | default('N/A') }}s"
+
+- name: Save validation report
+  copy:
+    content: "{{ validation_report | to_nice_json }}"
+    dest: "{{ log_dir }}/validation_{{ ansible_date_time.epoch }}.json"
+    mode: '0644'
+
+- name: Display validation summary
+  debug:
+    msg:
+      - "========================================"
+      - " DEPLOYMENT VALIDATION REPORT"
+      - "========================================"
+      - "Status: {{ validation_report.overall_status }}"
+      - "Duration: {{ validation_report.duration_seconds }}s"
+      - "----------------------------------------"
+      - "Services:"
+      - "  Apache: {{ '✓' if validation_results.apache_service else '✗' }}"
+      - "  Database: {{ '✓' if validation_results.database_connection else '✗' }}"
+      - "----------------------------------------"
+      - "Endpoints:"
+      - "  Home: {{ '✓' if validation_results.home_endpoint | default(false) else '✗' }}"
+      - "  Health: {{ '✓' if validation_results.health_endpoint | default(false) else '✗' }}"
+      - "  Tools: {{ '✓' if validation_results.tools_endpoint | default(false) else '✗' }}"
+      - "  API: {{ '✓' if validation_results.api_endpoint | default(false) else '✗' }}"
+      - "  Explorer: {{ '✓' if validation_results.explorer_endpoint | default(false) else '✗' }}"
+      - "----------------------------------------"
+      - "System Resources:"
+      - "  CPU: {{ cpu_usage | default('N/A') }}%"
+      - "  Memory: {{ memory_usage | default('N/A') }}%"
+      - "  Disk: {{ disk_usage | default('N/A') }}%"
+      - "========================================"
+
+- name: Fail if validation failed
+  fail:
+    msg: "Deployment validation failed. See report above for details."
+  when: not validation_passed and fail_on_validation_error | default(true)

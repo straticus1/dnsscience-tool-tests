@@ -1,0 +1,145 @@
+---
+# Database Setup and Migration Role
+
+- name: Install PostgreSQL client
+  yum:
+    name:
+      - postgresql
+      - postgresql-devel
+    state: present
+
+- name: Test database connection
+  postgresql_ping:
+    db: "{{ db_name }}"
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_password: "{{ db_password }}"
+    port: "{{ db_port }}"
+  register: db_ping
+  retries: 3
+  delay: 10
+  until: db_ping is succeeded
+
+- name: Create migrations directory
+  file:
+    path: "{{ app_dir }}/sql-files/migrations"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0755'
+
+- name: Copy migration files
+  copy:
+    src: "{{ playbook_dir }}/../sql-files/migrations/{{ item }}"
+    dest: "{{ app_dir }}/sql-files/migrations/{{ item }}"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0644'
+  loop:
+    - 001_initial_schema.sql
+    - 002_add_indexes.sql
+    - 003_add_constraints.sql
+    - 004_add_triggers.sql
+    - 005_add_views.sql
+    - 006_subscription_tiers.sql
+    - 007_professional_services.sql
+    - 008_email_system.sql
+    - 009_certificate_alerts.sql
+    - 010_stripe_and_trials.sql
+    - 011_opensrs_integration.sql
+    - 012_darkweb_monitoring.sql
+    - 013_domain_acquisition_and_marketplace.sql
+  ignore_errors: yes
+
+- name: Create migrations tracking table
+  postgresql_query:
+    db: "{{ db_name }}"
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_password: "{{ db_password }}"
+    port: "{{ db_port }}"
+    query: |
+      CREATE TABLE IF NOT EXISTS schema_migrations (
+        version VARCHAR(255) PRIMARY KEY,
+        applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        checksum VARCHAR(64),
+        execution_time INTERVAL,
+        success BOOLEAN DEFAULT TRUE
+      );
+
+- name: Get list of applied migrations
+  postgresql_query:
+    db: "{{ db_name }}"
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_password: "{{ db_password }}"
+    port: "{{ db_port }}"
+    query: "SELECT version FROM schema_migrations;"
+  register: applied_migrations
+
+- name: Apply pending migrations
+  postgresql_db:
+    name: "{{ db_name }}"
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_password: "{{ db_password }}"
+    port: "{{ db_port }}"
+    state: restore
+    target: "{{ app_dir }}/sql-files/migrations/{{ item }}"
+  loop: "{{ migration_files }}"
+  when: item.split('_')[0] not in (applied_migrations.query_result | map(attribute='version') | list)
+  register: migration_results
+  ignore_errors: yes
+
+- name: Record successful migrations
+  postgresql_query:
+    db: "{{ db_name }}"
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_password: "{{ db_password }}"
+    port: "{{ db_port }}"
+    query: |
+      INSERT INTO schema_migrations (version, checksum)
+      VALUES ('{{ item.item.split("_")[0] }}', MD5('{{ item.item }}'))
+      ON CONFLICT (version) DO NOTHING;
+  loop: "{{ migration_results.results }}"
+  when: item is succeeded
+  ignore_errors: yes
+
+- name: Optimize database
+  postgresql_query:
+    db: "{{ db_name }}"
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_password: "{{ db_password }}"
+    port: "{{ db_port }}"
+    query: "{{ item }}"
+  loop:
+    - "VACUUM ANALYZE;"
+    - "REINDEX DATABASE {{ db_name }};"
+  when: optimize_database | default(false)
+  ignore_errors: yes
+
+- name: Create database backup
+  postgresql_db:
+    name: "{{ db_name }}"
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_password: "{{ db_password }}"
+    port: "{{ db_port }}"
+    state: dump
+    target: "{{ backup_dir }}/database_{{ ansible_date_time.epoch }}.sql"
+  when: create_backup | default(true)
+  ignore_errors: yes
+
+- name: Set up database connection pool configuration
+  template:
+    src: pgbouncer.ini.j2
+    dest: /etc/pgbouncer/pgbouncer.ini
+    owner: pgbouncer
+    group: pgbouncer
+    mode: '0644'
+    backup: yes
+  when: use_connection_pooling | default(false)
+  notify: restart pgbouncer
+  ignore_errors: yes

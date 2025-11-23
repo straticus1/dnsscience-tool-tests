@@ -1,0 +1,117 @@
+---
+# Python Dependencies Installation Role
+
+- name: Install system Python packages
+  yum:
+    name: "{{ system_packages }}"
+    state: present
+  register: system_packages_installed
+  retries: 3
+  delay: 10
+  until: system_packages_installed is succeeded
+
+- name: Create application directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0755'
+  loop:
+    - "{{ base_dir }}"
+    - "{{ app_dir }}"
+    - "{{ log_dir }}"
+    - "{{ config_dir }}"
+    - "{{ backup_dir }}"
+
+- name: Check if virtual environment exists
+  stat:
+    path: "{{ venv_path }}"
+  register: venv_stat
+
+- name: Create Python virtual environment
+  command: "{{ virtualenv_command }} {{ venv_path }}"
+  args:
+    creates: "{{ venv_path }}/bin/python"
+  when: not venv_stat.stat.exists
+
+- name: Upgrade pip in virtual environment
+  pip:
+    name:
+      - pip
+      - setuptools
+      - wheel
+    state: latest
+    virtualenv: "{{ venv_path }}"
+  register: pip_upgrade
+  retries: 3
+  delay: 5
+  until: pip_upgrade is succeeded
+
+- name: Generate requirements.txt from template
+  template:
+    src: requirements.txt.j2
+    dest: "{{ requirements_file }}"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0644'
+    backup: yes
+
+- name: Install Python packages from requirements
+  pip:
+    requirements: "{{ requirements_file }}"
+    virtualenv: "{{ venv_path }}"
+    state: present
+  register: pip_install
+  retries: 3
+  delay: 10
+  until: pip_install is succeeded
+  notify: restart apache
+
+- name: Install additional Python packages
+  pip:
+    name: "{{ python_packages }}"
+    virtualenv: "{{ venv_path }}"
+    state: present
+  when: python_packages is defined and python_packages | length > 0
+  register: additional_pip_install
+  retries: 3
+  delay: 10
+  until: additional_pip_install is succeeded
+
+- name: Set virtual environment ownership
+  file:
+    path: "{{ venv_path }}"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    recurse: yes
+    mode: '0755'
+
+- name: Create pip cache directory
+  file:
+    path: /var/cache/pip
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0755'
+
+- name: Verify Python installation
+  command: "{{ venv_path }}/bin/python --version"
+  register: python_version_check
+  changed_when: false
+
+- name: Display Python version
+  debug:
+    msg: "Python version installed: {{ python_version_check.stdout }}"
+
+- name: Test import of critical packages
+  command: "{{ venv_path }}/bin/python -c 'import {{ item }}'"
+  loop:
+    - flask
+    - psycopg2
+    - stripe
+    - boto3
+    - requests
+  register: import_test
+  changed_when: false
+  failed_when: import_test.rc != 0

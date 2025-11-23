@@ -1,0 +1,395 @@
+2025-11-15 10:47:53,566 p=18942 u=ryan n=ansible WARNING| [WARNING]: Deprecation warnings can be disabled by setting `deprecation_warnings=False` in ansible.cfg.
+
+2025-11-15 10:47:53,567 p=18942 u=ryan n=ansible INFO| [DEPRECATION WARNING]: DEFAULT_MANAGED_STR option. Reason: The `ansible_managed` variable can be set just like any other variable, or a different variable can be used.
+Alternatives: Set the `ansible_managed` variable, or use any custom variable in templates. This feature will be removed from ansible-core version 2.23.
+
+
+2025-11-15 10:47:57,851 p=19068 u=ryan n=ansible WARNING| [WARNING]: Deprecation warnings can be disabled by setting `deprecation_warnings=False` in ansible.cfg.
+
+2025-11-15 10:47:57,852 p=19068 u=ryan n=ansible INFO| [DEPRECATION WARNING]: DEFAULT_MANAGED_STR option. Reason: The `ansible_managed` variable can be set just like any other variable, or a different variable can be used.
+Alternatives: Set the `ansible_managed` variable, or use any custom variable in templates. This feature will be removed from ansible-core version 2.23.
+
+
+2025-11-15 10:47:58,243 p=19068 u=ryan n=ansible WARNING| [WARNING]: Error getting vault password file (default): The vault password file /Users/ryan/development/dnsscience-tool-tests/ansible/.vault_pass was not found
+
+2025-11-15 10:47:58,250 p=19068 u=ryan n=ansible ERROR| [ERROR]: The vault password file /Users/ryan/development/dnsscience-tool-tests/ansible/.vault_pass was not found
+
+2025-11-15 10:47:58,932 p=19075 u=ryan n=ansible WARNING| [WARNING]: Deprecation warnings can be disabled by setting `deprecation_warnings=False` in ansible.cfg.
+
+2025-11-15 10:47:58,932 p=19075 u=ryan n=ansible INFO| [DEPRECATION WARNING]: DEFAULT_MANAGED_STR option. Reason: The `ansible_managed` variable can be set just like any other variable, or a different variable can be used.
+Alternatives: Set the `ansible_managed` variable, or use any custom variable in templates. This feature will be removed from ansible-core version 2.23.
+
+
+2025-11-15 10:47:59,809 p=19075 u=ryan n=ansible WARNING| [WARNING]: Error getting vault password file (default): The vault password file /Users/ryan/development/dnsscience-tool-tests/ansible/.vault_pass was not found
+
+2025-11-15 10:47:59,810 p=19075 u=ryan n=ansible ERROR| [ERROR]: The vault password file /Users/ryan/development/dnsscience-tool-tests/ansible/.vault_pass was not found
+
+2025-11-15 10:48:42,369 p=20075 u=ryan n=ansible WARNING| [WARNING]: Deprecation warnings can be disabled by setting `deprecation_warnings=False` in ansible.cfg.
+
+2025-11-15 10:48:42,370 p=20075 u=ryan n=ansible INFO| [DEPRECATION WARNING]: DEFAULT_MANAGED_STR option. Reason: The `ansible_managed` variable can be set just like any other variable, or a different variable can be used.
+Alternatives: Set the `ansible_managed` variable, or use any custom variable in templates. This feature will be removed from ansible-core version 2.23.
+
+
+2025-11-15 10:48:42,661 p=20075 u=ryan n=ansible WARNING| [WARNING]: Error getting vault password file (default): The vault password file /Users/ryan/development/dnsscience-tool-tests/ansible/.vault_pass was not found
+
+2025-11-15 10:48:42,661 p=20075 u=ryan n=ansible ERROR| [ERROR]: The vault password file /Users/ryan/development/dnsscience-tool-tests/ansible/.vault_pass was not found
+
+2025-11-15 10:49:13,761 p=20776 u=ryan n=ansible WARNING| [WARNING]: Deprecation warnings can be disabled by setting `deprecation_warnings=False` in ansible.cfg.
+
+2025-11-15 10:49:13,761 p=20776 u=ryan n=ansible INFO| [DEPRECATION WARNING]: DEFAULT_MANAGED_STR option. Reason: The `ansible_managed` variable can be set just like any other variable, or a different variable can be used.
+Alternatives: Set the `ansible_managed` variable, or use any custom variable in templates. This feature will be removed from ansible-core version 2.23.
+
+
+2025-11-15 10:49:14,816 p=20776 u=ryan n=ansible WARNING| [WARNING]: Failed to load inventory plugin, skipping aws_ssm
+
+2025-11-15 10:49:15,102 p=20776 u=ryan n=ansible WARNING| [WARNING]: Found variable using reserved name 'environment'.
+Origin: /Users/ryan/development/dnsscience-tool-tests/ansible/group_vars/production.yml:6:1
+
+4
+5 # Environment
+6 environment: production
+  ^ column 1
+
+
+2025-11-15 10:49:15,310 p=20776 u=ryan n=ansible ERROR| [ERROR]: YAML parsing failed: Values starting with a quote must end with the same quote, and not contain that quote.
+Origin: /Users/ryan/development/dnsscience-tool-tests/ansible/roles/templates/tasks/main.yml:68:13
+
+66   replace:
+67     path: "{{ template_dir }}/{{ item }}"
+68     regexp: 'include\s*\(\s*["\']\.\.\/config\.php["\']\s*\)'
+               ^ column 13
+
+
+For example:
+
+    raw: "foo" in "bar"
+
+Should be:
+
+    raw: '"foo" in "bar"'
+
+
+2025-11-15 10:50:39,296 p=22559 u=ryan n=ansible WARNING| [WARNING]: Deprecation warnings can be disabled by setting `deprecation_warnings=False` in ansible.cfg.
+
+2025-11-15 10:50:39,297 p=22559 u=ryan n=ansible INFO| [DEPRECATION WARNING]: DEFAULT_MANAGED_STR option. Reason: The `ansible_managed` variable can be set just like any other variable, or a different variable can be used.
+Alternatives: Set the `ansible_managed` variable, or use any custom variable in templates. This feature will be removed from ansible-core version 2.23.
+
+
+2025-11-15 10:50:39,825 p=22559 u=ryan n=ansible WARNING| [WARNING]: Failed to load inventory plugin, skipping aws_ssm
+
+2025-11-15 10:50:40,032 p=22559 u=ryan n=ansible WARNING| [WARNING]: Found variable using reserved name 'environment'.
+Origin: /Users/ryan/development/dnsscience-tool-tests/ansible/group_vars/production.yml:6:1
+
+4
+5 # Environment
+6 environment: production
+  ^ column 1
+
+
+2025-11-15 10:50:40,369 p=22559 u=ryan n=ansible INFO| playbook: deploy-dnsscience.yml
+2025-11-15 10:50:57,105 p=23043 u=ryan n=ansible WARNING| [WARNING]: Deprecation warnings can be disabled by setting `deprecation_warnings=False` in ansible.cfg.
+
+2025-11-15 10:50:57,105 p=23043 u=ryan n=ansible INFO| [DEPRECATION WARNING]: DEFAULT_MANAGED_STR option. Reason: The `ansible_managed` variable can be set just like any other variable, or a different variable can be used.
+Alternatives: Set the `ansible_managed` variable, or use any custom variable in templates. This feature will be removed from ansible-core version 2.23.
+
+
+2025-11-15 10:50:58,537 p=23069 u=ryan n=ansible WARNING| [WARNING]: Deprecation warnings can be disabled by setting `deprecation_warnings=False` in ansible.cfg.
+
+2025-11-15 10:50:58,537 p=23069 u=ryan n=ansible INFO| [DEPRECATION WARNING]: DEFAULT_MANAGED_STR option. Reason: The `ansible_managed` variable can be set just like any other variable, or a different variable can be used.
+Alternatives: Set the `ansible_managed` variable, or use any custom variable in templates. This feature will be removed from ansible-core version 2.23.
+
+
+2025-11-15 10:50:58,954 p=23069 u=ryan n=ansible WARNING| [WARNING]: Failed to load inventory plugin, skipping aws_ssm
+
+2025-11-15 10:50:58,975 p=23069 u=ryan n=ansible WARNING| [WARNING]: Found variable using reserved name 'environment'.
+Origin: /Users/ryan/development/dnsscience-tool-tests/ansible/inventory/production.yml:16:11
+
+14           ansible_python_interpreter: /usr/bin/python3
+15           public_ip: 54.221.150.32
+16           environment: production
+             ^ column 11
+
+
+2025-11-15 10:50:58,978 p=23069 u=ryan n=ansible INFO| {
+    "_meta": {
+        "hostvars": {
+            "dnsscience-prod-1": {
+                "allowed_hosts": [
+                    "dnsscience.io",
+                    "www.dnsscience.io",
+                    "54.221.150.32"
+                ],
+                "ansible_aws_ssm_bucket_name": "dnsscience-ssm-output",
+                "ansible_aws_ssm_plugin": "community.aws.aws_ssm",
+                "ansible_aws_ssm_region": "us-east-1",
+                "ansible_aws_ssm_retries": 3,
+                "ansible_aws_ssm_timeout": 60,
+                "ansible_connection": "aws_ssm",
+                "ansible_host": "i-0609352c5884a48ee",
+                "ansible_python_interpreter": "/usr/bin/python3",
+                "apache_document_root": "/var/www/dnsscience",
+                "apache_group": "apache",
+                "apache_modules": [
+                    "wsgi",
+                    "ssl",
+                    "rewrite",
+                    "headers",
+                    "deflate",
+                    "expires"
+                ],
+                "apache_port": 80,
+                "apache_server_admin": "admin@dnsscience.io",
+                "apache_server_name": "dnsscience.io",
+                "apache_ssl_cert": "/etc/pki/tls/certs/dnsscience.crt",
+                "apache_ssl_chain": "/etc/pki/tls/certs/dnsscience-chain.crt",
+                "apache_ssl_key": "/etc/pki/tls/private/dnsscience.key",
+                "apache_ssl_port": 443,
+                "apache_user": "apache",
+                "apache_vhost_template": "dnsscience.conf.j2",
+                "app_dir": "{{ base_dir }}/app",
+                "app_domain": "dnsscience.io",
+                "app_group": "apache",
+                "app_home": "/var/www/dnsscience",
+                "app_name": "dnsscience",
+                "app_user": "apache",
+                "app_version": "{{ lookup('env', 'APP_VERSION') | default('latest', true) }}",
+                "aws_account_id": "{{ lookup('env', 'AWS_ACCOUNT_ID') }}",
+                "aws_region": "us-east-1",
+                "backup_dir": "/var/backups/dnsscience",
+                "base_dir": "/var/www/dnsscience",
+                "cleanup_old_deployments": true,
+                "cloudfront_distribution_id": "{{ lookup('env', 'CLOUDFRONT_DISTRIBUTION_ID') | default('', true) }}",
+                "config_dir": "{{ base_dir }}/config",
+                "cors_origins": [
+                    "https://dnsscience.io",
+                    "https://www.dnsscience.io"
+                ],
+                "create_backup": true,
+                "cron_jobs": [
+                    {
+                        "hour": "2",
+                        "job": "{{ venv_path }}/bin/python {{ app_dir }}/daemons/domain_expiry_daemon.py",
+                        "minute": "0",
+                        "name": "Domain expiry check"
+                    },
+                    {
+                        "hour": "*",
+                        "job": "{{ venv_path }}/bin/python {{ app_dir }}/certificate_alerts.py",
+                        "minute": "*/30",
+                        "name": "Certificate monitoring"
+                    },
+                    {
+                        "hour": "3",
+                        "job": "/usr/local/bin/backup-database.sh",
+                        "minute": "0",
+                        "name": "Database backup"
+                    },
+                    {
+                        "hour": "4",
+                        "job": "find {{ log_dir }} -type f -mtime +30 -delete",
+                        "minute": "0",
+                        "name": "Clean old logs",
+                        "weekday": "0"
+                    }
+                ],
+                "datadog_api_key": "{{ lookup('env', 'DATADOG_API_KEY') | default('', true) }}",
+                "db_host": "{{ lookup('env', 'DB_HOST') | default('localhost', true) }}",
+                "db_max_overflow": 40,
+                "db_name": "{{ lookup('env', 'DB_NAME') | default('dnsscience', true) }}",
+                "db_password": "{{ lookup('env', 'DB_PASSWORD') }}",
+                "db_pool_size": 20,
+                "db_pool_timeout": 30,
+                "db_port": "{{ lookup('env', 'DB_PORT') | default('5432', true) }}",
+                "db_type": "postgresql",
+                "db_user": "{{ lookup('env', 'DB_USER') | default('dnsscience', true) }}",
+                "default_tags": {
+                    "Application": "{{ app_name }}",
+                    "CostCenter": "engineering",
+                    "Environment": "{{ environment | default('production') }}",
+                    "ManagedBy": "ansible",
+                    "Owner": "devops"
+                },
+                "deploy_apache": true,
+                "deploy_database": true,
+                "deploy_flask_app": true,
+                "deploy_health_check": true,
+                "deploy_python_deps": true,
+                "deploy_static_files": true,
+                "deploy_templates": true,
+                "deployment_strategy": "blue_green",
+                "deployment_timeout": 300,
+                "deployment_user": "ec2-user",
+                "email_from": "{{ lookup('env', 'EMAIL_FROM') | default('noreply@dnsscience.io', true) }}",
+                "enable_backups": true,
+                "enable_caching": true,
+                "enable_compression": true,
+                "enable_debug_mode": false,
+                "enable_maintenance_mode": false,
+                "enable_monitoring": true,
+                "enable_rate_limiting": true,
+                "enable_ssl": true,
+                "environment": "production",
+                "flask_app": "app.py",
+                "flask_debug": false,
+                "flask_env": "production",
+                "flask_host": "0.0.0.0",
+                "flask_port": 5000,
+                "flask_workers": 4,
+                "google_maps_api_key": "{{ lookup('env', 'GOOGLE_MAPS_API_KEY') }}",
+                "health_check_endpoint": "/health",
+                "health_check_grace_period": 60,
+                "health_check_interval": 30,
+                "health_check_port": 80,
+                "keep_releases": 5,
+                "keepalive": 2,
+                "log_dir": "/var/log/dnsscience",
+                "log_format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+                "log_level": "INFO",
+                "log_retention_days": 30,
+                "log_rotation": "daily",
+                "max_content_length": 16777216,
+                "max_request_size": 10485760,
+                "notify_on_deployment": true,
+                "opensrs_api_key": "{{ lookup('env', 'OPENSRS_API_KEY') }}",
+                "opensrs_reseller_username": "{{ lookup('env', 'OPENSRS_RESELLER_USERNAME') }}",
+                "pip_executable": "pip3",
+                "public_ip": "54.221.150.32",
+                "python_executable": "python3",
+                "python_packages": [
+                    "flask==2.3.3",
+                    "flask-cors==4.0.0",
+                    "flask-limiter==3.5.0",
+                    "psycopg2-binary==2.9.7",
+                    "redis==5.0.0",
+                    "requests==2.31.0",
+                    "stripe==6.5.0",
+                    "boto3==1.28.57",
+                    "python-whois==0.8.0",
+                    "dnspython==2.4.2",
+                    "pyOpenSSL==23.2.0",
+                    "cryptography==41.0.4",
+                    "beautifulsoup4==4.12.2",
+                    "lxml==4.9.3",
+                    "python-dateutil==2.8.2",
+                    "pytz==2023.3",
+                    "gunicorn==21.2.0",
+                    "gevent==23.9.1",
+                    "celery==5.3.4",
+                    "sqlalchemy==2.0.21",
+                    "alembic==1.12.0",
+                    "pydantic==2.4.2",
+                    "python-dotenv==1.0.0",
+                    "jinja2==3.1.2",
+                    "markupsafe==2.1.3",
+                    "werkzeug==2.3.7",
+                    "click==8.1.7",
+                    "itsdangerous==2.1.2"
+                ],
+                "python_version": "3.9",
+                "rate_limit_per_minute": 60,
+                "redis_db": 0,
+                "redis_host": "{{ lookup('env', 'REDIS_HOST') | default('localhost', true) }}",
+                "redis_password": "{{ lookup('env', 'REDIS_PASSWORD') | default('', true) }}",
+                "redis_port": "{{ lookup('env', 'REDIS_PORT') | default('6379', true) }}",
+                "request_timeout": 30,
+                "requirements_file": "{{ base_dir }}/requirements.txt",
+                "rollback_on_failure": true,
+                "s3_backup_bucket": "dnsscience-backups",
+                "s3_bucket": "dnsscience-deployment",
+                "s3_deployment_bucket": "dnsscience-deployment",
+                "s3_region": "us-east-1",
+                "s3_static_prefix": "static/",
+                "s3_template_prefix": "templates/",
+                "secret_key": "{{ lookup('env', 'SECRET_KEY') | default('generate-strong-secret-key', true) }}",
+                "sentry_dsn": "{{ lookup('env', 'SENTRY_DSN') | default('', true) }}",
+                "slack_webhook_url": "{{ lookup('env', 'SLACK_WEBHOOK_URL') | default('', true) }}",
+                "smtp_host": "{{ lookup('env', 'SMTP_HOST') | default('smtp.gmail.com', true) }}",
+                "smtp_password": "{{ lookup('env', 'SMTP_PASSWORD') }}",
+                "smtp_port": "{{ lookup('env', 'SMTP_PORT') | default('587', true) }}",
+                "smtp_use_tls": true,
+                "smtp_user": "{{ lookup('env', 'SMTP_USER') }}",
+                "static_dir": "{{ base_dir }}/static",
+                "static_dirs": [
+                    "css",
+                    "js",
+                    "images",
+                    "fonts",
+                    "data",
+                    "vendor"
+                ],
+                "stripe_publishable_key": "{{ lookup('env', 'STRIPE_PUBLISHABLE_KEY') }}",
+                "stripe_secret_key": "{{ lookup('env', 'STRIPE_SECRET_KEY') }}",
+                "stripe_webhook_secret": "{{ lookup('env', 'STRIPE_WEBHOOK_SECRET') }}",
+                "system_packages": [
+                    "python3",
+                    "python3-pip",
+                    "python3-devel",
+                    "gcc",
+                    "postgresql-devel",
+                    "redis",
+                    "httpd",
+                    "mod_wsgi",
+                    "mod_ssl",
+                    "git",
+                    "curl",
+                    "wget",
+                    "vim",
+                    "htop",
+                    "nmap",
+                    "traceroute",
+                    "bind-utils",
+                    "openssl",
+                    "certbot"
+                ],
+                "template_dir": "{{ base_dir }}/templates",
+                "template_files": [
+                    "index.php",
+                    "explorer.html",
+                    "tools.html",
+                    "api_docs.html",
+                    "cli_docs.html",
+                    "pricing.html",
+                    "services.html",
+                    "registrar.html",
+                    "acquisition.html",
+                    "dashboard/index.html",
+                    "dashboard/settings.html",
+                    "marketplace/browse.html",
+                    "marketplace/listing.html",
+                    "tools/autolookup.html",
+                    "tools/visualtrace.html",
+                    "tools/whois.html",
+                    "tools/dns.html",
+                    "tools/rdap.html"
+                ],
+                "venv_path": "/var/www/dnsscience/venv",
+                "virtualenv_command": "{{ python_executable }} -m venv",
+                "worker_class": "gevent",
+                "worker_connections": 1000
+            }
+        },
+        "profile": "inventory_legacy"
+    },
+    "all": {
+        "children": [
+            "ungrouped",
+            "dnsscience_production",
+            "dnsscience_staging",
+            "dnsscience_development"
+        ]
+    },
+    "dnsscience_production": {
+        "hosts": [
+            "dnsscience-prod-1"
+        ]
+    }
+}
+2025-11-15 10:50:59,335 p=23071 u=ryan n=ansible WARNING| [WARNING]: Deprecation warnings can be disabled by setting `deprecation_warnings=False` in ansible.cfg.
+
+2025-11-15 10:50:59,335 p=23071 u=ryan n=ansible INFO| [DEPRECATION WARNING]: DEFAULT_MANAGED_STR option. Reason: The `ansible_managed` variable can be set just like any other variable, or a different variable can be used.
+Alternatives: Set the `ansible_managed` variable, or use any custom variable in templates. This feature will be removed from ansible-core version 2.23.
+
+
+2025-11-15 10:50:59,855 p=23071 u=ryan n=ansible WARNING| [WARNING]: Failed to load inventory plugin, skipping aws_ssm
+
+2025-11-15 10:51:00,368 p=23071 u=ryan n=ansible INFO| playbook: deploy-dnsscience.yml

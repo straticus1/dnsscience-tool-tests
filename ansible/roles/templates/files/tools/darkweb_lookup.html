@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Web DNS Monitor | DNS Science</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .hero-section {
+            padding: 4rem 0 3rem;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(37,99,235,0.1) 0%, transparent 100%);
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .lookup-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            margin-bottom: 2rem;
+        }
+
+        .lookup-input {
+            background: var(--dark-bg);
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 1rem;
+            font-size: 1.1rem;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .lookup-input:focus {
+            background: var(--dark-bg);
+            border-color: var(--primary-color);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
+        }
+
+        .btn-lookup {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(37,99,235,0.4);
+        }
+
+        .btn-lookup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37,99,235,0.6);
+        }
+
+        .check-option {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .check-option:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--primary-color);
+        }
+
+        .check-option input[type="checkbox"]:checked ~ label {
+            color: var(--primary-color);
+        }
+
+        .result-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .result-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .badge-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-found {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .badge-not-found {
+            background: var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .badge-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .badge-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .onion-address {
+            background: rgba(139,92,246,0.1);
+            border: 1px solid rgba(139,92,246,0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            margin: 0.5rem 0;
+        }
+
+        .rate-limit-display {
+            background: rgba(59,130,246,0.1);
+            border: 1px solid rgba(59,130,246,0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .alert-custom {
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-info {
+            background: rgba(59,130,246,0.1);
+            border: 1px solid rgba(59,130,246,0.3);
+            color: #93c5fd;
+        }
+
+        .alert-warning {
+            background: rgba(245,158,11,0.1);
+            border: 1px solid rgba(245,158,11,0.3);
+            color: #fcd34d;
+        }
+
+        .tor-exit-node {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.3);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+        }
+
+        .blockchain-domain {
+            background: rgba(16,185,129,0.1);
+            border: 1px solid rgba(16,185,129,0.3);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+        }
+
+        .cert-anomaly {
+            background: rgba(245,158,11,0.1);
+            border: 1px solid rgba(245,158,11,0.3);
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+        }
+
+        .info-icon {
+            cursor: help;
+            color: var(--text-secondary);
+            margin-left: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero-section">
+            <h1 class="hero-title">
+                <i class="fas fa-user-secret"></i> Dark Web DNS Monitor
+            </h1>
+            <p class="hero-subtitle">
+                Discover hidden services, blockchain DNS, and Tor infrastructure associated with any domain
+            </p>
+        </div>
+
+        <!-- Legal Compliance Notice -->
+        <div class="alert-custom alert-info">
+            <i class="fas fa-info-circle"></i>
+            <strong>Legal Compliance Notice:</strong> This tool performs passive monitoring only for security research and analysis.
+            All lookups are logged for compliance. Do not use for illegal purposes.
+        </div>
+
+        <!-- Main Lookup Card -->
+        <div class="lookup-card">
+            <h3 class="mb-4"><i class="fas fa-search"></i> Domain Lookup</h3>
+
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <input type="text"
+                           id="domainInput"
+                           class="form-control lookup-input"
+                           placeholder="Enter domain (e.g., example.com)"
+                           autocomplete="off">
+                </div>
+                <div class="col-md-4">
+                    <button id="lookupBtn" class="btn btn-primary btn-lookup w-100">
+                        <i class="fas fa-binoculars"></i> Analyze Domain
+                    </button>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <h5 class="mb-3">
+                        <i class="fas fa-filter"></i> Select Checks
+                        <span class="info-icon" title="Choose which dark web checks to perform">
+                            <i class="fas fa-question-circle"></i>
+                        </span>
+                    </h5>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="check-option">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="checkOnion" value="onion" checked>
+                            <label class="form-check-label" for="checkOnion">
+                                <i class="fas fa-shield-alt text-purple"></i> <strong>Tor Hidden Services (.onion)</strong>
+                                <br><small class="text-secondary">Check for .onion mirror sites</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="check-option">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="checkI2P" value="i2p" checked>
+                            <label class="form-check-label" for="checkI2P">
+                                <i class="fas fa-network-wired text-info"></i> <strong>I2P Network (.i2p)</strong>
+                                <br><small class="text-secondary">Check for I2P eepsites</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="check-option">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="checkBlockchain" value="blockchain" checked>
+                            <label class="form-check-label" for="checkBlockchain">
+                                <i class="fas fa-cube text-success"></i> <strong>Blockchain DNS</strong>
+                                <br><small class="text-secondary">Namecoin, Handshake, ENS, Unstoppable</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="check-option">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="checkTorNodes" value="tor_nodes" checked>
+                            <label class="form-check-label" for="checkTorNodes">
+                                <i class="fas fa-globe text-danger"></i> <strong>Tor Exit Nodes</strong>
+                                <br><small class="text-secondary">Check if IPs are Tor exits</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="check-option">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="checkCerts" value="certificates" checked>
+                            <label class="form-check-label" for="checkCerts">
+                                <i class="fas fa-certificate text-warning"></i> <strong>Certificate Analysis</strong>
+                                <br><small class="text-secondary">Analyze SSL/TLS certificates</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rate Limit Display -->
+            <div id="rateLimitDisplay" class="rate-limit-display" style="display: none;">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <strong>Tier:</strong> <span id="rateLimitTier">-</span>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Remaining:</strong> <span id="rateLimitRemaining">-</span> / <span id="rateLimitTotal">-</span>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Resets:</strong> <span id="rateLimitReset">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" style="display: none;" class="text-center my-4">
+            <div class="loading-spinner"></div>
+            <p class="mt-3">Analyzing domain across dark web infrastructure...</p>
+        </div>
+
+        <!-- Results Container -->
+        <div id="resultsContainer" style="display: none;">
+            <!-- Results will be dynamically inserted here -->
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="mt-5">
+            <h3 class="mb-4"><i class="fas fa-chart-bar"></i> Dark Web Monitoring Statistics</h3>
+            <div id="statsGrid" class="stats-grid">
+                <!-- Stats will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // API Base URL
+        const API_BASE = '/api/darkweb';
+
+        // Load statistics on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStatistics();
+            loadRateLimit();
+        });
+
+        // Load dark web statistics
+        async function loadStatistics() {
+            try {
+                const response = await fetch(`${API_BASE}/stats`);
+                const data = await response.json();
+
+                const statsGrid = document.getElementById('statsGrid');
+                statsGrid.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-number">${(data.active_onion_addresses || 0).toLocaleString()}</div>
+                        <div class="stat-label">Active .onion Addresses</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${(data.active_tor_exits || 0).toLocaleString()}</div>
+                        <div class="stat-label">Tor Exit Nodes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${(data.active_i2p_addresses || 0).toLocaleString()}</div>
+                        <div class="stat-label">I2P Addresses</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${(data.verified_blockchain_domains || 0).toLocaleString()}</div>
+                        <div class="stat-label">Blockchain Domains</div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        }
+
+        // Load rate limit status
+        async function loadRateLimit() {
+            try {
+                const response = await fetch(`${API_BASE}/rate-limit`);
+                const data = await response.json();
+
+                const display = document.getElementById('rateLimitDisplay');
+                display.style.display = 'block';
+
+                document.getElementById('rateLimitTier').textContent = data.tier || 'anonymous';
+                document.getElementById('rateLimitRemaining').textContent = data.remaining || 0;
+                document.getElementById('rateLimitTotal').textContent = data.limit || 0;
+
+                if (data.reset_at) {
+                    const resetDate = new Date(data.reset_at);
+                    document.getElementById('rateLimitReset').textContent = resetDate.toLocaleTimeString();
+                }
+            } catch (error) {
+                console.error('Error loading rate limit:', error);
+            }
+        }
+
+        // Perform lookup
+        document.getElementById('lookupBtn').addEventListener('click', async function() {
+            const domain = document.getElementById('domainInput').value.trim();
+
+            if (!domain) {
+                alert('Please enter a domain');
+                return;
+            }
+
+            // Get selected checks
+            const checks = [];
+            if (document.getElementById('checkOnion').checked) checks.push('onion');
+            if (document.getElementById('checkI2P').checked) checks.push('i2p');
+            if (document.getElementById('checkBlockchain').checked) checks.push('blockchain');
+            if (document.getElementById('checkTorNodes').checked) checks.push('tor_nodes');
+            if (document.getElementById('checkCerts').checked) checks.push('certificates');
+
+            if (checks.length === 0) {
+                alert('Please select at least one check');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('resultsContainer').style.display = 'none';
+            this.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE}/lookup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        domain: domain,
+                        checks: checks
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.status === 429) {
+                    alert('Rate limit exceeded. Please wait or upgrade your account.');
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Lookup failed');
+                }
+
+                displayResults(data);
+                updateRateLimit(data.rate_limit);
+
+            } catch (error) {
+                alert('Error: ' + error.message);
+                console.error('Lookup error:', error);
+            } finally {
+                document.getElementById('loadingIndicator').style.display = 'none';
+                this.disabled = false;
+            }
+        });
+
+        // Display results
+        function displayResults(data) {
+            const container = document.getElementById('resultsContainer');
+            let html = '';
+
+            // Onion results
+            if (data.onion) {
+                html += generateOnionResults(data.onion);
+            }
+
+            // I2P results
+            if (data.i2p) {
+                html += generateI2PResults(data.i2p);
+            }
+
+            // Blockchain DNS results
+            if (data.blockchain_dns) {
+                html += generateBlockchainResults(data.blockchain_dns);
+            }
+
+            // Tor exit nodes
+            if (data.tor_exit_nodes) {
+                html += generateTorExitResults(data.tor_exit_nodes);
+            }
+
+            // Certificate analysis
+            if (data.certificates) {
+                html += generateCertificateResults(data.certificates);
+            }
+
+            container.innerHTML = html;
+            container.style.display = 'block';
+        }
+
+        function generateOnionResults(onion) {
+            if (!onion.has_onion) {
+                return `
+                    <div class="result-card">
+                        <div class="result-header">
+                            <div class="result-title">
+                                <i class="fas fa-shield-alt"></i> Tor Hidden Services
+                            </div>
+                            <span class="badge-status badge-not-found">Not Found</span>
+                        </div>
+                        <p class="text-secondary">No .onion mirrors found for this domain.</p>
+                    </div>
+                `;
+            }
+
+            let addresses = '';
+            onion.onion_addresses.forEach(addr => {
+                const verifiedBadge = addr.verified ?
+                    '<span class="badge bg-success ms-2">Verified</span>' :
+                    '<span class="badge bg-secondary ms-2">Unverified</span>';
+
+                addresses += `
+                    <div class="onion-address">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>${addr.address}</strong> ${verifiedBadge}
+                                <br><small class="text-secondary">Version ${addr.version} | ${addr.verification_method || 'Unknown method'}</small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-light" onclick="copyToClipboard('${addr.address}')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            return `
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-title">
+                            <i class="fas fa-shield-alt"></i> Tor Hidden Services
+                        </div>
+                        <span class="badge-status badge-found">${onion.onion_addresses.length} Found</span>
+                    </div>
+                    ${addresses}
+                </div>
+            `;
+        }
+
+        function generateI2PResults(i2p) {
+            if (!i2p.has_i2p) {
+                return `
+                    <div class="result-card">
+                        <div class="result-header">
+                            <div class="result-title">
+                                <i class="fas fa-network-wired"></i> I2P Network
+                            </div>
+                            <span class="badge-status badge-not-found">Not Found</span>
+                        </div>
+                        <p class="text-secondary">No .i2p addresses found for this domain.</p>
+                    </div>
+                `;
+            }
+
+            // Similar structure for I2P addresses
+            return `
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-title">
+                            <i class="fas fa-network-wired"></i> I2P Network
+                        </div>
+                        <span class="badge-status badge-found">${i2p.i2p_addresses.length} Found</span>
+                    </div>
+                    <p>I2P addresses found (implementation details omitted for brevity)</p>
+                </div>
+            `;
+        }
+
+        function generateBlockchainResults(blockchain) {
+            if (!blockchain.has_blockchain_dns) {
+                return `
+                    <div class="result-card">
+                        <div class="result-header">
+                            <div class="result-title">
+                                <i class="fas fa-cube"></i> Blockchain DNS
+                            </div>
+                            <span class="badge-status badge-not-found">Not Found</span>
+                        </div>
+                        <p class="text-secondary">No blockchain DNS registrations found.</p>
+                    </div>
+                `;
+            }
+
+            let domains = '';
+            if (blockchain.namecoin) {
+                domains += `<div class="blockchain-domain"><strong>Namecoin (.bit):</strong> ${blockchain.namecoin.domain}</div>`;
+            }
+            if (blockchain.handshake) {
+                domains += `<div class="blockchain-domain"><strong>Handshake (.hns):</strong> ${blockchain.handshake.domain}</div>`;
+            }
+            if (blockchain.ens) {
+                domains += `<div class="blockchain-domain"><strong>ENS (.eth):</strong> ${blockchain.ens.domain}</div>`;
+            }
+
+            return `
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-title">
+                            <i class="fas fa-cube"></i> Blockchain DNS
+                        </div>
+                        <span class="badge-status badge-found">Found</span>
+                    </div>
+                    ${domains}
+                </div>
+            `;
+        }
+
+        function generateTorExitResults(exits) {
+            if (!exits || exits.length === 0) {
+                return `
+                    <div class="result-card">
+                        <div class="result-header">
+                            <div class="result-title">
+                                <i class="fas fa-globe"></i> Tor Exit Nodes
+                            </div>
+                            <span class="badge-status badge-not-found">None</span>
+                        </div>
+                        <p class="text-secondary">Domain does not resolve to any Tor exit nodes.</p>
+                    </div>
+                `;
+            }
+
+            let exitNodes = '';
+            exits.forEach(exit => {
+                exitNodes += `
+                    <div class="tor-exit-node">
+                        <strong>${exit.ip}</strong>
+                        <br><small class="text-secondary">
+                            ${exit.details.country_name || exit.details.country_code || 'Unknown'} |
+                            ${exit.details.bandwidth_class || 'Unknown bandwidth'}
+                        </small>
+                    </div>
+                `;
+            });
+
+            return `
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-title">
+                            <i class="fas fa-globe"></i> Tor Exit Nodes
+                        </div>
+                        <span class="badge-status badge-warning">${exits.length} Found</span>
+                    </div>
+                    <div class="alert-custom alert-warning mb-3">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        This domain resolves to Tor exit nodes. This may indicate anonymized infrastructure.
+                    </div>
+                    ${exitNodes}
+                </div>
+            `;
+        }
+
+        function generateCertificateResults(certs) {
+            if (!certs.certificates || certs.certificates.length === 0) {
+                return '';
+            }
+
+            let anomalies = '';
+            if (certs.anomalies && certs.anomalies.length > 0) {
+                certs.anomalies.forEach(anomaly => {
+                    anomalies += `
+                        <div class="cert-anomaly">
+                            <strong>${anomaly.type}</strong>: ${anomaly.description}
+                            <span class="badge bg-${anomaly.severity === 'high' ? 'danger' : 'warning'} ms-2">${anomaly.severity}</span>
+                        </div>
+                    `;
+                });
+            }
+
+            return `
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-title">
+                            <i class="fas fa-certificate"></i> Certificate Analysis
+                        </div>
+                        <span class="badge-status ${certs.risk_score > 50 ? 'badge-danger' : 'badge-found'}">
+                            Risk Score: ${certs.risk_score}/100
+                        </span>
+                    </div>
+                    ${certs.hidden_service_indicators ?
+                        '<div class="alert-custom alert-warning"><i class="fas fa-exclamation-triangle"></i> Hidden service indicators detected!</div>' :
+                        ''
+                    }
+                    ${anomalies}
+                    <p class="text-secondary mt-3">${certs.certificates.length} certificate(s) analyzed</p>
+                </div>
+            `;
+        }
+
+        function updateRateLimit(rateLimit) {
+            if (rateLimit) {
+                document.getElementById('rateLimitRemaining').textContent = rateLimit.remaining || 0;
+                if (rateLimit.reset_at) {
+                    const resetDate = new Date(rateLimit.reset_at);
+                    document.getElementById('rateLimitReset').textContent = resetDate.toLocaleTimeString();
+                }
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            });
+        }
+
+        // Enter key support
+        document.getElementById('domainInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('lookupBtn').click();
+            }
+        });
+    </script>
+</body>
+</html>

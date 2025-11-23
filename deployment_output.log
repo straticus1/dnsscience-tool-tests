@@ -1,0 +1,97 @@
+
+[0;34m========================================[0m
+[0;34mPRE-FLIGHT CHECKS[0m
+[0;34m========================================[0m
+[0;32m[SUCCESS][0m AWS credentials valid
+[0;32m[SUCCESS][0m Instance is running
+[0;32m[SUCCESS][0m SSM connectivity verified
+
+[0;34m========================================[0m
+[0;34mFIX 1: RESTORE ENRICHMENT DAEMON[0m
+[0;34m========================================[0m
+[0;34m[INFO][0m Current status: Daemon crashing (230+ restarts)
+[0;34m[INFO][0m Root cause: Working code replaced with documentation file
+[0;34m[INFO][0m Solution: Restore from backup (.bak file)
+[0;34m[INFO][0m Creating backup directory
+
+[0;34m[INFO][0m Stopping enrichment service...
+[0;34m[INFO][0m Stopping enrichment service
+
+[0;32m[SUCCESS][0m Service stopped
+[0;34m[INFO][0m Backing up current (broken) file...
+[0;34m[INFO][0m Backing up broken file
+
+[0;34m[INFO][0m Restoring from backup (.bak file - 795 lines vs 232)...
+[0;34m[INFO][0m Restoring from backup
+
+[0;34m[INFO][0m Setting permissions
+
+[0;32m[SUCCESS][0m Daemon restored from backup
+[0;34m[INFO][0m Restored file: [0;34m[INFO][0m Verifying restored file
+795 /var/www/dnsscience/daemons/enrichment_daemon.py
+[0;34m[INFO][0m Testing daemon manually (5 second test)...
+[0;31m[ERROR][0m Daemon test failed with errors:
+[0;34m[INFO][0m Testing daemon
+[1;33m[WARNING][0m Command produced errors: /usr/lib/python3/dist-packages/requests/__init__.py:87: RequestsDependencyWarning: urllib3 (2.5.0) or chardet (4.0.0) doesn't match a supported version!
+  warnings.warn("urllib3 ({}) or chardet ({}) doesn't match a supported "
+Traceback (most recent call last):
+  File "/var/www/dnsscience/daemons/enrichment_daemon.py", line 51, in <module>
+    logging.FileHandler('/var/log/dnsscience/enrichment.log'),
+  File "/usr/lib/python3.10/logging/__init__.py", line 1169, in __init__
+    StreamHandler.__init__(self, self._open())
+  File "/usr/lib/python3.10/logging/__init__.py", line 1201, in _open
+    return open_func(self.baseFilename, self.mode,
+PermissionError: [Errno 13] Permission denied: '/var/log/dnsscience/enrichment.log'
+Test timeout (expected)
+[0;31m[ERROR][0m Manual intervention required. Continuing anyway...
+[0;34m[INFO][0m Starting enrichment service...
+[0;34m[INFO][0m Starting service
+
+[1;33m[WARNING][0m Service status: [0;34m[INFO][0m Checking service status
+active
+[0;34m[INFO][0m Checking recent logs...
+[0;34m[INFO][0m Getting service logs
+Nov 15 12:24:03 ip-10-0-1-60 python3[25049]: 2025-11-15 12:24:03,845 - Enrichment - INFO - [Worker 90] ✓ cloudflare-dns.com - Score: 80
+Nov 15 12:24:03 ip-10-0-1-60 python3[25049]: 2025-11-15 12:24:03,886 - Enrichment - INFO - [Worker 85] ✓ office365.com - Score: 70
+Nov 15 12:24:03 ip-10-0-1-60 python3[25049]: 2025-11-15 12:24:03,960 - Enrichment - INFO - [Worker 97] ✓ vedcdnlb.com - Score: 50
+Nov 15 12:24:06 ip-10-0-1-60 python3[25049]: 2025-11-15 12:24:06,802 - Enrichment - INFO - [Worker 4] ✓ cloudflare.com - Score: 70
+Nov 15 12:24:06 ip-10-0-1-60 python3[25049]: 2025-11-15 12:24:06,805 - Enrichment - INFO - [Worker 21] ✓ akamaiedge.net - Score: 50
+Nov 15 12:24:06 ip-10-0-1-60 python3[25049]: 2025-11-15 12:24:06,946 - Enrichment - INFO - [Worker 23] ✓ akadns.net - Score: 60
+Nov 15 12:24:07 ip-10-0-1-60 python3[25049]: 2025-11-15 12:24:07,342 - Enrichment - INFO - [Worker 16] ✓ akamai.net - Score: 50
+Nov 15 12:24:07 ip-10-0-1-60 python3[25049]: 2025-11-15 12:24:07,756 - Enrichment - INFO - [Worker 10] ✓ instagram.com - Score: 70
+Nov 15 12:24:07 ip-10-0-1-60 python3[25049]: 2025-11-15 12:24:07,997 - Enrichment - INFO - [Worker 1] ✓ mail.ru - Score: 70
+Nov 15 12:24:08 ip-10-0-1-60 python3[25049]: 2025-11-15 12:24:08,435 - Enrichment - INFO - [Worker 56] ✓ whatsapp.com - Score: 70
+Nov 15 12:24:08 ip-10-0-1-60 python3[25049]: 2025-11-15 12:24:08,667 - Enrichment - INFO - [Worker 81] ✓ cloudflare.net - Score: 70
+Nov 15 12:24:08 ip-10-0-1-60 python3[25049]: 2025-11-15 12:24:08,714 - Enrichment - INFO - [Worker 55] ✓ ntp.org - Score: 100
+Nov 15 12:24:08 ip-10-0-1-60 python3[25049]: 2025-11-15 12:24:08,726 - Enrichment - INFO - [Worker 7] ✓ dzen.ru - Score: 70
+Nov 15 12:24:08 ip-10-0-1-60 python3[25049]: 2025-11-15 12:24:08,956 - Enrichment - INFO - [Worker 80] ✓ zoom.us - Score: 70
+Nov 15 12:24:09 ip-10-0-1-60 python3[25049]: 2025-11-15 12:24:09,364 - Enrichment - INFO - [Worker 91] ✓ nginx.org - Score: 90
+Nov 15 12:24:10 ip-10-0-1-60 python3[25049]: 2025-11-15 12:24:10,737 - Enrichment - INFO - [Worker 18] ✓ 14emeliaterracewestroxburyma02132.su - Score: 40
+Nov 15 12:24:11 ip-10-0-1-60 python3[25049]: 2025-11-15 12:24:11,091 - Enrichment - INFO - [Worker 87] ✓ baidu.com - Score: 70
+Nov 15 12:24:13 ip-10-0-1-60 python3[25049]: 2025-11-15 12:24:13,214 - Enrichment - INFO - [Worker 48] ✓ icloud.com - Score: 70
+Nov 15 12:24:13 ip-10-0-1-60 python3[25049]: 2025-11-15 12:24:13,285 - Enrichment - INFO - [Worker 40] ✓ wordpress.org - Score: 70
+Nov 15 12:24:16 ip-10-0-1-60 python3[25049]: 2025-11-15 12:24:16,448 - Enrichment - INFO - [Worker 6] ✓ amazonaws.com - Score: 70
+[0;34m[INFO][0m Waiting 30 seconds to verify daemon stability...
+[0;31m[ERROR][0m Daemon still not stable. Manual debugging required.
+[0;34m[INFO][0m Check logs: sudo journalctl -u enrichment.service -f
+
+[0;34m========================================[0m
+[0;34mFIX 2: DEPLOY REDIS CACHING[0m
+[0;34m========================================[0m
+[0;34m[INFO][0m Current status: Redis not installed
+[0;34m[INFO][0m Impact: Homepage shows 'Loading...' forever
+[0;34m[INFO][0m Solution: Install Redis, populate cache, configure app
+[0;34m[INFO][0m Redis not found. Installing...
+[0;34m[INFO][0m Updating package list
+
+[0;34m[INFO][0m Installing Redis server
+
+[0;32m[SUCCESS][0m Redis installed
+[0;34m[INFO][0m Enabling Redis on boot
+[1;33m[WARNING][0m Command produced errors: Synchronizing state of redis-server.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable redis-server
+
+[0;34m[INFO][0m Starting Redis service
+
+[0;31m[ERROR][0m Redis failed to start: [0;34m[INFO][0m Checking Redis status
+active

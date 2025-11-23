@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Architecture - DNS Science</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 50px;
+            padding: 10px 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 10000;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .theme-toggle .moon {
+            display: none;
+        }
+
+        body.dark-mode .theme-toggle {
+            background: #2d2d2d;
+        }
+
+        body.dark-mode .theme-toggle .sun {
+            display: none;
+        }
+
+        body.dark-mode .theme-toggle .moon {
+            display: block;
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            padding: 15px 30px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        body.dark-mode .nav-bar {
+            background: rgba(45,45,45,0.95);
+        }
+
+        .nav-button {
+            padding: 8px 20px;
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nav-button:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .nav-button.primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .nav-button.primary:hover {
+            background: #5568d3;
+            border-color: #5568d3;
+        }
+
+        body.dark-mode .nav-button {
+            color: #8b9cff;
+            border-color: #8b9cff;
+        }
+
+        body.dark-mode .nav-button:hover {
+            background: #8b9cff;
+            color: #1a1a1a;
+        }
+
+        body.dark-mode .nav-button.primary {
+            background: #8b9cff;
+            color: #1a1a1a;
+        }
+
+        /* Dropdown Menu */
+        .nav-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .nav-dropdown-content {
+            display: none;
+            position: absolute;
+            background: white;
+            min-width: 160px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            border-radius: 5px;
+            z-index: 1000;
+            top: 100%;
+            margin-top: 2px;
+            padding: 5px 0;
+        }
+
+        .nav-dropdown:hover .nav-dropdown-content,
+        .nav-dropdown-content:hover {
+            display: block;
+        }
+
+        .nav-dropdown-content a {
+            color: #667eea !important;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            border: none !important;
+            background: transparent !important;
+            transition: background 0.3s;
+            border-radius: 0 !important;
+        }
+
+        .nav-dropdown-content a:hover {
+            background: #f0f0f0 !important;
+            color: #667eea !important;
+        }
+
+        .nav-dropdown .nav-button::after {
+            content: ' ▼';
+            font-size: 10px;
+        }
+
+        body.dark-mode .nav-dropdown-content {
+            background: #2d2d2d;
+        }
+
+        body.dark-mode .nav-dropdown-content a {
+            color: #8b9cff !important;
+        }
+
+        body.dark-mode .nav-dropdown-content a:hover {
+            background: #3d3d3d !important;
+            color: #8b9cff !important;
+        }
+
+        /* Header */
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        body.dark-mode header {
+            background: #2d2d2d;
+            color: #e0e0e0;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        body.dark-mode h1 {
+            color: #8b9cff;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        body.dark-mode .subtitle {
+            color: #aaa;
+        }
+
+        /* Content Sections */
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        body.dark-mode .section {
+            background: #2d2d2d;
+            color: #e0e0e0;
+        }
+
+        .section h2 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        body.dark-mode .section h2 {
+            color: #8b9cff;
+            border-bottom-color: #8b9cff;
+        }
+
+        .section h3 {
+            color: #667eea;
+            font-size: 1.4em;
+            margin: 25px 0 15px 0;
+        }
+
+        body.dark-mode .section h3 {
+            color: #8b9cff;
+        }
+
+        .section h4 {
+            color: #764ba2;
+            font-size: 1.2em;
+            margin: 15px 0 10px 0;
+        }
+
+        body.dark-mode .section h4 {
+            color: #a78bfa;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+            border: 2px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        body.dark-mode .stat-box {
+            background: linear-gradient(135deg, rgba(139, 156, 255, 0.1) 0%, rgba(167, 139, 250, 0.05) 100%);
+            border-color: #8b9cff;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            color: #667eea;
+            font-weight: bold;
+            display: block;
+        }
+
+        body.dark-mode .stat-number {
+            color: #8b9cff;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        body.dark-mode .stat-label {
+            color: #aaa;
+        }
+
+        /* Tech Stack Badges */
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .tech-badge {
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        body.dark-mode .tech-badge {
+            background: #8b9cff;
+            color: #1a1a1a;
+        }
+
+        /* Architecture Grid */
+        .architecture-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .arch-card {
+            background: rgba(102, 126, 234, 0.05);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .arch-card:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: rgba(102, 126, 234, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        body.dark-mode .arch-card {
+            background: rgba(139, 156, 255, 0.05);
+            border-color: rgba(139, 156, 255, 0.3);
+        }
+
+        body.dark-mode .arch-card:hover {
+            background: rgba(139, 156, 255, 0.1);
+            border-color: rgba(139, 156, 255, 0.6);
+        }
+
+        /* Daemon List */
+        .daemon-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .daemon-item {
+            background: rgba(255, 255, 255, 0.5);
+            border-left: 3px solid #667eea;
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        body.dark-mode .daemon-item {
+            background: rgba(45, 45, 45, 0.5);
+            border-left-color: #8b9cff;
+        }
+
+        .daemon-item strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        body.dark-mode .daemon-item strong {
+            color: #8b9cff;
+        }
+
+        .daemon-item small {
+            color: #666;
+        }
+
+        body.dark-mode .daemon-item small {
+            color: #aaa;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 30px;
+            line-height: 1.8;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        body.dark-mode ul li,
+        body.dark-mode ol li {
+            color: #e0e0e0;
+        }
+
+        /* Code */
+        code {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 2px 8px;
+            border-radius: 3px;
+            color: #764ba2;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        body.dark-mode code {
+            background: rgba(139, 156, 255, 0.1);
+            color: #a78bfa;
+        }
+
+        pre {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            border-left: 3px solid #667eea;
+            margin: 15px 0;
+        }
+
+        body.dark-mode pre {
+            background: rgba(0, 0, 0, 0.3);
+            border-left-color: #8b9cff;
+        }
+
+        pre code {
+            background: transparent;
+            padding: 0;
+            color: #333;
+        }
+
+        body.dark-mode pre code {
+            color: #e0e0e0;
+        }
+
+        .highlight {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        body.dark-mode .highlight {
+            color: #8b9cff;
+        }
+
+        /* Footer */
+        .footer {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-top: 30px;
+        }
+
+        body.dark-mode .footer {
+            background: #2d2d2d;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+        }
+
+        .footer-column {
+            color: #666;
+        }
+
+        body.dark-mode .footer-column {
+            color: #aaa;
+        }
+
+        .footer-title {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        body.dark-mode .footer-title {
+            color: #8b9cff;
+        }
+
+        .footer-heading {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        body.dark-mode .footer-heading {
+            color: #8b9cff;
+        }
+
+        .footer-text {
+            line-height: 1.8;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        body.dark-mode .footer-text {
+            color: #aaa;
+        }
+
+        .footer-copyright {
+            color: #999;
+            margin-top: 15px;
+            font-size: 0.85em;
+        }
+
+        body.dark-mode .footer-copyright {
+            color: #666;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin: 8px 0;
+        }
+
+        .footer-links a {
+            color: #666;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: #667eea;
+        }
+
+        body.dark-mode .footer-links a {
+            color: #aaa;
+        }
+
+        body.dark-mode .footer-links a:hover {
+            color: #8b9cff;
+        }
+
+        .footer-links span {
+            color: #666;
+        }
+
+        body.dark-mode .footer-links span {
+            color: #888;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #e0e0e0;
+            margin-top: 30px;
+            padding-top: 20px;
+            text-align: center;
+            color: #999;
+            font-size: 0.85em;
+        }
+
+        body.dark-mode .footer-bottom {
+            border-top-color: #444;
+            color: #666;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-bar {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .nav-button {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .section h2 {
+                font-size: 1.5em;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <div id="themeToggle" class="theme-toggle">
+        <span class="sun">☀️</span>
+        <span class="moon">🌙</span>
+    </div>
+
+    <div class="container">
+        <!-- Navigation Bar -->
+        <div class="nav-bar">
+            <a href="/about" class="nav-button">About Us</a>
+            <a href="/explorer" class="nav-button">Data Explorer</a>
+            <a href="/registrar" class="nav-button">Registrar</a>
+            <a href="/pricing" class="nav-button">Pricing</a>
+            <div class="nav-dropdown">
+                <span class="nav-button">Docs</span>
+                <div class="nav-dropdown-content">
+                    <a href="/docs/api">API Docs</a>
+                    <a href="/docs/cli">CLI Docs</a>
+                    <a href="/docs/architecture">Architecture</a>
+                </div>
+            </div>
+            <a href="/login" class="nav-button">Login</a>
+            <a href="/signup" class="nav-button primary">Sign Up</a>
+        </div>
+
+        <!-- Header -->
+        <header>
+            <h1>🏗️ Platform Architecture</h1>
+            <p class="subtitle">
+                DNS Science is built on a distributed, scalable architecture designed for real-time domain intelligence.
+                Our platform processes millions of DNS records daily through a network of specialized daemons and verification systems.
+            </p>
+        </header>
+
+        <!-- Infrastructure Overview -->
+        <div class="section">
+            <h2>Infrastructure Overview</h2>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-number">1.1M+</span>
+                    <span class="stat-label">Domains Tracked</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">22</span>
+                    <span class="stat-label">Active Daemons</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">1,160</span>
+                    <span class="stat-label">Tor Exit Nodes</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">20</span>
+                    <span class="stat-label">Data Sources</span>
+                </div>
+            </div>
+
+            <h3>Technology Stack</h3>
+            <div class="tech-stack">
+                <span class="tech-badge">Python 3.11+</span>
+                <span class="tech-badge">Flask</span>
+                <span class="tech-badge">PostgreSQL (RDS)</span>
+                <span class="tech-badge">Redis (ElastiCache)</span>
+                <span class="tech-badge">Apache + WSGI</span>
+                <span class="tech-badge">AWS EC2 (t3.medium)</span>
+                <span class="tech-badge">DNSPython</span>
+                <span class="tech-badge">PyCryptography</span>
+                <span class="tech-badge">Psycopg2</span>
+                <span class="tech-badge">Requests</span>
+            </div>
+
+            <h3>Architecture Layers</h3>
+            <div class="architecture-grid">
+                <div class="arch-card">
+                    <h4>🌐 Presentation Layer</h4>
+                    <p>Flask-based web application serving dynamic content with real-time updates. Built with responsive design principles and progressive enhancement.</p>
+                </div>
+                <div class="arch-card">
+                    <h4>🔧 Application Layer</h4>
+                    <p>RESTful API endpoints handling domain lookups, dark web monitoring, RDAP queries, and comprehensive DNS analysis.</p>
+                </div>
+                <div class="arch-card">
+                    <h4>⚙️ Service Layer</h4>
+                    <p>22 specialized daemons running continuously to discover, enrich, and monitor domain data from multiple sources.</p>
+                </div>
+                <div class="arch-card">
+                    <h4>💾 Data Layer</h4>
+                    <p>PostgreSQL database with Redis caching for high-performance queries. Optimized indexes and materialized views for analytics.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daemon Architecture -->
+        <div class="section">
+            <h2>Daemon Architecture</h2>
+            <p>Our platform runs 22 specialized daemons, each focused on a specific aspect of domain intelligence:</p>
+
+            <h3>Data Discovery & Enrichment</h3>
+            <div class="daemon-list">
+                <div class="daemon-item">
+                    <strong>domain_discovery_daemon.py</strong>
+                    <small>Discovers domains from Certificate Transparency logs and public DNS datasets. Currently monitoring 1.1M+ domains.</small>
+                </div>
+                <div class="daemon-item">
+                    <strong>enrichment_daemon.py</strong>
+                    <small>Enriches domain records with WHOIS, geolocation, and metadata.</small>
+                </div>
+                <div class="daemon-item">
+                    <strong>rdap_daemon.py</strong>
+                    <small>Queries RDAP servers for authoritative registration data.</small>
+                </div>
+                <div class="daemon-item">
+                    <strong>gtld_daemon.py</strong>
+                    <small>Monitors generic top-level domain (gTLD) zones and changes.</small>
+                </div>
+            </div>
+
+            <h3>Security & Threat Intelligence</h3>
+            <div class="daemon-list">
+                <div class="daemon-item">
+                    <strong>ssl_monitord.py</strong>
+                    <small>Monitors SSL/TLS certificates for expiration and anomalies.</small>
+                </div>
+                <div class="daemon-item">
+                    <strong>threat_intel_daemon.py</strong>
+                    <small>Integrates with threat intelligence feeds (AbuseIPDB, IPInfo).</small>
+                </div>
+                <div class="daemon-item">
+                    <strong>reputationd.py</strong>
+                    <small>Calculates domain reputation scores based on multiple signals.</small>
+                </div>
+                <div class="daemon-item">
+                    <strong>arpad_daemon.py</strong>
+                    <small>Advanced RPAD (Reputation & Phishing Analysis Daemon) for detecting malicious domains.</small>
+                </div>
+            </div>
+
+            <h3>Network Security Integration</h3>
+            <div class="daemon-list">
+                <div class="daemon-item">
+                    <strong>suricata_integration_daemon.py</strong>
+                    <small>Integrates with Suricata IDS for network threat detection.</small>
+                </div>
+                <div class="daemon-item">
+                    <strong>zeek_integration_daemon.py</strong>
+                    <small>Processes Zeek network monitoring logs for DNS analysis.</small>
+                </div>
+            </div>
+
+            <h3>Specialized Monitoring</h3>
+            <div class="daemon-list">
+                <div class="daemon-item">
+                    <strong>web3d.py</strong>
+                    <small>Monitors blockchain DNS systems (ENS, Handshake, Namecoin).</small>
+                </div>
+                <div class="daemon-item">
+                    <strong>geoipd.py</strong>
+                    <small>Real-time geolocation lookups for IP addresses.</small>
+                </div>
+                <div class="daemon-item">
+                    <strong>emaild.py</strong>
+                    <small>Email validation and deliverability scoring.</small>
+                </div>
+                <div class="daemon-item">
+                    <strong>recordtyped.py</strong>
+                    <small>Analyzes DNS record types and configurations.</small>
+                </div>
+            </div>
+
+            <h3>User Management</h3>
+            <div class="daemon-list">
+                <div class="daemon-item">
+                    <strong>auto_renewal_daemon.py</strong>
+                    <small>Handles automatic subscription renewals and billing.</small>
+                </div>
+                <div class="daemon-item">
+                    <strong>domain_expiry_daemon.py</strong>
+                    <small>Monitors domain expirations and sends alerts.</small>
+                </div>
+                <div class="daemon-item">
+                    <strong>email_scheduler_daemon.py</strong>
+                    <small>Schedules and sends email notifications and reports.</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Flow -->
+        <div class="section">
+            <h2>Data Flow & Processing Pipeline</h2>
+
+            <ol>
+                <li><strong>Discovery:</strong> Certificate Transparency logs, zone files, passive DNS</li>
+                <li><strong>Validation:</strong> DNS resolution, RDAP lookup, WHOIS query</li>
+                <li><strong>Enrichment:</strong> GeoIP, SSL cert, threat intel, reputation scoring</li>
+                <li><strong>Storage:</strong> PostgreSQL with Redis caching layer</li>
+                <li><strong>API Exposure:</strong> RESTful endpoints with rate limiting</li>
+                <li><strong>Real-time Updates:</strong> WebSocket connections for live data</li>
+            </ol>
+
+            <h3>Verification Process</h3>
+            <p>Every domain in our database goes through a multi-stage verification process:</p>
+
+            <ol>
+                <li><strong>DNS Resolution Verification</strong> - Confirm domain resolves via authoritative nameservers</li>
+                <li><strong>RDAP Validation</strong> - Query regional internet registries for registration data</li>
+                <li><strong>WHOIS Cross-Reference</strong> - Compare RDAP data with WHOIS records for consistency</li>
+                <li><strong>Certificate Transparency</strong> - Check for SSL certificates in CT logs</li>
+                <li><strong>Historical Analysis</strong> - Compare against historical DNS data for anomalies</li>
+                <li><strong>Reputation Scoring</strong> - Calculate score based on age, registrar, hosting, and threat intel</li>
+            </ol>
+        </div>
+
+        <!-- Dark Web Monitoring -->
+        <div class="section">
+            <h2>Dark Web Monitoring Architecture</h2>
+            <p>Our dark web monitoring system provides passive intelligence on Tor hidden services, I2P networks, and blockchain DNS:</p>
+
+            <div class="architecture-grid">
+                <div class="arch-card">
+                    <h4>Tor Network Monitoring</h4>
+                    <p>Tracking <span class="highlight">1,160 active Tor exit nodes</span> updated hourly from Tor Project APIs. Database of known .onion addresses mapped to clearnet domains.</p>
+                </div>
+                <div class="arch-card">
+                    <h4>Blockchain DNS</h4>
+                    <p>Monitoring ENS (Ethereum Name Service), Handshake (.hns), and Namecoin (.bit) domains for alternative DNS registrations.</p>
+                </div>
+                <div class="arch-card">
+                    <h4>Certificate Analysis</h4>
+                    <p>Analyzing SSL certificates for hidden services, identifying anomalies and self-signed certs indicative of dark web infrastructure.</p>
+                </div>
+                <div class="arch-card">
+                    <h4>Passive Intelligence</h4>
+                    <p>100% passive monitoring - no active crawling. All data from public sources, CT logs, and community-verified mappings.</p>
+                </div>
+            </div>
+
+            <h3>Database Schema</h3>
+            <p>Dark web monitoring utilizes 10 specialized tables:</p>
+            <ul>
+                <li><code>onion_addresses</code> - Known .onion hidden services</li>
+                <li><code>i2p_addresses</code> - I2P eepsite addresses</li>
+                <li><code>tor_exit_nodes</code> - Active Tor exit node database</li>
+                <li><code>alternative_dns</code> - Blockchain DNS registrations</li>
+                <li><code>darkweb_certificates</code> - SSL cert anomaly tracking</li>
+                <li><code>darkweb_lookups</code> - Audit trail of all lookups</li>
+                <li><code>onion_clearnet_mappings</code> - Verified .onion ↔ clearnet associations</li>
+                <li><code>darkweb_rate_limits</code> - Per-user rate limiting</li>
+                <li><code>darkweb_stats</code> - Cached statistics</li>
+                <li><code>darkweb_audit_log</code> - Compliance and security logging</li>
+            </ul>
+        </div>
+
+        <!-- Scalability -->
+        <div class="section">
+            <h2>Scalability & Performance</h2>
+
+            <h3>Horizontal Scaling</h3>
+            <p>Our architecture is designed to scale horizontally across multiple dimensions:</p>
+
+            <div class="architecture-grid">
+                <div class="arch-card">
+                    <h4>Web Tier</h4>
+                    <p>Auto Scaling Group with load balancer. Currently running <code>t3.medium</code> instances with capacity to scale to t3.xlarge.</p>
+                </div>
+                <div class="arch-card">
+                    <h4>Database Tier</h4>
+                    <p>RDS PostgreSQL with read replicas. Multi-AZ deployment for high availability.</p>
+                </div>
+                <div class="arch-card">
+                    <h4>Cache Tier</h4>
+                    <p>Redis ElastiCache (<code>cache.t3.small</code>) with 1.5GB memory for hot data.</p>
+                </div>
+                <div class="arch-card">
+                    <h4>Daemon Distribution</h4>
+                    <p>Daemons run independently and can be distributed across multiple worker instances.</p>
+                </div>
+            </div>
+
+            <h3>Performance Optimizations</h3>
+            <ul>
+                <li><strong>Database Indexing:</strong> Optimized B-tree and GIN indexes on frequently queried columns</li>
+                <li><strong>Redis Caching:</strong> 5-minute TTL on frequently accessed data reduces DB load by 80%</li>
+                <li><strong>Async Processing:</strong> Daemon jobs run asynchronously with queue-based architecture</li>
+                <li><strong>Connection Pooling:</strong> Database connection pooling reduces overhead</li>
+                <li><strong>CDN Integration:</strong> Static assets served via CloudFront (planned)</li>
+                <li><strong>API Rate Limiting:</strong> Tier-based rate limiting prevents abuse</li>
+            </ul>
+
+            <h3>Current Performance Metrics</h3>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-number">134ms</span>
+                    <span class="stat-label">Avg. Page Load</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">~50ms</span>
+                    <span class="stat-label">API Response</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">99.9%</span>
+                    <span class="stat-label">Uptime SLA</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-number">10K+</span>
+                    <span class="stat-label">Queries/Hour</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security -->
+        <div class="section">
+            <h2>Security Architecture</h2>
+
+            <h3>Defense in Depth</h3>
+            <ul>
+                <li><strong>Network Security:</strong> AWS VPC with private subnets for database and cache</li>
+                <li><strong>Application Security:</strong> Input validation, SQL injection prevention, XSS protection</li>
+                <li><strong>Authentication:</strong> Bcrypt password hashing, JWT tokens, session management</li>
+                <li><strong>API Security:</strong> Rate limiting, API key rotation, request signing</li>
+                <li><strong>Data Encryption:</strong> TLS 1.3 in transit, AES-256 at rest (planned)</li>
+                <li><strong>Audit Logging:</strong> All sensitive operations logged with tamper-evident trails</li>
+            </ul>
+
+            <h3>Compliance</h3>
+            <p>Our architecture is designed with compliance in mind:</p>
+            <ul>
+                <li>GDPR-compliant data handling and right-to-erasure</li>
+                <li>CFAA-compliant passive monitoring (no unauthorized access)</li>
+                <li>SOC 2 Type II controls (in progress)</li>
+                <li>Responsible disclosure program for security researchers</li>
+            </ul>
+        </div>
+
+        <!-- API Architecture -->
+        <div class="section">
+            <h2>API Architecture</h2>
+
+            <h3>RESTful Design</h3>
+            <p>Our API follows REST principles with predictable endpoints:</p>
+
+            <pre><code>GET  /api/stats/live          # Real-time platform statistics
+GET  /api/darkweb/stats       # Dark web monitoring stats
+GET  /api/darkweb/onion/:domain  # Check for .onion alternatives
+POST /api/lookup              # Domain intelligence lookup
+GET  /api/rdap/:domain        # RDAP registration data
+GET  /api/whois/:domain       # WHOIS information
+POST /api/bulk-lookup         # Batch domain analysis
+POST /api/scan                # Domain scan (Simple/Advanced/Expert modes)
+GET  /api/ip/:ip/scan         # IP scan (Simple/Advanced/Expert modes)</code></pre>
+
+            <h3>Expert Mode Scanning</h3>
+            <p>Our platform offers three scanning modes with progressively granular control:</p>
+
+            <div class="architecture-grid">
+                <div class="arch-card">
+                    <h4>Simple Mode</h4>
+                    <p>Quick scans with automatic checks for DNS, SSL, and basic security indicators. Perfect for rapid assessments.</p>
+                </div>
+                <div class="arch-card">
+                    <h4>Advanced Mode</h4>
+                    <p>Comprehensive scans including DNSSEC validation, threat intelligence feeds, and enhanced security checks.</p>
+                </div>
+                <div class="arch-card">
+                    <h4>Expert Mode</h4>
+                    <p>Fully customizable scans with granular control over intelligence sources, DNS resolvers, and data collection methods. Choose exactly which checks to run.</p>
+                </div>
+            </div>
+
+            <h4>Expert Mode Options</h4>
+            <p><strong>Domain Scans:</strong> Customize DNS analysis (records, DNSSEC, propagation), security checks (SSL, certificate transparency), email security (SPF, DKIM, DMARC), and threat intelligence sources.</p>
+
+            <p><strong>IP Scans:</strong> Configure geolocation providers (IPInfo, MaxMind, BGP, RIPEstat), security sources (AbuseIPDB, RBL, threat feeds), and advanced analysis (Cloudflare detection, reverse DNS, WHOIS lookups).</p>
+
+            <pre><code># Example: Expert Mode Domain Scan
+POST /api/scan
+{
+  "domain": "example.com",
+  "expert": true,
+  "options": {
+    "dns": ["records", "dnssec", "propagation"],
+    "security": ["ssl", "ssl-chain", "cert-transparency"],
+    "email": ["spf", "dkim", "dmarc", "mx-health"],
+    "intel": ["whois", "reputation", "threat"]
+  }
+}
+
+# Example: Expert Mode IP Scan
+GET /api/ip/8.8.8.8/scan?expert=true&options={"geo":["ipinfo","maxmind"]}</code></pre>
+
+            <h3>Rate Limiting Tiers</h3>
+            <div class="daemon-list">
+                <div class="daemon-item">
+                    <strong>Anonymous</strong>
+                    <small>3 requests/day - Basic public access</small>
+                </div>
+                <div class="daemon-item">
+                    <strong>Free Tier</strong>
+                    <small>5 requests/day - Registered users</small>
+                </div>
+                <div class="daemon-item">
+                    <strong>Essentials ($29/mo)</strong>
+                    <small>25 requests/day - Individual researchers</small>
+                </div>
+                <div class="daemon-item">
+                    <strong>Professional ($99/mo)</strong>
+                    <small>100 requests/day - Security teams</small>
+                </div>
+                <div class="daemon-item">
+                    <strong>Research ($299/mo)</strong>
+                    <small>250 requests/day - Academic institutions</small>
+                </div>
+                <div class="daemon-item">
+                    <strong>Commercial ($999/mo)</strong>
+                    <small>500 requests/day - Enterprises</small>
+                </div>
+                <div class="daemon-item">
+                    <strong>Enterprise (Custom)</strong>
+                    <small>Unlimited - Custom integrations</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Future Roadmap -->
+        <div class="section">
+            <h2>Future Architecture Enhancements</h2>
+
+            <h3>Planned Advanced Features</h3>
+
+            <div class="architecture-grid">
+                <div class="arch-card">
+                    <h4>GraphQL API</h4>
+                    <p><strong>Timeline:</strong> 3-4 weeks</p>
+                    <p><strong>Cost:</strong> $0-10/month</p>
+                    <p>Flexible querying interface for complex use cases. Query exactly the data you need with a single request. Perfect for advanced integrations and custom dashboards.</p>
+                    <p><small>Tech: Graphene-Python, Apollo Server, GraphQL subscriptions</small></p>
+                </div>
+
+                <div class="arch-card">
+                    <h4>Real-time WebSockets</h4>
+                    <p><strong>Timeline:</strong> 2-3 weeks</p>
+                    <p><strong>Cost:</strong> $50-150/month</p>
+                    <p>Live domain monitoring feeds with instant notifications. Stream CT log discoveries, SSL certificate changes, and DNS updates in real-time.</p>
+                    <p><small>Tech: Socket.IO, Redis Pub/Sub, AWS API Gateway WebSocket</small></p>
+                </div>
+
+                <div class="arch-card">
+                    <h4>Machine Learning</h4>
+                    <p><strong>Timeline:</strong> 6-8 weeks</p>
+                    <p><strong>Cost:</strong> $50-200/month</p>
+                    <p>Predictive analytics for domain reputation scoring. Anomaly detection, phishing prediction, and automated threat classification using TensorFlow and scikit-learn.</p>
+                    <p><small>Tech: TensorFlow, scikit-learn, AWS SageMaker</small></p>
+                </div>
+
+                <div class="arch-card">
+                    <h4>AI Features</h4>
+                    <p><strong>Timeline:</strong> 4-6 weeks</p>
+                    <p><strong>Cost:</strong> $200-800/month</p>
+                    <p>Natural language queries, automated report generation, and intelligent domain recommendations. Powered by large language models and vector embeddings.</p>
+                    <p><small>Tech: OpenAI GPT-4, Claude API, Pinecone vector DB</small></p>
+                </div>
+            </div>
+
+            <h3>Infrastructure Enhancements</h3>
+            <ul>
+                <li><strong>Kubernetes Migration:</strong> Container orchestration for better resource utilization and auto-scaling</li>
+                <li><strong>Multi-Region Deployment:</strong> Global edge presence for low latency access worldwide</li>
+                <li><strong>Data Lake:</strong> Long-term historical analysis with S3 + Athena for trend detection</li>
+                <li><strong>Blockchain Integration:</strong> Immutable audit trails on-chain for compliance and transparency</li>
+                <li><strong>Advanced Caching:</strong> Redis Cluster with read replicas for sub-millisecond response times</li>
+                <li><strong>CDN Integration:</strong> CloudFront distribution for static assets and API caching</li>
+            </ul>
+
+            <p style="margin-top: 20px; padding: 15px; background: rgba(102, 126, 234, 0.1); border-left: 3px solid #667eea; border-radius: 4px;">
+                <strong>Note:</strong> Detailed implementation plans, technical architecture diagrams, and cost breakdowns are available in our internal documentation. These features are being prioritized based on user feedback and enterprise requirements.
+            </p>
+        </div>
+
+        <div style="text-align: center; padding: 40px 0; color: #666;">
+            <p>This architecture documentation is continuously updated as we enhance our platform.</p>
+            <p style="margin-top: 10px;">Last updated: November 2025</p>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <!-- Company Info -->
+                <div class="footer-column">
+                    <h3 class="footer-title">🔒 DNS Science</h3>
+                    <p class="footer-text">
+                        Professional DNS intelligence and security platform. Track domains, monitor SSL certificates, and analyze DNS infrastructure in real-time.
+                    </p>
+                    <p class="footer-copyright">
+                        © 2025 DNS Science. All rights reserved.
+                    </p>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="footer-column">
+                    <h4 class="footer-heading">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/explorer">Data Explorer</a></li>
+                        <li><a href="/about">About Us</a></li>
+                        <li><a href="/pricing">Pricing</a></li>
+                        <li><a href="/docs/api">API Docs</a></li>
+                        <li><a href="/docs/cli">CLI Docs</a></li>
+                        <li><a href="/docs/architecture">Architecture</a></li>
+                    </ul>
+                </div>
+
+                <!-- Services -->
+                <div class="footer-column">
+                    <h4 class="footer-heading">Services</h4>
+                    <ul class="footer-links">
+                        <li><a href="/services">Professional Services</a></li>
+                        <li><a href="/registrar">Domain Registrar</a></li>
+                        <li><span>Dark Web Monitoring</span></li>
+                        <li><span>SSL Monitoring</span></li>
+                        <li><span>Threat Intelligence</span></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div class="footer-column">
+                    <h4 class="footer-heading">Contact</h4>
+                    <ul class="footer-links">
+                        <li>
+                            <strong>Email:</strong><br>
+                            <a href="mailto:support@dnsscience.io">support@dnsscience.io</a>
+                        </li>
+                        <li>
+                            <strong>Sales:</strong><br>
+                            <a href="mailto:sales@dnsscience.io">sales@dnsscience.io</a>
+                        </li>
+                        <li>
+                            <strong>Security:</strong><br>
+                            <a href="mailto:security@dnsscience.io">security@dnsscience.io</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <div class="footer-bottom">
+                <p>Built with ❤️ for DNS security professionals and researchers</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        // Check for saved theme preference or default to light mode
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        if (currentTheme === 'dark') {
+            body.classList.add('dark-mode');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+
+            // Save theme preference
+            const theme = body.classList.contains('dark-mode') ? 'dark' : 'light';
+            localStorage.setItem('theme', theme);
+        });
+    </script>
+</body>
+</html>

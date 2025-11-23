@@ -1,0 +1,119 @@
+---
+# Apache Configuration Role
+
+- name: Install Apache and mod_wsgi
+  yum:
+    name:
+      - httpd
+      - mod_wsgi
+      - mod_ssl
+    state: present
+
+- name: Enable Apache modules
+  apache2_module:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ apache_modules }}"
+  ignore_errors: yes
+  notify: restart apache
+
+- name: Create Apache configuration for DNS Science
+  template:
+    src: dnsscience.conf.j2
+    dest: /etc/httpd/conf.d/dnsscience.conf
+    owner: root
+    group: root
+    mode: '0644'
+    backup: yes
+  notify: restart apache
+
+- name: Create SSL configuration
+  template:
+    src: ssl.conf.j2
+    dest: /etc/httpd/conf.d/ssl.conf
+    owner: root
+    group: root
+    mode: '0644'
+    backup: yes
+  when: enable_ssl | default(false)
+  notify: restart apache
+
+- name: Configure Apache performance settings
+  template:
+    src: performance.conf.j2
+    dest: /etc/httpd/conf.d/performance.conf
+    owner: root
+    group: root
+    mode: '0644'
+    backup: yes
+  notify: restart apache
+
+- name: Configure Apache security settings
+  template:
+    src: security.conf.j2
+    dest: /etc/httpd/conf.d/security.conf
+    owner: root
+    group: root
+    mode: '0644'
+    backup: yes
+  notify: restart apache
+
+- name: Create .htaccess file
+  template:
+    src: htaccess.j2
+    dest: "{{ app_dir }}/.htaccess"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0644'
+    backup: yes
+
+- name: Set up log rotation for Apache
+  template:
+    src: logrotate.conf.j2
+    dest: /etc/logrotate.d/httpd
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Configure SELinux for Apache
+  seboolean:
+    name: "{{ item }}"
+    state: yes
+    persistent: yes
+  loop:
+    - httpd_can_network_connect
+    - httpd_can_network_connect_db
+    - httpd_can_sendmail
+  when: ansible_selinux.status == "enabled"
+  ignore_errors: yes
+
+- name: Ensure Apache service is running
+  systemd:
+    name: httpd
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+- name: Test Apache configuration
+  command: httpd -t
+  register: apache_config_test
+  changed_when: false
+  failed_when: apache_config_test.rc != 0
+
+- name: Check Apache status
+  systemd:
+    name: httpd
+    state: started
+  register: apache_status
+
+- name: Verify Apache is listening on ports
+  wait_for:
+    port: "{{ item }}"
+    host: 0.0.0.0
+    delay: 5
+    timeout: 30
+    state: started
+  loop:
+    - 80
+    - 443
+  when: enable_ssl | default(false)

@@ -1,0 +1,168 @@
+---
+# Smoke Tests for DNS Science Deployment
+
+- name: Wait for services to stabilize
+  pause:
+    seconds: 10
+
+- name: Test home page
+  uri:
+    url: "http://{{ ansible_default_ipv4.address | default('127.0.0.1') }}/"
+    method: GET
+    status_code: 200
+    timeout: 30
+  register: home_test
+  retries: 3
+  delay: 5
+
+- name: Test health endpoint
+  uri:
+    url: "http://{{ ansible_default_ipv4.address | default('127.0.0.1') }}/health"
+    method: GET
+    status_code: 200
+    timeout: 10
+  register: health_test
+  retries: 3
+  delay: 5
+
+- name: Test API endpoint
+  uri:
+    url: "http://{{ ansible_default_ipv4.address | default('127.0.0.1') }}/api/v1/status"
+    method: GET
+    status_code: [200, 401]
+    timeout: 10
+  register: api_test
+  retries: 3
+  delay: 5
+
+- name: Test static files
+  uri:
+    url: "http://{{ ansible_default_ipv4.address | default('127.0.0.1') }}/static/css/main.css"
+    method: HEAD
+    status_code: 200
+    timeout: 10
+  register: static_test
+  ignore_errors: yes
+
+- name: Test tools page
+  uri:
+    url: "http://{{ ansible_default_ipv4.address | default('127.0.0.1') }}/tools"
+    method: GET
+    status_code: 200
+    timeout: 10
+  register: tools_test
+  retries: 3
+  delay: 5
+
+- name: Test explorer page
+  uri:
+    url: "http://{{ ansible_default_ipv4.address | default('127.0.0.1') }}/explorer"
+    method: GET
+    status_code: [200, 500]
+    timeout: 10
+  register: explorer_test
+  retries: 3
+  delay: 5
+
+- name: Check Apache service status
+  systemd:
+    name: httpd
+    state: started
+  register: apache_status
+  failed_when: apache_status.status.ActiveState != "active"
+
+- name: Check Apache error log for critical errors
+  shell: |
+    tail -50 {{ log_dir }}/error.log | grep -E "(FATAL|CRITICAL|emerg|alert|crit)" || true
+  register: error_log_check
+  changed_when: false
+
+- name: Display error log issues if found
+  debug:
+    msg: "Critical errors found in log: {{ error_log_check.stdout }}"
+  when: error_log_check.stdout != ""
+
+- name: Test database connectivity from application
+  uri:
+    url: "http://{{ ansible_default_ipv4.address | default('127.0.0.1') }}/api/v1/db-check"
+    method: GET
+    status_code: [200, 404]
+    timeout: 10
+  register: db_test
+  ignore_errors: yes
+
+- name: Validate Python imports
+  command: |
+    {{ venv_path }}/bin/python -c "
+    import sys
+    sys.path.insert(0, '{{ app_dir }}')
+    try:
+        import app
+        print('SUCCESS: Application imports correctly')
+    except Exception as e:
+        print(f'ERROR: {e}')
+        sys.exit(1)
+    "
+  register: import_test
+  changed_when: false
+
+- name: Check disk usage
+  shell: df -h {{ base_dir }} | awk 'NR==2 {print $5}' | sed 's/%//'
+  register: disk_usage
+  changed_when: false
+
+- name: Warn if disk usage is high
+  debug:
+    msg: "WARNING: Disk usage is {{ disk_usage.stdout }}%"
+  when: disk_usage.stdout | int > 80
+
+- name: Check memory usage
+  shell: free -m | awk 'NR==2 {printf "%.1f", $3/$2*100}'
+  register: memory_usage
+  changed_when: false
+
+- name: Warn if memory usage is high
+  debug:
+    msg: "WARNING: Memory usage is {{ memory_usage.stdout }}%"
+  when: memory_usage.stdout | float > 85
+
+- name: Generate test report
+  set_fact:
+    test_results:
+      home_page: "{{ 'PASS' if home_test is succeeded else 'FAIL' }}"
+      health_endpoint: "{{ 'PASS' if health_test is succeeded else 'FAIL' }}"
+      api_endpoint: "{{ 'PASS' if api_test is succeeded else 'FAIL' }}"
+      static_files: "{{ 'PASS' if static_test is succeeded else 'FAIL' }}"
+      tools_page: "{{ 'PASS' if tools_test is succeeded else 'FAIL' }}"
+      explorer_page: "{{ 'PASS' if explorer_test.status == 200 else 'WARN' }}"
+      apache_service: "{{ 'PASS' if apache_status is succeeded else 'FAIL' }}"
+      python_imports: "{{ 'PASS' if import_test is succeeded else 'FAIL' }}"
+
+- name: Display test results
+  debug:
+    msg:
+      - "=== Smoke Test Results ==="
+      - "Home Page: {{ test_results.home_page }}"
+      - "Health Endpoint: {{ test_results.health_endpoint }}"
+      - "API Endpoint: {{ test_results.api_endpoint }}"
+      - "Static Files: {{ test_results.static_files }}"
+      - "Tools Page: {{ test_results.tools_page }}"
+      - "Explorer Page: {{ test_results.explorer_page }}"
+      - "Apache Service: {{ test_results.apache_service }}"
+      - "Python Imports: {{ test_results.python_imports }}"
+      - "========================="
+
+- name: Save test results to file
+  copy:
+    content: "{{ test_results | to_nice_json }}"
+    dest: "{{ log_dir }}/smoke-test-{{ ansible_date_time.epoch }}.json"
+    mode: '0644'
+
+- name: Fail if critical tests failed
+  fail:
+    msg: "Critical smoke tests failed. See results above."
+  when: >
+    test_results.home_page == 'FAIL' or
+    test_results.health_endpoint == 'FAIL' or
+    test_results.apache_service == 'FAIL' or
+    test_results.python_imports == 'FAIL'

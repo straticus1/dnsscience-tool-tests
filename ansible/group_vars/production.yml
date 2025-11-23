@@ -1,0 +1,98 @@
+---
+# Production-specific variables for DNS Science
+# These override the defaults in all.yml for production environment
+
+# Environment
+deployment_environment: production
+debug_mode: false
+
+# Production Database (RDS)
+db_host: dnsscience-prod.cluster-xxxxxxxx.us-east-1.rds.amazonaws.com
+db_port: 5432
+db_name: dnsscience_prod
+db_ssl_mode: require
+
+# Production Redis (ElastiCache)
+redis_host: dnsscience-prod.xxxxxx.ng.0001.use1.cache.amazonaws.com
+redis_port: 6379
+
+# Production S3 Buckets
+s3_deployment_bucket: dnsscience-prod-deployment
+s3_backup_bucket: dnsscience-prod-backups
+s3_static_bucket: dnsscience-prod-static
+
+# Production CloudFront
+cloudfront_distribution_id: E1234567890ABC
+cloudfront_domain: d1234567890.cloudfront.net
+
+# Production Endpoints
+api_endpoint: https://api.dnsscience.io
+app_endpoint: https://dnsscience.io
+
+# SSL Configuration (Production)
+ssl_enabled: true
+ssl_cert_path: /etc/letsencrypt/live/dnsscience.io/fullchain.pem
+ssl_key_path: /etc/letsencrypt/live/dnsscience.io/privkey.pem
+force_ssl: true
+
+# Production Performance Settings
+flask_workers: 8
+worker_connections: 2000
+db_pool_size: 50
+db_max_overflow: 100
+cache_ttl: 3600
+
+# Production Monitoring
+enable_apm: true
+enable_error_tracking: true
+enable_performance_monitoring: true
+datadog_env: production
+sentry_environment: production
+
+# Production Backup Settings
+backup_retention_days: 30
+backup_schedule: "0 2 * * *"
+backup_compression: true
+backup_encryption: true
+
+# Production Security
+rate_limit_per_minute: 100
+max_upload_size: 52428800  # 50MB
+session_lifetime: 3600
+secure_cookies: true
+csrf_protection: true
+
+# Production Logging
+log_level: WARNING
+log_to_cloudwatch: true
+cloudwatch_log_group: /aws/ec2/dnsscience/production
+cloudwatch_retention_days: 90
+
+# Production Feature Flags
+enable_maintenance_page: false
+enable_debug_toolbar: false
+enable_profiling: false
+enable_test_endpoints: false
+
+# Production Deployment Settings
+deployment_strategy: blue_green
+pre_deployment_backup: true
+post_deployment_validation: true
+auto_rollback: true
+deployment_approval_required: false
+
+# Production Scaling
+auto_scaling_enabled: true
+min_instances: 2
+max_instances: 10
+target_cpu_utilization: 70
+
+# Production Alerts
+alert_email: devops@dnsscience.io
+pagerduty_service_key: "{{ vault_pagerduty_service_key }}"
+alert_thresholds:
+  cpu_critical: 90
+  memory_critical: 90
+  disk_critical: 85
+  response_time_critical: 2000  # ms
+  error_rate_critical: 5  # percent

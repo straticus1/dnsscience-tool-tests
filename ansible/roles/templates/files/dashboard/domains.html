@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Domains - DNS Science</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 0;
+            padding-top: 80px;
+        }
+
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 30px;
+            background: rgba(30, 30, 50, 0.98);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(139, 156, 255, 0.2);
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-left {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-button {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .nav-button.secondary {
+            background: rgba(139, 156, 255, 0.2);
+            color: #8b9cff;
+        }
+
+        .nav-button.secondary:hover {
+            background: rgba(139, 156, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #8b9cff;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #b0b0b0;
+            font-size: 1.1em;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #8b9cff;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #4caf50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #b0b0b0;
+            font-size: 0.9em;
+        }
+
+        .domains-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            color: #8b9cff;
+            font-size: 1.8em;
+        }
+
+        .domain-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .domain-table th {
+            text-align: left;
+            padding: 15px;
+            background: rgba(139, 156, 255, 0.1);
+            color: #8b9cff;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(139, 156, 255, 0.3);
+        }
+
+        .domain-table td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .domain-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .status-badge.active {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+        }
+
+        .status-badge.pending {
+            background: rgba(255, 152, 0, 0.2);
+            color: #ff9800;
+        }
+
+        .status-badge.expired {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 5px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .action-btn.danger {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #b0b0b0;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            color: #8b9cff;
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+
+        .empty-state a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .empty-state a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #8b9cff;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(139, 156, 255, 0.3);
+            border-top: 4px solid #8b9cff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* DNS Management Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1e1e32;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid rgba(139, 156, 255, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(139, 156, 255, 0.2);
+        }
+
+        .modal-header h3 {
+            color: #8b9cff;
+            font-size: 1.5em;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #b0b0b0;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div class="nav-bar">
+        <div class="nav-left">
+            <a href="/" class="nav-button secondary">← Home</a>
+            <a href="/registrar" class="nav-button secondary">Register Domains</a>
+            <a href="/dashboard/domains" class="nav-button">My Domains</a>
+        </div>
+        <div>
+            <a href="/docs/api" class="nav-button secondary">API Docs</a>
+            <a href="/logout" class="nav-button secondary">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🌐 My Domains</h1>
+            <p>Manage your registered domains, DNS settings, and SSL certificates</p>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-value" id="totalDomains">-</div>
+                <div class="stat-label">Total Domains</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeDomains">-</div>
+                <div class="stat-label">Active Domains</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="expiringSoon">-</div>
+                <div class="stat-label">Expiring Soon</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalSSL">-</div>
+                <div class="stat-label">SSL Certificates</div>
+            </div>
+        </div>
+
+        <!-- Domains Section -->
+        <div class="domains-section">
+            <div class="section-header">
+                <h2>Your Domains</h2>
+                <a href="/registrar" class="action-btn">+ Register New Domain</a>
+            </div>
+
+            <div id="domainsContainer">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Loading your domains...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DNS Management Modal -->
+    <div id="dnsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalDomainName">DNS Management</h3>
+                <button class="close-btn" onclick="closeDNSModal()">&times;</button>
+            </div>
+            <div id="dnsContent">
+                <!-- DNS records will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userDomains = [];
+
+        // Load domains on page load
+        async function loadDomains() {
+            try {
+                const response = await fetch('/api/domains/list');
+                if (!response.ok) {
+                    throw new Error('Failed to load domains');
+                }
+
+                const data = await response.json();
+                userDomains = data.domains || [];
+                displayDomains(userDomains);
+                updateStats(data.stats || {});
+
+            } catch (error) {
+                console.error('Error loading domains:', error);
+                showError('Failed to load domains. Please refresh the page.');
+            }
+        }
+
+        function displayDomains(domains) {
+            const container = document.getElementById('domainsContainer');
+
+            if (!domains || domains.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🌐</div>
+                        <h3>No Domains Yet</h3>
+                        <p>You haven't registered any domains yet. Start building your online presence!</p>
+                        <a href="/registrar">Register Your First Domain</a>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <table class="domain-table">
+                    <thead>
+                        <tr>
+                            <th>Domain Name</th>
+                            <th>Status</th>
+                            <th>Registered</th>
+                            <th>Expires</th>
+                            <th>Auto-Renew</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${domains.map(domain => createDomainRow(domain)).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function createDomainRow(domain) {
+            const statusClass = domain.status || 'pending';
+            const registered = domain.registered_at ? new Date(domain.registered_at).toLocaleDateString() : 'N/A';
+            const expires = domain.expires_at ? new Date(domain.expires_at).toLocaleDateString() : 'N/A';
+            const autoRenew = domain.auto_renew ? '✓ Enabled' : '✗ Disabled';
+
+            return `
+                <tr>
+                    <td><strong>${domain.domain_name}</strong></td>
+                    <td><span class="status-badge ${statusClass}">${statusClass.toUpperCase()}</span></td>
+                    <td>${registered}</td>
+                    <td>${expires}</td>
+                    <td>${autoRenew}</td>
+                    <td>
+                        <button class="action-btn" onclick="manageDNS('${domain.domain_name}', ${domain.id})">
+                            Manage DNS
+                        </button>
+                        <button class="action-btn" onclick="viewDetails(${domain.id})">
+                            Details
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function updateStats(stats) {
+            document.getElementById('totalDomains').textContent = stats.total || 0;
+            document.getElementById('activeDomains').textContent = stats.active || 0;
+            document.getElementById('expiringSoon').textContent = stats.expiring_soon || 0;
+            document.getElementById('totalSSL').textContent = stats.ssl_certificates || 0;
+        }
+
+        function manageDNS(domainName, domainId) {
+            document.getElementById('modalDomainName').textContent = `DNS Management - ${domainName}`;
+            document.getElementById('dnsModal').classList.add('active');
+            loadDNSRecords(domainId);
+        }
+
+        async function loadDNSRecords(domainId) {
+            const content = document.getElementById('dnsContent');
+            content.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>Loading DNS records...</p></div>';
+
+            try {
+                const response = await fetch(`/api/domains/${domainId}/dns`);
+                const data = await response.json();
+
+                // Display DNS records
+                content.innerHTML = `
+                    <p style="color: #b0b0b0; margin-bottom: 20px;">
+                        DNS management interface coming soon. Contact support to update your DNS records.
+                    </p>
+                    <p style="color: #8b9cff;">
+                        Default Nameservers:<br>
+                        • ns1.dnsscience.io<br>
+                        • ns2.dnsscience.io
+                    </p>
+                `;
+
+            } catch (error) {
+                content.innerHTML = '<p style="color: #f44336;">Failed to load DNS records.</p>';
+            }
+        }
+
+        function closeDNSModal() {
+            document.getElementById('dnsModal').classList.remove('active');
+        }
+
+        function viewDetails(domainId) {
+            window.location.href = `/dashboard/domains/${domainId}`;
+        }
+
+        function showError(message) {
+            const container = document.getElementById('domainsContainer');
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">⚠️</div>
+                    <h3>Error</h3>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        // Load domains when page loads
+        window.addEventListener('DOMContentLoaded', loadDomains);
+    </script>
+</body>
+</html>

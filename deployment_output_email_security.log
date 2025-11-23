@@ -1,0 +1,51 @@
+
+[0;34m======================================================================
+DNS SCIENCE - COMPLETE EMAIL SECURITY DEPLOYMENT
+======================================================================[0m
+
+[0;36mDeploying: DANE/TLSA + MTA-STS + Redis + Homepage Updates[0m
+
+
+[0;34m======================================================================
+STEP 1: Uploading Files to S3
+======================================================================[0m
+
+[0;36m[08:05:15] INFO:[0m Uploading migrations/015_dane_tlsa_columns.sql...
+[0;36m[08:05:15] INFO:[0m Uploading migrations/016_mta_sts_columns.sql...
+[0;36m[08:05:15] INFO:[0m Uploading daemons/emaild_complete.py...
+[0;36m[08:05:15] INFO:[0m Uploading populate_redis_stats.py...
+[0;32m[08:05:15][0m All files uploaded to S3
+
+
+[0;34m======================================================================
+STEP 2: Downloading Files on Instance
+======================================================================[0m
+
+[0;36m[08:05:15] INFO:[0m Downloading deployment files from S3
+Completed 1.8 KiB/30.6 KiB (21.9 KiB/s) with 4 file(s) remainingdownload: s3://dnsscience-deployment/email_security_complete/20251115_080515/015_dane_tlsa_columns.sql to ./015_dane_tlsa_columns.sql
+Completed 1.8 KiB/30.6 KiB (21.9 KiB/s) with 3 file(s) remainingCompleted 14.3 KiB/30.6 KiB (130.2 KiB/s) with 3 file(s) remainingdownload: s3://dnsscience-deployment/email_security_complete/20251115_080515/populate_redis_stats.py to ./populate_redis_stats.py
+Completed 14.3 KiB/30.6 KiB (130.2 KiB/s) with 2 file(s) remainingCompleted 17.0 KiB/30.6 KiB (149.3 KiB/s) with 2 file(s) remainingdownload: s3://dnsscience-deployment/email_security_complete/20251115_080515/016_mta_sts_columns.sql to ./016_mta_sts_columns.sql
+Completed 17.0 KiB/30.6 KiB (149.3 KiB/s) with 1 file(s) remainingCompleted 30.6 KiB/30.6 KiB (226.7 KiB/s) with 1 file(s) remainingdownload: s3://dnsscience-deployment/email_security_complete/20251115_080515/emaild_complete.py to ./emaild_complete.py
+total 48K
+drwxr-xr-x  2 root root 4.0K Nov 15 13:05 .
+drwxrwxrwt 17 root root 4.0K Nov 15 13:05 ..
+-rw-r--r--  1 root root 1.9K Nov 15 13:05 015_dane_tlsa_columns.sql
+-rw-r--r--  1 root root 2.8K Nov 15 13:05 016_mta_sts_columns.sql
+-rw-r--r--  1 root root  14K Nov 15 13:05 emaild_complete.py
+-rw-r--r--  1 root root  13K Nov 15 13:05 populate_redis_stats.py
+
+[0;32m[08:05:19][0m Files downloaded
+
+
+[0;34m======================================================================
+STEP 3: Running Database Migrations
+======================================================================[0m
+
+[0;36m[08:05:19] INFO:[0m Running DANE/TLSA migration...
+[0;36m[08:05:19] INFO:[0m Creating DANE/TLSA database columns
+[0;31m[08:05:22] ERROR:[0m Command failed!
+grep: .env.production: No such file or directory
+psql: error: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: No such file or directory
+	Is the server running locally and accepting connections on that socket?
+failed to run commands: exit status 2
+[0;31m[08:05:22] ERROR:[0m DANE/TLSA migration failed!

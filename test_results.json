@@ -1,0 +1,483 @@
+{
+  "timestamp": "2025-11-15T13:13:40.965Z",
+  "baseUrl": "https://www.dnsscience.io",
+  "summary": {
+    "total": 62,
+    "passed": 48,
+    "failed": 6,
+    "warnings": 8
+  },
+  "tests": [
+    {
+      "name": "Homepage loads",
+      "status": "PASS",
+      "details": "Status: 200",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:45.267Z"
+    },
+    {
+      "name": "Homepage title present",
+      "status": "PASS",
+      "details": "Title: \"DNS Science - Email Security & DNS Tracker\"",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:45.269Z"
+    },
+    {
+      "name": "Navigation present",
+      "status": "FAIL",
+      "details": "No navigation found",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:45.271Z"
+    },
+    {
+      "name": "Stats loaded",
+      "status": "WARN",
+      "details": "3 elements still showing \"Loading...\"",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:48.496Z"
+    },
+    {
+      "name": "Forms present",
+      "status": "PASS",
+      "details": "29 form elements found",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:48.704Z"
+    },
+    {
+      "name": "JavaScript errors",
+      "status": "FAIL",
+      "details": "4 console errors found",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:48.704Z"
+    },
+    {
+      "name": "Network requests",
+      "status": "PASS",
+      "details": "All network requests successful",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:48.704Z"
+    },
+    {
+      "name": "Logo present",
+      "status": "FAIL",
+      "details": "",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:48.705Z"
+    },
+    {
+      "name": "Footer present",
+      "status": "PASS",
+      "details": "",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:48.706Z"
+    },
+    {
+      "name": "Main content present",
+      "status": "FAIL",
+      "details": "",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:48.706Z"
+    },
+    {
+      "name": "Headings present",
+      "status": "PASS",
+      "details": "",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:48.706Z"
+    },
+    {
+      "name": "Performance metrics collected",
+      "status": "PASS",
+      "details": "JSHeapUsedSize: 3MB",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:48.707Z"
+    },
+    {
+      "name": "Explorer page loads",
+      "status": "PASS",
+      "details": "Status: 200",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:49.998Z"
+    },
+    {
+      "name": "Search input present",
+      "status": "PASS",
+      "details": "",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:50.016Z"
+    },
+    {
+      "name": "Search functionality works",
+      "status": "FAIL",
+      "details": "SyntaxError: Failed to execute 'querySelector' on 'Document': 'button[type=\"submit\"], button:has-text(\"Search\")' is not a valid selector.",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:52.055Z"
+    },
+    {
+      "name": "Data display elements present",
+      "status": "PASS",
+      "details": "Table: true, Grid: true, Cards: 4",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:52.057Z"
+    },
+    {
+      "name": "Filter controls present",
+      "status": "WARN",
+      "details": "No filter controls found",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:52.058Z"
+    },
+    {
+      "name": "Pagination present",
+      "status": "PASS",
+      "details": "",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:52.060Z"
+    },
+    {
+      "name": "Tools page loads",
+      "status": "PASS",
+      "details": "Status: 200",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:53.742Z"
+    },
+    {
+      "name": "Tool items present",
+      "status": "PASS",
+      "details": "9 cards, 2 tool links",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:53.744Z"
+    },
+    {
+      "name": "DNS Auto Detect link present",
+      "status": "PASS",
+      "details": "https://www.dnsscience.io/autolookup",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:53.744Z"
+    },
+    {
+      "name": "First tool link works",
+      "status": "PASS",
+      "details": "Tool loaded: 🔧 Tools",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:53.948Z"
+    },
+    {
+      "name": "Auto Detect page loads",
+      "status": "PASS",
+      "details": "Status: 200",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:55.409Z"
+    },
+    {
+      "name": "Branding present",
+      "status": "PASS",
+      "details": "",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:13:55.410Z"
+    },
+    {
+      "name": "IP detection works",
+      "status": "PASS",
+      "details": "Detected IP: 24.187.53.33",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:00.412Z"
+    },
+    {
+      "name": "Resolver detection works",
+      "status": "PASS",
+      "details": "",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:00.414Z"
+    },
+    {
+      "name": "EDNS detection works",
+      "status": "PASS",
+      "details": "",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:00.414Z"
+    },
+    {
+      "name": "Security assessment works",
+      "status": "PASS",
+      "details": "",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:00.415Z"
+    },
+    {
+      "name": "Copy buttons present",
+      "status": "PASS",
+      "details": "4 copy buttons",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:00.417Z"
+    },
+    {
+      "name": "Copy button clickable",
+      "status": "PASS",
+      "details": "",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:00.953Z"
+    },
+    {
+      "name": "Navigation links work",
+      "status": "PASS",
+      "details": "4 navigation links",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:00.955Z"
+    },
+    {
+      "name": "/api/stats - Status code",
+      "status": "PASS",
+      "details": "200 (3647ms)",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:05.144Z"
+    },
+    {
+      "name": "/api/stats - Response time",
+      "status": "FAIL",
+      "details": "3647ms (very slow)",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:05.144Z"
+    },
+    {
+      "name": "/api/stats - JSON validity",
+      "status": "PASS",
+      "details": "Valid JSON returned",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:05.146Z"
+    },
+    {
+      "name": "/api/stats - Data completeness",
+      "status": "PASS",
+      "details": "7 top-level keys",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:05.146Z"
+    },
+    {
+      "name": "/api/domains - Status code",
+      "status": "PASS",
+      "details": "200 (1254ms)",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:06.902Z"
+    },
+    {
+      "name": "/api/domains - Response time",
+      "status": "WARN",
+      "details": "1254ms (slow)",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:06.902Z"
+    },
+    {
+      "name": "/api/domains - JSON validity",
+      "status": "PASS",
+      "details": "Valid JSON returned",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:06.905Z"
+    },
+    {
+      "name": "/api/domains - Data completeness",
+      "status": "PASS",
+      "details": "2 top-level keys",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:06.906Z"
+    },
+    {
+      "name": "/api/autolookup/ip - Status code",
+      "status": "PASS",
+      "details": "200 (1215ms)",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:08.622Z"
+    },
+    {
+      "name": "/api/autolookup/ip - Response time",
+      "status": "WARN",
+      "details": "1215ms (slow)",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:08.622Z"
+    },
+    {
+      "name": "/api/autolookup/ip - JSON validity",
+      "status": "PASS",
+      "details": "Valid JSON returned",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:08.623Z"
+    },
+    {
+      "name": "/api/autolookup/ip - Data completeness",
+      "status": "PASS",
+      "details": "4 top-level keys",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:08.623Z"
+    },
+    {
+      "name": "/api/autolookup/resolver - Status code",
+      "status": "PASS",
+      "details": "200 (1219ms)",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:10.343Z"
+    },
+    {
+      "name": "/api/autolookup/resolver - Response time",
+      "status": "WARN",
+      "details": "1219ms (slow)",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:10.343Z"
+    },
+    {
+      "name": "/api/autolookup/resolver - JSON validity",
+      "status": "PASS",
+      "details": "Valid JSON returned",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:10.345Z"
+    },
+    {
+      "name": "/api/autolookup/resolver - Data completeness",
+      "status": "PASS",
+      "details": "5 top-level keys",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:10.345Z"
+    },
+    {
+      "name": "/api/autolookup/edns - Status code",
+      "status": "PASS",
+      "details": "200 (1219ms)",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:12.065Z"
+    },
+    {
+      "name": "/api/autolookup/edns - Response time",
+      "status": "WARN",
+      "details": "1219ms (slow)",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:12.065Z"
+    },
+    {
+      "name": "/api/autolookup/edns - JSON validity",
+      "status": "PASS",
+      "details": "Valid JSON returned",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:12.066Z"
+    },
+    {
+      "name": "/api/autolookup/edns - Data completeness",
+      "status": "PASS",
+      "details": "4 top-level keys",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:12.066Z"
+    },
+    {
+      "name": "/api/autolookup/security - Status code",
+      "status": "PASS",
+      "details": "200 (1213ms)",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:13.780Z"
+    },
+    {
+      "name": "/api/autolookup/security - Response time",
+      "status": "WARN",
+      "details": "1213ms (slow)",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:13.780Z"
+    },
+    {
+      "name": "/api/autolookup/security - JSON validity",
+      "status": "PASS",
+      "details": "Valid JSON returned",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:13.781Z"
+    },
+    {
+      "name": "/api/autolookup/security - Data completeness",
+      "status": "PASS",
+      "details": "6 top-level keys",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:13.781Z"
+    },
+    {
+      "name": "/api/autolookup/all - Status code",
+      "status": "PASS",
+      "details": "200 (1229ms)",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:15.511Z"
+    },
+    {
+      "name": "/api/autolookup/all - Response time",
+      "status": "WARN",
+      "details": "1229ms (slow)",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:15.511Z"
+    },
+    {
+      "name": "/api/autolookup/all - JSON validity",
+      "status": "PASS",
+      "details": "Valid JSON returned",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:15.512Z"
+    },
+    {
+      "name": "/api/autolookup/all - Data completeness",
+      "status": "PASS",
+      "details": "5 top-level keys",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:15.512Z"
+    },
+    {
+      "name": "Mobile viewport renders",
+      "status": "PASS",
+      "details": "375x667",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:17.707Z"
+    },
+    {
+      "name": "Tablet viewport renders",
+      "status": "PASS",
+      "details": "768x1024",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:20.335Z"
+    },
+    {
+      "name": "Desktop viewport renders",
+      "status": "PASS",
+      "details": "1920x1080",
+      "screenshot": null,
+      "timestamp": "2025-11-15T13:14:21.808Z"
+    }
+  ],
+  "consoleErrors": [
+    {
+      "page": "homepage",
+      "error": "Failed to load resource: the server responded with a status of 401 ()"
+    },
+    {
+      "page": "homepage",
+      "error": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "page": "homepage",
+      "error": "Failed to load resource: the server responded with a status of 500 ()"
+    },
+    {
+      "page": "homepage",
+      "error": "Failed to load dashboard stats: JSHandle@error"
+    }
+  ],
+  "networkErrors": [],
+  "brokenLinks": [],
+  "performanceMetrics": {
+    "homepage": {
+      "Timestamp": 135307.071438,
+      "Documents": 3,
+      "Frames": 1,
+      "JSEventListeners": 61,
+      "Nodes": 1943,
+      "LayoutCount": 15,
+      "RecalcStyleCount": 38,
+      "LayoutDuration": 0.057739,
+      "RecalcStyleDuration": 0.02855,
+      "ScriptDuration": 0.040877,
+      "TaskDuration": 0.289,
+      "JSHeapUsedSize": 2747652,
+      "JSHeapTotalSize": 5767168
+    }
+  }
+}

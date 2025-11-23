@@ -1,0 +1,87 @@
+---
+# Backup Current Deployment
+
+- name: Create backup directory
+  file:
+    path: "{{ backup_dir }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0755'
+
+- name: Set backup filename
+  set_fact:
+    backup_filename: "backup_{{ ansible_date_time.epoch }}_{{ environment }}.tar.gz"
+    backup_manifest: "backup_{{ ansible_date_time.epoch }}_manifest.txt"
+
+- name: Create application backup
+  archive:
+    path:
+      - "{{ app_dir }}"
+      - "{{ template_dir }}"
+      - "{{ static_dir }}"
+    dest: "{{ backup_dir }}/{{ backup_filename }}"
+    format: gz
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: '0640'
+  register: backup_created
+
+- name: Create backup manifest
+  shell: |
+    echo "Backup created: {{ ansible_date_time.iso8601 }}" > {{ backup_dir }}/{{ backup_manifest }}
+    echo "Environment: {{ environment }}" >> {{ backup_dir }}/{{ backup_manifest }}
+    echo "Host: {{ inventory_hostname }}" >> {{ backup_dir }}/{{ backup_manifest }}
+    echo "User: {{ ansible_user_id }}" >> {{ backup_dir }}/{{ backup_manifest }}
+    echo "" >> {{ backup_dir }}/{{ backup_manifest }}
+    echo "Files included:" >> {{ backup_dir }}/{{ backup_manifest }}
+    tar -tzf {{ backup_dir }}/{{ backup_filename }} | head -20 >> {{ backup_dir }}/{{ backup_manifest }}
+  when: backup_created is succeeded
+
+- name: Create database backup
+  postgresql_db:
+    name: "{{ db_name }}"
+    login_host: "{{ db_host }}"
+    login_user: "{{ db_user }}"
+    login_password: "{{ db_password }}"
+    port: "{{ db_port }}"
+    state: dump
+    target: "{{ backup_dir }}/database_{{ ansible_date_time.epoch }}.sql"
+    dump_extra_args: "--clean --if-exists"
+  when: backup_database | default(true)
+  ignore_errors: yes
+  register: db_backup
+
+- name: Compress database backup
+  archive:
+    path: "{{ backup_dir }}/database_{{ ansible_date_time.epoch }}.sql"
+    dest: "{{ backup_dir }}/database_{{ ansible_date_time.epoch }}.sql.gz"
+    format: gz
+    remove: yes
+  when: db_backup is succeeded
+
+- name: Upload backup to S3
+  aws_s3:
+    bucket: "{{ s3_backup_bucket | default('dnsscience-backups') }}"
+    object: "{{ environment }}/{{ backup_filename }}"
+    src: "{{ backup_dir }}/{{ backup_filename }}"
+    mode: put
+    metadata:
+      environment: "{{ environment }}"
+      timestamp: "{{ ansible_date_time.iso8601 }}"
+      host: "{{ inventory_hostname }}"
+  when: upload_to_s3 | default(true)
+  ignore_errors: yes
+
+- name: Clean up old local backups
+  shell: |
+    find {{ backup_dir }} -name "backup_*.tar.gz" -type f -mtime +{{ backup_retention_days | default(30) }} -delete
+    find {{ backup_dir }} -name "database_*.sql.gz" -type f -mtime +{{ backup_retention_days | default(30) }} -delete
+  when: cleanup_old_backups | default(true)
+
+- name: Display backup information
+  debug:
+    msg:
+      - "Backup created: {{ backup_dir }}/{{ backup_filename }}"
+      - "Size: {{ backup_created.size | default(0) | human_readable }}"
+      - "Database backup: {{ 'Success' if db_backup is succeeded else 'Skipped' }}"

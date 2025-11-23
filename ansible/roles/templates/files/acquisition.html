@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domain Acquisition Service - DNS Science</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            color: #8b9cff;
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .header .subtitle {
+            color: #b0b0b0;
+            font-size: 1.2em;
+            line-height: 1.6;
+        }
+
+        .service-info {
+            background: rgba(139, 156, 255, 0.1);
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 4px solid #8b9cff;
+            margin-bottom: 30px;
+        }
+
+        .service-info h2 {
+            color: #8b9cff;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .service-info ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .service-info li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #d0d0d0;
+        }
+
+        .service-info li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #8b9cff;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .acquisition-form {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 35px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+        }
+
+        .form-section h3 {
+            color: #8b9cff;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #b0b0b0;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(139, 156, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #8b9cff;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .budget-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .budget-option {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(139, 156, 255, 0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .budget-option:hover {
+            border-color: #8b9cff;
+            background: rgba(139, 156, 255, 0.15);
+        }
+
+        .budget-option input[type="radio"] {
+            display: none;
+        }
+
+        .budget-option input[type="radio"]:checked + label {
+            color: #8b9cff;
+            font-weight: bold;
+        }
+
+        .budget-option.selected {
+            border-color: #8b9cff;
+            background: rgba(139, 156, 255, 0.2);
+        }
+
+        .urgency-selector {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .urgency-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(139, 156, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .urgency-btn:hover {
+            border-color: #8b9cff;
+            background: rgba(139, 156, 255, 0.15);
+        }
+
+        .urgency-btn.selected {
+            border-color: #8b9cff;
+            background: rgba(139, 156, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .pricing-info {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .pricing-info h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .pricing-info p {
+            color: #c0c0c0;
+            line-height: 1.6;
+        }
+
+        .success-message {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid #4CAF50;
+            color: #a5d6a7;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message {
+            background: rgba(244, 67, 54, 0.2);
+            border: 2px solid #f44336;
+            color: #ef9a9a;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #8b9cff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(139, 156, 255, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .acquisition-form {
+                padding: 20px;
+            }
+
+            .budget-options {
+                grid-template-columns: 1fr;
+            }
+
+            .urgency-selector {
+                flex-direction: column;
+            }
+
+            .urgency-btn {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to DNS Science</a>
+
+        <div class="header">
+            <h1>Domain Acquisition Service</h1>
+            <p class="subtitle">Let our experts negotiate and acquire valuable domains on your behalf</p>
+        </div>
+
+        <div class="service-info">
+            <h2>How It Works</h2>
+            <ul>
+                <li>We discretely contact the current domain owner on your behalf</li>
+                <li>Our team negotiates the best possible price using proven strategies</li>
+                <li>We handle all legal documentation and secure escrow services</li>
+                <li>You get the domain transferred safely to your account</li>
+                <li>No upfront fees - we only charge upon successful acquisition</li>
+            </ul>
+        </div>
+
+        <div id="successMessage" class="success-message">
+            <strong>Request Submitted!</strong><br>
+            We've received your domain acquisition request. Our team will review it and contact you within 24 hours with an initial assessment.
+        </div>
+
+        <div id="errorMessage" class="error-message">
+            <strong>Error:</strong> <span id="errorText"></span>
+        </div>
+
+        <div class="acquisition-form">
+            <form id="acquisitionForm">
+                <div class="form-section">
+                    <h3>Domain Information</h3>
+
+                    <div class="form-group">
+                        <label for="domain">Domain Name *</label>
+                        <input type="text" id="domain" name="domain" placeholder="example.com" value="{{ domain }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reason">Why do you want this domain? *</label>
+                        <textarea id="reason" name="reason" placeholder="Describe your business use case, branding strategy, or other reasons..." required></textarea>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Budget & Timeline</h3>
+
+                    <div class="form-group">
+                        <label>Maximum Budget *</label>
+                        <div class="budget-options">
+                            <div class="budget-option" onclick="selectBudget(this, 'under-1k')">
+                                <input type="radio" name="budget" value="under-1k" id="budget1">
+                                <label for="budget1">Under $1,000</label>
+                            </div>
+                            <div class="budget-option" onclick="selectBudget(this, '1k-5k')">
+                                <input type="radio" name="budget" value="1k-5k" id="budget2">
+                                <label for="budget2">$1,000 - $5,000</label>
+                            </div>
+                            <div class="budget-option" onclick="selectBudget(this, '5k-10k')">
+                                <input type="radio" name="budget" value="5k-10k" id="budget3">
+                                <label for="budget3">$5,000 - $10,000</label>
+                            </div>
+                            <div class="budget-option" onclick="selectBudget(this, '10k-50k')">
+                                <input type="radio" name="budget" value="10k-50k" id="budget4">
+                                <label for="budget4">$10,000 - $50,000</label>
+                            </div>
+                            <div class="budget-option" onclick="selectBudget(this, '50k-plus')">
+                                <input type="radio" name="budget" value="50k-plus" id="budget5">
+                                <label for="budget5">$50,000+</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Timeline Urgency *</label>
+                        <div class="urgency-selector">
+                            <div class="urgency-btn" onclick="selectUrgency(this, 'flexible')">
+                                <strong>Flexible</strong><br>
+                                <small>No rush</small>
+                            </div>
+                            <div class="urgency-btn" onclick="selectUrgency(this, 'moderate')">
+                                <strong>Moderate</strong><br>
+                                <small>1-3 months</small>
+                            </div>
+                            <div class="urgency-btn" onclick="selectUrgency(this, 'urgent')">
+                                <strong>Urgent</strong><br>
+                                <small>Within 30 days</small>
+                            </div>
+                        </div>
+                        <input type="hidden" name="urgency" id="urgency" required>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Contact Information</h3>
+
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" name="name" placeholder="John Doe" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" placeholder="john@example.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" placeholder="+1 (555) 123-4567">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="company">Company/Organization</label>
+                        <input type="text" id="company" name="company" placeholder="Acme Corporation">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="additional_info">Additional Information</label>
+                        <textarea id="additional_info" name="additional_info" placeholder="Any other details that might help us with the acquisition..."></textarea>
+                    </div>
+                </div>
+
+                <div class="pricing-info">
+                    <h4>Service Fee Structure</h4>
+                    <p>
+                        <strong>Success Fee:</strong> 15% of the final purchase price (minimum $500)<br>
+                        <strong>No Success, No Fee:</strong> If we can't acquire the domain, you pay nothing<br>
+                        <strong>Market Analysis:</strong> Free preliminary valuation and feasibility assessment
+                    </p>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">Submit Acquisition Request</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function selectBudget(element, value) {
+            // Remove selected class from all budget options
+            document.querySelectorAll('.budget-option').forEach(opt => opt.classList.remove('selected'));
+
+            // Add selected class to clicked option
+            element.classList.add('selected');
+
+            // Check the radio button
+            element.querySelector('input[type="radio"]').checked = true;
+        }
+
+        function selectUrgency(element, value) {
+            // Remove selected class from all urgency buttons
+            document.querySelectorAll('.urgency-btn').forEach(btn => btn.classList.remove('selected'));
+
+            // Add selected class to clicked button
+            element.classList.add('selected');
+
+            // Set the hidden input value
+            document.getElementById('urgency').value = value;
+        }
+
+        document.getElementById('acquisitionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const successMsg = document.getElementById('successMessage');
+            const errorMsg = document.getElementById('errorMessage');
+
+            // Hide previous messages
+            successMsg.style.display = 'none';
+            errorMsg.style.display = 'none';
+
+            // Validate budget selection
+            const budgetSelected = document.querySelector('input[name="budget"]:checked');
+            if (!budgetSelected) {
+                errorMsg.style.display = 'block';
+                document.getElementById('errorText').textContent = 'Please select a budget range';
+                return;
+            }
+
+            // Validate urgency selection
+            if (!document.getElementById('urgency').value) {
+                errorMsg.style.display = 'block';
+                document.getElementById('errorText').textContent = 'Please select a timeline urgency';
+                return;
+            }
+
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            // Collect form data
+            const formData = {
+                domain: document.getElementById('domain').value,
+                reason: document.getElementById('reason').value,
+                budget: budgetSelected.value,
+                urgency: document.getElementById('urgency').value,
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                company: document.getElementById('company').value,
+                additional_info: document.getElementById('additional_info').value
+            };
+
+            try {
+                const response = await fetch('/api/acquisition/request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Show success message
+                    successMsg.style.display = 'block';
+
+                    // Reset form
+                    document.getElementById('acquisitionForm').reset();
+                    document.querySelectorAll('.budget-option, .urgency-btn').forEach(el => el.classList.remove('selected'));
+
+                    // Scroll to success message
+                    successMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
+                    // Show error message
+                    errorMsg.style.display = 'block';
+                    document.getElementById('errorText').textContent = data.error || 'Failed to submit request. Please try again.';
+                }
+            } catch (error) {
+                errorMsg.style.display = 'block';
+                document.getElementById('errorText').textContent = 'Network error. Please check your connection and try again.';
+            } finally {
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Acquisition Request';
+            }
+        });
+
+        // Auto-fill domain from URL parameter if provided
+        window.addEventListener('load', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const domainParam = urlParams.get('domain');
+            if (domainParam && !document.getElementById('domain').value) {
+                document.getElementById('domain').value = domainParam;
+            }
+        });
+    </script>
+</body>
+</html>

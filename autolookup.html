@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNS Auto Lookup - DNS Science</title>
+    <meta name="description" content="Automatically detect your IP address, DNS resolver, EDNS Client Subnet, and DNS security configuration">
+    <link rel="stylesheet" href="/static/css/autolookup.css">
+    <link rel="icon" type="image/png" href="/static/favicon.png">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>🔍 DNS Auto Lookup</h1>
+                <p class="subtitle">Real-time network diagnostic tool</p>
+            </div>
+            <nav class="header-nav">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/explorer" class="nav-link">DNS Explorer</a>
+                <a href="/api_docs" class="nav-link">API Docs</a>
+            </nav>
+        </header>
+
+        <main>
+            <!-- IP Address Detection -->
+            <section class="info-card">
+                <div class="card-header">
+                    <h2>📡 Your IP Address</h2>
+                    <span class="status-badge" id="ip-status">detecting...</span>
+                </div>
+                <div class="card-body">
+                    <div class="result-display">
+                        <div class="result-item">
+                            <label>IPv4 Address:</label>
+                            <div class="result-value" id="ipv4-result">
+                                <span class="loading-spinner"></span>
+                            </div>
+                            <button class="copy-btn" onclick="copyToClipboard('ipv4-result')" style="display:none" id="ipv4-copy">
+                                📋 Copy
+                            </button>
+                        </div>
+                        <div class="result-item">
+                            <label>IPv6 Address:</label>
+                            <div class="result-value" id="ipv6-result">
+                                <span class="loading-spinner"></span>
+                            </div>
+                            <button class="copy-btn" onclick="copyToClipboard('ipv6-result')" style="display:none" id="ipv6-copy">
+                                📋 Copy
+                            </button>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        <p><strong>What is this?</strong> Your public IP address as seen by the internet. This is how websites and services identify your connection.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DNS Resolver Detection -->
+            <section class="info-card">
+                <div class="card-header">
+                    <h2>🌐 DNS Resolver</h2>
+                    <span class="status-badge" id="resolver-status">detecting...</span>
+                </div>
+                <div class="card-body">
+                    <div class="result-display">
+                        <div class="result-item">
+                            <label>Resolver Provider:</label>
+                            <div class="result-value" id="resolver-provider">
+                                <span class="loading-spinner"></span>
+                            </div>
+                        </div>
+                        <div class="result-item">
+                            <label>Resolver IP:</label>
+                            <div class="result-value" id="resolver-ip">
+                                <span class="loading-spinner"></span>
+                            </div>
+                            <button class="copy-btn" onclick="copyToClipboard('resolver-ip')" style="display:none" id="resolver-copy">
+                                📋 Copy
+                            </button>
+                        </div>
+                        <div class="result-item">
+                            <label>Response Time:</label>
+                            <div class="result-value" id="resolver-speed">
+                                <span class="loading-spinner"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        <p><strong>What is this?</strong> The DNS resolver your browser uses to convert domain names to IP addresses. Common resolvers include Google (8.8.8.8), Cloudflare (1.1.1.1), and your ISP's DNS.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- EDNS Client Subnet -->
+            <section class="info-card">
+                <div class="card-header">
+                    <h2>🔐 EDNS Client Subnet (ECS)</h2>
+                    <span class="status-badge" id="edns-status">detecting...</span>
+                </div>
+                <div class="card-body">
+                    <div class="result-display">
+                        <div class="result-item">
+                            <label>ECS Enabled:</label>
+                            <div class="result-value" id="edns-enabled">
+                                <span class="loading-spinner"></span>
+                            </div>
+                        </div>
+                        <div class="result-item">
+                            <label>Your Subnet:</label>
+                            <div class="result-value" id="edns-subnet">
+                                <span class="loading-spinner"></span>
+                            </div>
+                            <button class="copy-btn" onclick="copyToClipboard('edns-subnet')" style="display:none" id="edns-copy">
+                                📋 Copy
+                            </button>
+                        </div>
+                        <div class="result-item">
+                            <label>Privacy Impact:</label>
+                            <div class="result-value" id="edns-privacy">
+                                <span class="loading-spinner"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        <p><strong>What is this?</strong> <a href="https://en.wikipedia.org/wiki/EDNS_Client_Subnet" target="_blank" rel="noopener">EDNS Client Subnet</a> allows DNS resolvers to send part of your IP address to authoritative nameservers for geo-location purposes. This can improve CDN performance but may reduce privacy.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DNS Security Assessment -->
+            <section class="info-card">
+                <div class="card-header">
+                    <h2>🛡️ DNS Security</h2>
+                    <span class="status-badge" id="security-status">analyzing...</span>
+                </div>
+                <div class="card-body">
+                    <div class="result-display">
+                        <div class="result-item">
+                            <label>DNSSEC Validation:</label>
+                            <div class="result-value" id="security-dnssec">
+                                <span class="loading-spinner"></span>
+                            </div>
+                        </div>
+                        <div class="result-item">
+                            <label>DNS-over-HTTPS (DoH):</label>
+                            <div class="result-value" id="security-doh">
+                                <span class="loading-spinner"></span>
+                            </div>
+                        </div>
+                        <div class="result-item">
+                            <label>DNS-over-TLS (DoT):</label>
+                            <div class="result-value" id="security-dot">
+                                <span class="loading-spinner"></span>
+                            </div>
+                        </div>
+                        <div class="result-item">
+                            <label>Overall Security Score:</label>
+                            <div class="result-value" id="security-score">
+                                <span class="loading-spinner"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        <p><strong>What is this?</strong> An assessment of your DNS security configuration. DNSSEC validates DNS responses, while DoH and DoT encrypt DNS queries to prevent eavesdropping and tampering.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Advanced Information -->
+            <section class="info-card advanced-section" style="display:none" id="advanced-info">
+                <div class="card-header">
+                    <h2>📊 Advanced Details</h2>
+                </div>
+                <div class="card-body">
+                    <div class="result-display">
+                        <div class="result-item">
+                            <label>DNS Leak Status:</label>
+                            <div class="result-value" id="advanced-leak">N/A</div>
+                        </div>
+                        <div class="result-item">
+                            <label>Resolver Country:</label>
+                            <div class="result-value" id="advanced-country">N/A</div>
+                        </div>
+                        <div class="result-item">
+                            <label>Query Count:</label>
+                            <div class="result-value" id="advanced-queries">0</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>About This Tool</h3>
+                    <p>DNS Auto Lookup automatically detects your network configuration and DNS settings in real-time. No input required.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Features</h3>
+                    <ul>
+                        <li>Instant IP detection (IPv4 & IPv6)</li>
+                        <li>DNS resolver identification</li>
+                        <li>EDNS Client Subnet analysis</li>
+                        <li>Security configuration assessment</li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Tools</h3>
+                    <ul>
+                        <li><a href="/">DNS Lookup</a></li>
+                        <li><a href="/explorer">DNS Explorer</a></li>
+                        <li><a href="/autolookup">Auto Lookup</a></li>
+                        <li><a href="/api_docs">API Documentation</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 DNS Science. Real-time DNS diagnostics and network analysis.</p>
+                <p class="query-counter">Queries performed: <span id="query-counter">0</span></p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="/static/js/autolookup.js"></script>
+</body>
+</html>

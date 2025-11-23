@@ -1,0 +1,11 @@
+Lets write low level analysis suite that consists of:
+
+dnsscienced -> connects to dnsscience
+dnsscience_collectd -> collects DNS query data 
+dnsscience_checkd -> Checks known records and results
+dnscience_check_unbound_cache -> Check unbound cache
+
+All of these should work together with our current monitoring tooling.
+
+https://www.dnsscience.io/docs/cli -
+https://www.dnsscience.io/docs/api 

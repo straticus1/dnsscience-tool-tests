@@ -446,6 +446,230 @@ class DNSScienceAPI:
             self.logger.error(f"Web3 domain lookup failed: {e}")
             raise Exception(f"Web3 domain lookup failed: {str(e)}")
 
+    # Phase 2 Features
+    def dns_propagation(self, domain: str, record_type: str = 'A') -> Dict:
+        """Check DNS propagation across global resolvers"""
+        self.logger.info(f"Checking DNS propagation for: {domain}")
+        try:
+            response = self.session.post(
+                f"{self.API_BASE_URL}/dns-propagation",
+                json={'domain': domain, 'record_type': record_type},
+                timeout=30
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"DNS propagation check failed: {e}")
+            raise Exception(f"DNS propagation check failed: {str(e)}")
+
+    def incident_triage(self, domain: str) -> Dict:
+        """Comprehensive domain triage for SOC teams"""
+        self.logger.info(f"Performing incident triage for: {domain}")
+        try:
+            response = self.session.post(
+                f"{self.API_BASE_URL}/incident-triage",
+                json={'domain': domain},
+                timeout=30
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"Incident triage failed: {e}")
+            raise Exception(f"Incident triage failed: {str(e)}")
+
+    def bulk_dns(self, domains: List[str], operation: str = 'health') -> Dict:
+        """Process bulk DNS operations"""
+        self.logger.info(f"Processing bulk DNS for {len(domains)} domains")
+        try:
+            response = self.session.post(
+                f"{self.API_BASE_URL}/bulk-dns?operation={operation}",
+                json={'domains': domains},
+                timeout=60
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"Bulk DNS operation failed: {e}")
+            raise Exception(f"Bulk DNS operation failed: {str(e)}")
+
+    def dns_drift_snapshot(self, domain: str) -> Dict:
+        """Take a DNS snapshot for drift detection"""
+        self.logger.info(f"Taking DNS snapshot for: {domain}")
+        try:
+            response = self.session.post(
+                f"{self.API_BASE_URL}/dns-drift/snapshot",
+                json={'domain': domain},
+                timeout=15
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"DNS drift snapshot failed: {e}")
+            raise Exception(f"DNS drift snapshot failed: {str(e)}")
+
+    def subdomain_enum(self, domain: str, techniques: List[str] = None) -> Dict:
+        """Enumerate subdomains using multiple techniques"""
+        if techniques is None:
+            techniques = ['dns', 'crt']
+        self.logger.info(f"Enumerating subdomains for: {domain}")
+        try:
+            response = self.session.post(
+                f"{self.API_BASE_URL}/subdomain-enum",
+                json={'domain': domain, 'techniques': techniques},
+                timeout=60
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"Subdomain enumeration failed: {e}")
+            raise Exception(f"Subdomain enumeration failed: {str(e)}")
+
+    # Phase 3 Features
+    def zone_analyze(self, content: str, origin: str = None) -> Dict:
+        """Analyze a DNS zone file"""
+        self.logger.info("Analyzing zone file")
+        try:
+            response = self.session.post(
+                f"{self.API_BASE_URL}/zone/analyze",
+                json={'content': content, 'origin': origin},
+                timeout=30
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"Zone analysis failed: {e}")
+            raise Exception(f"Zone analysis failed: {str(e)}")
+
+    def dnssec_chain(self, domain: str) -> Dict:
+        """Validate DNSSEC chain of trust"""
+        self.logger.info(f"Validating DNSSEC chain for: {domain}")
+        try:
+            response = self.session.get(
+                f"{self.API_BASE_URL}/dnssec/chain/{domain}",
+                timeout=30
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"DNSSEC chain validation failed: {e}")
+            raise Exception(f"DNSSEC chain validation failed: {str(e)}")
+
+    def domain_timeline(self, domain: str, days: int = 90) -> Dict:
+        """Get domain intelligence timeline"""
+        self.logger.info(f"Getting timeline for: {domain}")
+        try:
+            response = self.session.get(
+                f"{self.API_BASE_URL}/domain/{domain}/timeline",
+                params={'days': days},
+                timeout=30
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"Domain timeline failed: {e}")
+            raise Exception(f"Domain timeline failed: {str(e)}")
+
+    def threat_hunting_search(self, query: str, filters: Dict = None) -> Dict:
+        """Search for threats across domains and IPs"""
+        self.logger.info(f"Searching threats for: {query}")
+        try:
+            response = self.session.post(
+                f"{self.API_BASE_URL}/threat-hunting/search",
+                json={'query': query, 'filters': filters or {}},
+                timeout=30
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"Threat hunting search failed: {e}")
+            raise Exception(f"Threat hunting search failed: {str(e)}")
+
+    def get_iocs(self) -> Dict:
+        """Get recent indicators of compromise"""
+        self.logger.info("Getting IOCs")
+        try:
+            response = self.session.get(
+                f"{self.API_BASE_URL}/threat-hunting/iocs",
+                timeout=30
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"Get IOCs failed: {e}")
+            raise Exception(f"Get IOCs failed: {str(e)}")
+
+    def brand_scan(self, brand_name: str) -> Dict:
+        """Scan for brand impersonation domains"""
+        self.logger.info(f"Scanning for brand impersonation: {brand_name}")
+        try:
+            response = self.session.post(
+                f"{self.API_BASE_URL}/brand/scan/{brand_name}",
+                timeout=60
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"Brand scan failed: {e}")
+            raise Exception(f"Brand scan failed: {str(e)}")
+
+    def compliance_report(self, domains: List[str], report_type: str = 'dns_security') -> Dict:
+        """Generate a compliance report"""
+        self.logger.info(f"Generating compliance report for {len(domains)} domains")
+        try:
+            response = self.session.post(
+                f"{self.API_BASE_URL}/compliance/report",
+                json={'domains': domains, 'type': report_type},
+                timeout=60
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"Compliance report failed: {e}")
+            raise Exception(f"Compliance report failed: {str(e)}")
+
+    def get_playbooks(self) -> Dict:
+        """Get available incident response playbooks"""
+        self.logger.info("Getting playbooks")
+        try:
+            response = self.session.get(
+                f"{self.API_BASE_URL}/playbooks",
+                timeout=15
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"Get playbooks failed: {e}")
+            raise Exception(f"Get playbooks failed: {str(e)}")
+
+    def execute_playbook(self, playbook_id: str, domain: str) -> Dict:
+        """Execute automated steps of a playbook"""
+        self.logger.info(f"Executing playbook {playbook_id} for: {domain}")
+        try:
+            response = self.session.post(
+                f"{self.API_BASE_URL}/playbooks/{playbook_id}/execute",
+                json={'domain': domain},
+                timeout=60
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"Playbook execution failed: {e}")
+            raise Exception(f"Playbook execution failed: {str(e)}")
+
+    def get_glossary(self) -> Dict:
+        """Get DNS glossary terms"""
+        self.logger.info("Getting glossary")
+        try:
+            response = self.session.get(
+                f"{self.API_BASE_URL}/glossary",
+                timeout=15
+            )
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"Get glossary failed: {e}")
+            raise Exception(f"Get glossary failed: {str(e)}")
+
     def test_connection(self) -> bool:
         """Test API connection and authentication"""
         try:
@@ -1519,6 +1743,202 @@ class ZoneTransfer:
             raise Exception(f"AXFR failed: {str(e)}")
 
 
+def handle_ip_scan(ip_address: str, api_url: str, output_format: str, force: bool, advanced: bool = False) -> int:
+    """Handle IP scan command"""
+    url = f"{api_url}/api/ip/{ip_address}/scan"
+    params = {}
+    if force:
+        params['force_refresh'] = 'true'
+    if advanced:
+        params['advanced'] = 'true'
+
+    try:
+        response = requests.get(url, params=params, timeout=30)
+        data = response.json()
+
+        if output_format == 'json':
+            print(json.dumps(data, indent=2))
+        elif output_format == 'table':
+            scan_mode = data.get('scan_mode', 'standard')
+            print(f"\n{Colors.BOLD}IP Intelligence Report: {ip_address}")
+            if scan_mode == 'advanced':
+                print(f" {Colors.CYAN}[ADVANCED MODE]{Colors.END}")
+            print(f"{Colors.END}\n" + "=" * 70)
+
+            # Show advanced features status if advanced mode
+            if scan_mode == 'advanced' and 'advanced_features' in data:
+                features = data['advanced_features']
+                print(f"\n{Colors.HEADER}🔬 Advanced Features:{Colors.END}")
+                print(f"  Cloudflare API:        {'✓' if features.get('cloudflare_enabled') else '✗'}")
+                print(f"  IPInfo Privacy:        {'✓' if features.get('ipinfo_privacy_detection') else '✗'}")
+                print(f"  AbuseIPDB Intel:       {'✓' if features.get('abuseipdb_threat_intel') else '✗'}")
+                print(f"  BGP Analysis:          {'✓' if features.get('bgp_analysis') else '✗'}")
+                print(f"  Comprehensive RBL:     {'✓' if features.get('rbl_comprehensive') else '✗'}")
+
+            # Geolocation
+            geo = data.get('geolocation', {})
+            if geo:
+                print(f"\n{Colors.HEADER}📍 Geolocation:{Colors.END}")
+                print(f"  Country: {geo.get('country', 'N/A')}")
+                print(f"  Region:  {geo.get('region', 'N/A')}")
+                print(f"  City:    {geo.get('city', 'N/A')}")
+                coords = geo.get('coordinates', {})
+                if coords:
+                    print(f"  Coords:  {coords.get('latitude')}, {coords.get('longitude')}")
+
+            # Network
+            net = data.get('network', {})
+            if net:
+                print(f"\n{Colors.HEADER}🌐 Network:{Colors.END}")
+                print(f"  ASN:          AS{net.get('asn', 'N/A')}")
+                print(f"  AS Name:      {net.get('asn_name', 'N/A')}")
+                print(f"  Organization: {net.get('organization', 'N/A')}")
+                print(f"  ISP:          {net.get('isp', 'N/A')}")
+
+                # Privacy detection (advanced feature)
+                if net.get('is_vpn') is not None:
+                    print(f"\n{Colors.HEADER}🔒 Privacy Detection:{Colors.END}")
+                    print(f"  VPN:        {Colors.YELLOW if net.get('is_vpn') else Colors.GREEN}{'Yes' if net.get('is_vpn') else 'No'}{Colors.END}")
+                    print(f"  Proxy:      {Colors.YELLOW if net.get('is_proxy') else Colors.GREEN}{'Yes' if net.get('is_proxy') else 'No'}{Colors.END}")
+                    print(f"  Tor:        {Colors.RED if net.get('is_tor') else Colors.GREEN}{'Yes' if net.get('is_tor') else 'No'}{Colors.END}")
+                    print(f"  Hosting:    {Colors.YELLOW if net.get('is_hosting') else Colors.GREEN}{'Yes' if net.get('is_hosting') else 'No'}{Colors.END}")
+
+            # BGP
+            bgp = data.get('bgp', {})
+            if bgp:
+                print(f"\n{Colors.HEADER}🔀 BGP Routing:{Colors.END}")
+                print(f"  Prefix:     {bgp.get('prefix', 'N/A')}")
+                print(f"  Origin ASN: AS{bgp.get('origin_asn', 'N/A')}")
+                print(f"  Announced:  {bgp.get('is_announced', 'N/A')}")
+
+            # Reputation
+            rep = data.get('reputation', {})
+            if rep:
+                abuse_conf = rep.get('abuse_confidence', 0)
+                color = Colors.GREEN if abuse_conf < 25 else (Colors.YELLOW if abuse_conf < 75 else Colors.RED)
+
+                print(f"\n{Colors.HEADER}🛡️  Reputation:{Colors.END}")
+                print(f"  Abuse Confidence: {color}{abuse_conf}%{Colors.END}")
+                print(f"  Total Reports:    {rep.get('total_reports', 0)}")
+                print(f"  Whitelisted:      {rep.get('is_whitelisted', False)}")
+
+                bl = rep.get('blacklists', {})
+                if bl:
+                    hits = bl.get('hit_count', 0)
+                    bl_color = Colors.GREEN if hits == 0 else Colors.RED
+                    print(f"  Blacklist Hits:   {bl_color}{hits}{Colors.END}")
+
+            print("\n" + "=" * 70)
+        else:
+            # Text output
+            print(json.dumps(data, indent=2))
+
+    except Exception as e:
+        print(f"{Colors.RED}Error: {e}{Colors.END}")
+        return 1
+
+    return 0
+
+
+def handle_ip_reputation(ip_address: str, api_url: str) -> int:
+    """Handle IP reputation check"""
+    url = f"{api_url}/api/ip/{ip_address}/reputation"
+
+    try:
+        response = requests.get(url, timeout=10)
+        data = response.json()
+
+        abuse_conf = data.get('abuse_confidence', 0)
+        color = Colors.GREEN if abuse_conf < 25 else (Colors.YELLOW if abuse_conf < 75 else Colors.RED)
+
+        print(f"\nIP: {ip_address}")
+        print(f"Abuse Confidence: {color}{abuse_conf}%{Colors.END}")
+        print(f"Total Reports: {data.get('total_reports', 0)}")
+        print(f"Blacklist Hits: {data.get('rbl_hit_count', 0)}")
+        print(f"Whitelisted: {data.get('is_whitelisted', False)}")
+
+    except Exception as e:
+        print(f"{Colors.RED}Error: {e}{Colors.END}")
+        return 1
+
+    return 0
+
+
+def handle_ip_bgp(ip_address: str, api_url: str) -> int:
+    """Handle BGP routing lookup"""
+    url = f"{api_url}/api/ip/{ip_address}/bgp"
+
+    try:
+        response = requests.get(url, timeout=10)
+        data = response.json()
+        bgp = data.get('bgp', {})
+
+        print(f"\nBGP Routing for {ip_address}:")
+        print(f"  Prefix:     {bgp.get('prefix', 'N/A')}")
+        print(f"  Origin ASN: AS{bgp.get('origin_asn', 'N/A')}")
+        print(f"  AS Path:    {bgp.get('path', [])}")
+        print(f"  Announced:  {bgp.get('is_announced', 'N/A')}")
+        print(f"  RPKI:       {bgp.get('rpki_status', 'N/A')}")
+
+    except Exception as e:
+        print(f"{Colors.RED}Error: {e}{Colors.END}")
+        return 1
+
+    return 0
+
+
+def handle_ip_range(cidr: str, api_url: str, max_ips: int) -> int:
+    """Handle IP range scanning"""
+    url = f"{api_url}/api/ip/range"
+
+    try:
+        params = {
+            'cidr': cidr,
+            'max_ips': max_ips
+        }
+        response = requests.get(url, params=params, timeout=30)
+        data = response.json()
+
+        print(f"\nIP Range Scan: {cidr}")
+        print(f"Total IPs: {data.get('total_ips', 0)}")
+        print(f"Scanned: {data.get('scanned', 0)}")
+        print(json.dumps(data, indent=2))
+
+    except Exception as e:
+        print(f"{Colors.RED}Error: {e}{Colors.END}")
+        return 1
+
+    return 0
+
+
+def handle_ip_asn(asn: int, api_url: str) -> int:
+    """Handle ASN lookup"""
+    url = f"{api_url}/api/asn/{asn}"
+
+    try:
+        response = requests.get(url, timeout=10)
+        data = response.json()
+
+        print(f"\nASN Information: AS{asn}")
+        asn_data = data.get('asn', {})
+        print(f"  Name:         {asn_data.get('name', 'N/A')}")
+        print(f"  Description:  {asn_data.get('description', 'N/A')}")
+        print(f"  Country:      {asn_data.get('country', 'N/A')}")
+        print(f"  Prefixes:     {asn_data.get('prefix_count', 0)}")
+
+        prefixes = asn_data.get('prefixes', [])
+        if prefixes:
+            print(f"\n  IPv4 Prefixes:")
+            for prefix in prefixes[:10]:  # Show first 10
+                print(f"    - {prefix}")
+
+    except Exception as e:
+        print(f"{Colors.RED}Error: {e}{Colors.END}")
+        return 1
+
+    return 0
+
+
 class OutputFormatter:
     """Format DNS output in various styles"""
 
@@ -1727,6 +2147,15 @@ EXAMPLES:
     %(prog)s --whois example.com
     %(prog)s --web3 vitalik.eth
 
+  IP Intelligence:
+    %(prog)s --ip-scan 8.8.8.8
+    %(prog)s --ip-scan 1.1.1.1 --ip-advanced
+    %(prog)s --ip-scan 45.33.32.156 --ip-output json --ip-advanced
+    %(prog)s --ip-reputation 45.33.32.156
+    %(prog)s --ip-bgp 8.8.8.8
+    %(prog)s --ip-range 192.168.1.0/24
+    %(prog)s --ip-asn 15169
+
   Output Formats:
     %(prog)s example.com +json
     %(prog)s example.com +yaml
@@ -1828,6 +2257,22 @@ For more information, see: docs/EXAMPLES.md and docs/DNSSCIENCE-API.md
     config_group.add_argument('--log-level', default='INFO',
                              choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'],
                              help='Log level (default: INFO)')
+
+    # IP Intelligence commands
+    ip_group = parser.add_argument_group('IP Intelligence & Analysis')
+    ip_group.add_argument('--ip-scan', metavar='IP', help='Comprehensive IP scan')
+    ip_group.add_argument('--ip-reputation', metavar='IP', help='Check IP reputation')
+    ip_group.add_argument('--ip-bgp', metavar='IP', help='Get BGP routing info')
+    ip_group.add_argument('--ip-range', metavar='CIDR', help='Scan IP range (e.g., 192.168.1.0/24)')
+    ip_group.add_argument('--ip-asn', metavar='ASN', type=int, help='Lookup AS information')
+    ip_group.add_argument('--ip-api-url', default='https://www.dnsscience.io',
+                         help='DNS Science API URL for IP commands')
+    ip_group.add_argument('--ip-output', choices=['text', 'json', 'table'], default='table',
+                         help='Output format for IP commands')
+    ip_group.add_argument('--ip-force', action='store_true', help='Force fresh IP scan (bypass cache)')
+    ip_group.add_argument('--ip-advanced', action='store_true',
+                         help='Enable advanced mode (Cloudflare, privacy detection, enhanced analysis)')
+    ip_group.add_argument('--ip-max-ips', type=int, default=256, help='Maximum IPs to scan in range')
 
     # Version
     parser.add_argument('--version', action='version', version=f'%(prog)s {__version__}')
@@ -2131,6 +2576,28 @@ For more information, see: docs/EXAMPLES.md and docs/DNSSCIENCE-API.md
     except Exception as e:
         logger.error(str(e))
         print(f"{Colors.RED}; API Error: {e}{Colors.END}", file=sys.stderr)
+        sys.exit(1)
+
+    # IP Intelligence handlers
+    try:
+        if args.ip_scan:
+            sys.exit(handle_ip_scan(args.ip_scan, args.ip_api_url, args.ip_output, args.ip_force, args.ip_advanced))
+
+        if args.ip_reputation:
+            sys.exit(handle_ip_reputation(args.ip_reputation, args.ip_api_url))
+
+        if args.ip_bgp:
+            sys.exit(handle_ip_bgp(args.ip_bgp, args.ip_api_url))
+
+        if args.ip_range:
+            sys.exit(handle_ip_range(args.ip_range, args.ip_api_url, args.ip_max_ips))
+
+        if args.ip_asn:
+            sys.exit(handle_ip_asn(args.ip_asn, args.ip_api_url))
+
+    except Exception as e:
+        logger.error(str(e))
+        print(f"{Colors.RED}; IP Intelligence Error: {e}{Colors.END}", file=sys.stderr)
         sys.exit(1)
 
     # Validate arguments

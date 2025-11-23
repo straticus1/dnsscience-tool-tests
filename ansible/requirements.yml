@@ -1,0 +1,32 @@
+---
+# Ansible Galaxy Requirements
+
+collections:
+  # AWS Collection for EC2, SSM, S3, etc.
+  - name: amazon.aws
+    version: ">=6.5.0"
+
+  # Community AWS Collection
+  - name: community.aws
+    version: ">=6.3.0"
+
+  # PostgreSQL Collection
+  - name: community.postgresql
+    version: ">=3.2.0"
+
+  # General Community Collection
+  - name: community.general
+    version: ">=7.5.0"
+
+  # POSIX Collection
+  - name: ansible.posix
+    version: ">=1.5.4"
+
+  # Windows Collection (if needed for future)
+  - name: ansible.windows
+    version: ">=1.14.0"
+
+roles:
+  # Add any Galaxy roles here if needed
+  # - name: geerlingguy.apache
+  #   version: "3.2.0"

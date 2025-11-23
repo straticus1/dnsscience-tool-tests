@@ -1,0 +1,160 @@
+{
+  "root_servers": [
+    {
+      "name": "A-Root",
+      "letter": "A",
+      "operator": "VeriSign, Inc.",
+      "ip_v4": "198.41.0.4",
+      "ip_v6": "2001:503:ba3e::2:30",
+      "primary_location": "Dulles, VA, USA",
+      "lat": 38.9445,
+      "lon": -77.4558,
+      "anycast": true,
+      "sites": 5
+    },
+    {
+      "name": "B-Root",
+      "letter": "B",
+      "operator": "USC-ISI",
+      "ip_v4": "199.9.14.201",
+      "ip_v6": "2001:500:200::b",
+      "primary_location": "Marina del Rey, CA, USA",
+      "lat": 33.9806,
+      "lon": -118.4517,
+      "anycast": true,
+      "sites": 7
+    },
+    {
+      "name": "C-Root",
+      "letter": "C",
+      "operator": "Cogent Communications",
+      "ip_v4": "192.33.4.12",
+      "ip_v6": "2001:500:2::c",
+      "primary_location": "Herndon, VA, USA",
+      "lat": 38.9697,
+      "lon": -77.3859,
+      "anycast": true,
+      "sites": 8
+    },
+    {
+      "name": "D-Root",
+      "letter": "D",
+      "operator": "University of Maryland",
+      "ip_v4": "199.7.91.13",
+      "ip_v6": "2001:500:2d::d",
+      "primary_location": "College Park, MD, USA",
+      "lat": 38.9807,
+      "lon": -76.9369,
+      "anycast": true,
+      "sites": 4
+    },
+    {
+      "name": "E-Root",
+      "letter": "E",
+      "operator": "NASA Ames Research Center",
+      "ip_v4": "192.203.230.10",
+      "ip_v6": "2001:500:a8::e",
+      "primary_location": "Mountain View, CA, USA",
+      "lat": 37.4419,
+      "lon": -122.0768,
+      "anycast": true,
+      "sites": 12
+    },
+    {
+      "name": "F-Root",
+      "letter": "F",
+      "operator": "Internet Systems Consortium (ISC)",
+      "ip_v4": "192.5.5.241",
+      "ip_v6": "2001:500:2f::f",
+      "primary_location": "Palo Alto, CA, USA",
+      "lat": 37.4419,
+      "lon": -122.1430,
+      "anycast": true,
+      "sites": 85
+    },
+    {
+      "name": "G-Root",
+      "letter": "G",
+      "operator": "U.S. DOD Network Information Center",
+      "ip_v4": "192.112.36.4",
+      "ip_v6": "2001:500:12::d0d",
+      "primary_location": "Columbus, OH, USA",
+      "lat": 39.9612,
+      "lon": -82.9988,
+      "anycast": true,
+      "sites": 6
+    },
+    {
+      "name": "H-Root",
+      "letter": "H",
+      "operator": "U.S. Army Research Lab",
+      "ip_v4": "198.97.190.53",
+      "ip_v6": "2001:500:1::53",
+      "primary_location": "Aberdeen, MD, USA",
+      "lat": 39.5095,
+      "lon": -76.1644,
+      "anycast": true,
+      "sites": 2
+    },
+    {
+      "name": "I-Root",
+      "letter": "I",
+      "operator": "Netnod (Autonomica)",
+      "ip_v4": "192.36.148.17",
+      "ip_v6": "2001:7fe::53",
+      "primary_location": "Stockholm, Sweden",
+      "lat": 59.3293,
+      "lon": 18.0686,
+      "anycast": true,
+      "sites": 65
+    },
+    {
+      "name": "J-Root",
+      "letter": "J",
+      "operator": "VeriSign, Inc.",
+      "ip_v4": "192.58.128.30",
+      "ip_v6": "2001:503:c27::2:30",
+      "primary_location": "Dulles, VA, USA",
+      "lat": 38.9445,
+      "lon": -77.4558,
+      "anycast": true,
+      "sites": 127
+    },
+    {
+      "name": "K-Root",
+      "letter": "K",
+      "operator": "RIPE NCC",
+      "ip_v4": "193.0.14.129",
+      "ip_v6": "2001:7fd::1",
+      "primary_location": "Amsterdam, Netherlands",
+      "lat": 52.3676,
+      "lon": 4.9041,
+      "anycast": true,
+      "sites": 69
+    },
+    {
+      "name": "L-Root",
+      "letter": "L",
+      "operator": "ICANN",
+      "ip_v4": "199.7.83.42",
+      "ip_v6": "2001:500:9f::42",
+      "primary_location": "Los Angeles, CA, USA",
+      "lat": 34.0522,
+      "lon": -118.2437,
+      "anycast": true,
+      "sites": 167
+    },
+    {
+      "name": "M-Root",
+      "letter": "M",
+      "operator": "WIDE Project",
+      "ip_v4": "202.12.27.33",
+      "ip_v6": "2001:dc3::35",
+      "primary_location": "Tokyo, Japan",
+      "lat": 35.6762,
+      "lon": 139.6503,
+      "anycast": true,
+      "sites": 8
+    }
+  ]
+}

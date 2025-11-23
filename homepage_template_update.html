@@ -1,0 +1,445 @@
+<!--
+DNS Science - Homepage Template Update
+Add this section to /var/www/dnsscience/templates/index.php or index.html
+
+This displays comprehensive email security statistics with no "Loading..." states
+Includes: DMARC, SPF, DKIM, DANE, MTA-STS
+-->
+
+<!-- Email Security Statistics Section -->
+<section class="email-security-stats">
+    <div class="container">
+        <h2>Email Security Coverage</h2>
+        <p class="subtitle">Real-time monitoring of email authentication and security protocols</p>
+
+        <div class="stats-grid">
+            <!-- DMARC -->
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="dmarc-count">
+                        <span class="loading-spinner">Loading...</span>
+                    </div>
+                    <div class="stat-label">DMARC Records</div>
+                    <div class="stat-percentage" id="dmarc-pct">--%</div>
+                    <div class="stat-description">
+                        Domain-based Message Authentication, Reporting & Conformance
+                    </div>
+                </div>
+            </div>
+
+            <!-- SPF -->
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-envelope-open-text"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="spf-count">
+                        <span class="loading-spinner">Loading...</span>
+                    </div>
+                    <div class="stat-label">SPF Records</div>
+                    <div class="stat-percentage" id="spf-pct">--%</div>
+                    <div class="stat-description">
+                        Sender Policy Framework - Authorized sender verification
+                    </div>
+                </div>
+            </div>
+
+            <!-- DKIM -->
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-key"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="dkim-count">
+                        <span class="loading-spinner">Loading...</span>
+                    </div>
+                    <div class="stat-label">DKIM Configured</div>
+                    <div class="stat-percentage" id="dkim-pct">--%</div>
+                    <div class="stat-description">
+                        DomainKeys Identified Mail - Cryptographic authentication
+                    </div>
+                </div>
+            </div>
+
+            <!-- DANE/TLSA (NEW) -->
+            <div class="stat-card stat-card-new">
+                <div class="stat-icon">
+                    <i class="fas fa-certificate"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="dane-count">
+                        <span class="loading-spinner">Loading...</span>
+                    </div>
+                    <div class="stat-label">DANE/TLSA Records</div>
+                    <div class="stat-percentage" id="dane-pct">--%</div>
+                    <div class="stat-description">
+                        DNS-based Authentication of Named Entities
+                    </div>
+                    <div class="stat-badge">NEW</div>
+                </div>
+            </div>
+
+            <!-- MTA-STS (NEW) -->
+            <div class="stat-card stat-card-new">
+                <div class="stat-icon">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="mta-sts-count">
+                        <span class="loading-spinner">Loading...</span>
+                    </div>
+                    <div class="stat-label">MTA-STS Policies</div>
+                    <div class="stat-percentage" id="mta-sts-pct">--%</div>
+                    <div class="stat-description">
+                        Mail Transfer Agent Strict Transport Security
+                    </div>
+                    <div class="stat-badge">NEW</div>
+                </div>
+            </div>
+
+            <!-- Total Checked -->
+            <div class="stat-card stat-card-summary">
+                <div class="stat-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-number" id="email-total-count">
+                        <span class="loading-spinner">Loading...</span>
+                    </div>
+                    <div class="stat-label">Domains Analyzed</div>
+                    <div class="stat-description">
+                        Total domains with email security scanned
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Additional Stats Section (if not already present) -->
+<section class="global-stats">
+    <div class="container">
+        <div class="stats-row">
+            <div class="stat-item">
+                <h3 id="total-domains">Loading...</h3>
+                <p>Active Domains</p>
+            </div>
+            <div class="stat-item">
+                <h3 id="domains-today">Loading...</h3>
+                <p>Added Today</p>
+            </div>
+            <div class="stat-item">
+                <h3 id="ssl-total">Loading...</h3>
+                <p>SSL Certificates</p>
+            </div>
+            <div class="stat-item">
+                <h3 id="market-valuation">Loading...</h3>
+                <p>Total Market Value</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- JavaScript to Load Stats -->
+<script>
+// Configuration
+const STATS_REFRESH_INTERVAL = 30000; // 30 seconds
+const STATS_ENDPOINT = '/api/stats/live';
+
+// Format numbers with commas
+function formatNumber(num) {
+    if (num === null || num === undefined || isNaN(num)) {
+        return 'N/A';
+    }
+    return parseInt(num).toLocaleString();
+}
+
+// Format currency
+function formatCurrency(num) {
+    if (num === null || num === undefined || isNaN(num)) {
+        return '$0';
+    }
+    return '$' + parseFloat(num).toLocaleString(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    });
+}
+
+// Update all statistics on page
+function updateStats(data) {
+    console.log('Updating stats:', data);
+
+    // Global stats
+    document.getElementById('total-domains').textContent = formatNumber(data.total_domains);
+    document.getElementById('domains-today').textContent = formatNumber(data.domains_today);
+
+    // Email security stats
+    if (data.email_security) {
+        const email = data.email_security;
+
+        // Total
+        document.getElementById('email-total-count').textContent = formatNumber(email.total);
+
+        // DMARC
+        document.getElementById('dmarc-count').textContent = formatNumber(email.dmarc);
+        document.getElementById('dmarc-pct').textContent = email.dmarc_pct.toFixed(1) + '%';
+
+        // SPF
+        document.getElementById('spf-count').textContent = formatNumber(email.spf);
+        document.getElementById('spf-pct').textContent = email.spf_pct.toFixed(1) + '%';
+
+        // DKIM
+        document.getElementById('dkim-count').textContent = formatNumber(email.dkim);
+        document.getElementById('dkim-pct').textContent = email.dkim_pct.toFixed(1) + '%';
+
+        // DANE (NEW)
+        document.getElementById('dane-count').textContent = formatNumber(email.dane);
+        document.getElementById('dane-pct').textContent = email.dane_pct.toFixed(1) + '%';
+
+        // MTA-STS (NEW)
+        document.getElementById('mta-sts-count').textContent = formatNumber(email.mta_sts);
+        document.getElementById('mta-sts-pct').textContent = email.mta_sts_pct.toFixed(1) + '%';
+    }
+
+    // SSL stats
+    if (data.ssl_certificates) {
+        document.getElementById('ssl-total').textContent = formatNumber(data.ssl_certificates.total);
+    }
+
+    // Valuation stats
+    if (data.valuations) {
+        document.getElementById('market-valuation').textContent = formatCurrency(data.valuations.total_value);
+    }
+
+    // Add data source indicator
+    if (data.source) {
+        console.log('Stats source:', data.source);
+    }
+}
+
+// Show error state (instead of "Loading...")
+function showErrorState() {
+    console.error('Failed to load statistics');
+
+    // Replace all "Loading..." with "N/A"
+    document.querySelectorAll('.stat-number .loading-spinner').forEach(el => {
+        el.parentElement.textContent = 'N/A';
+    });
+
+    document.querySelectorAll('.stat-percentage').forEach(el => {
+        if (el.textContent === '--%') {
+            el.textContent = '0%';
+        }
+    });
+}
+
+// Load statistics from API
+async function loadStats() {
+    try {
+        const response = await fetch(STATS_ENDPOINT, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            cache: 'no-cache'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        updateStats(data);
+
+    } catch (error) {
+        console.error('Error loading stats:', error);
+
+        // Try fallback to SQL endpoint after 2 second delay
+        setTimeout(async () => {
+            try {
+                console.log('Trying SQL fallback endpoint...');
+                const fallbackResponse = await fetch('/api/stats/sql');
+                if (fallbackResponse.ok) {
+                    const fallbackData = await fallbackResponse.json();
+                    updateStats(fallbackData);
+                } else {
+                    showErrorState();
+                }
+            } catch (fallbackError) {
+                console.error('Fallback also failed:', fallbackError);
+                showErrorState();
+            }
+        }, 2000);
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Loading statistics...');
+    loadStats();
+
+    // Refresh stats periodically
+    setInterval(loadStats, STATS_REFRESH_INTERVAL);
+});
+
+// Refresh on visibility change (when user returns to tab)
+document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+        console.log('Tab visible, refreshing stats...');
+        loadStats();
+    }
+});
+</script>
+
+<!-- CSS Styles -->
+<style>
+.email-security-stats {
+    padding: 60px 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.email-security-stats h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.email-security-stats .subtitle {
+    text-align: center;
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 40px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.stat-card-new {
+    border: 2px solid #ffd700;
+}
+
+.stat-card-summary {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    opacity: 0.9;
+}
+
+.stat-number {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.stat-percentage {
+    font-size: 1.5rem;
+    opacity: 0.8;
+    margin-bottom: 10px;
+}
+
+.stat-description {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    line-height: 1.4;
+}
+
+.stat-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #ffd700;
+    color: #333;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.loading-spinner {
+    display: inline-block;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.global-stats {
+    padding: 40px 0;
+    background: #f8f9fa;
+}
+
+.stats-row {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 20px;
+    min-width: 200px;
+}
+
+.stat-item h3 {
+    font-size: 2.5rem;
+    color: #667eea;
+    margin-bottom: 10px;
+}
+
+.stat-item p {
+    font-size: 1rem;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+    }
+
+    .email-security-stats h2 {
+        font-size: 2rem;
+    }
+}
+</style>

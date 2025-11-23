@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - DNS Science</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 50px;
+            padding: 10px 15px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        body.dark-mode .theme-toggle { background: #2d2d2d; }
+        .theme-toggle .sun { font-size: 20px; }
+        .theme-toggle .moon { font-size: 20px; display: none; }
+        body.dark-mode .theme-toggle .sun { display: none; }
+        body.dark-mode .theme-toggle .moon { display: block; }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        body.dark-mode header { background: #2d2d2d; color: #e0e0e0; }
+
+        h1 { 
+            color: #667eea; 
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        body.dark-mode h1 { color: #8b9cff; }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        body.dark-mode .subtitle { color: #b0b0b0; }
+
+        .nav-bar {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .nav-button {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .nav-button:hover { background: #5568d3; }
+        .nav-button.secondary { background: #f0f0f0; color: #333; }
+        body.dark-mode .nav-button.secondary { background: #444; color: #e0e0e0; }
+
+        .content {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        body.dark-mode .content { background: #2d2d2d; color: #e0e0e0; }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        body.dark-mode .section h2 { 
+            color: #8b9cff;
+            border-bottom-color: #8b9cff;
+        }
+
+        .section h3 {
+            color: #764ba2;
+            font-size: 1.5em;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        body.dark-mode .section h3 { color: #a78bff; }
+
+        .section p {
+            margin-bottom: 15px;
+            font-size: 1.05em;
+        }
+
+        .section ul {
+            margin-left: 25px;
+            margin-bottom: 15px;
+        }
+
+        .section li {
+            margin-bottom: 10px;
+            font-size: 1.05em;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 30px 0;
+        }
+
+        .highlight-box h3 {
+            color: white;
+            margin-top: 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        body.dark-mode .stat-card { background: #1a1a1a; }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        body.dark-mode .stat-number { color: #8b9cff; }
+
+        .stat-label {
+            color: #666;
+            margin-top: 10px;
+        }
+
+        body.dark-mode .stat-label { color: #b0b0b0; }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        body.dark-mode .feature-item { background: #1a1a1a; }
+
+        .feature-item h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        body.dark-mode .feature-item h4 { color: #8b9cff; }
+    </style>
+</head>
+<body>
+    <div id="themeToggle" class="theme-toggle">
+        <span class="sun">☀️</span>
+        <span class="moon">🌙</span>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>🔬 About DNS Science</h1>
+            <p class="subtitle">Global DNS and SSL Infrastructure Monitoring at Internet Scale</p>
+            <div class="nav-bar">
+                <a href="/" class="nav-button secondary">← Home</a>
+                <a href="/explorer" class="nav-button secondary">Data Explorer</a>
+                <a href="/docs/api" class="nav-button secondary">API Docs</a>
+                <a href="/docs/cli" class="nav-button secondary">CLI Docs</a>
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- What is DNS Science -->
+            <div class="section">
+                <h2>🌍 What is DNS Science?</h2>
+                <p>
+                    DNS Science is a comprehensive global DNS and SSL infrastructure monitoring framework designed to provide 
+                    unprecedented visibility into the Internet's critical infrastructure. We continuously ingest, analyze, and 
+                    monitor DNS, SSL/TLS, CAA records, SMTP security configurations, and certificate data across the entire Internet.
+                </p>
+                
+                <div class="highlight-box">
+                    <h3>Our Mission</h3>
+                    <p>
+                        To provide security professionals, system administrators, and organizations with real-time intelligence 
+                        about their DNS and SSL infrastructure, enabling them to detect anomalies, prevent security incidents, 
+                        and maintain optimal configurations.
+                    </p>
+                </div>
+
+                <h3>What We Monitor</h3>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>🔐 DNS Security</h4>
+                        <p>DNSSEC validation, DNS drift detection, cache poisoning indicators, and propagation delays across global resolvers</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>📧 Email Security</h4>
+                        <p>SPF, DKIM, DMARC, BIMI, and MTA-STS configurations with real-time validation and compliance checking</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🔒 SSL/TLS Infrastructure</h4>
+                        <p>Certificate chain validation, expiration monitoring, revocation status, and cipher suite analysis</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>📊 Configuration Drift</h4>
+                        <p>Historical tracking of NS records, A/AAAA records, MX records, and all DNS configuration changes</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🌐 Global Coverage</h4>
+                        <p>Monitoring from multiple vantage points worldwide to detect regional anomalies and propagation issues</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🚨 Threat Intelligence</h4>
+                        <p>Integration with 20+ threat intelligence feeds to identify malicious domains and compromised infrastructure</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Infrastructure -->
+            <div class="section">
+                <h2>⚙️ Our Technology Stack</h2>
+                <p>
+                    DNS Science is powered by a proprietary, custom-built DNS and SSL monitoring, fingerprinting, and 
+                    diagnostics stack running on Amazon Web Services (AWS) infrastructure. Our platform is designed for 
+                    internet-scale data processing and analysis.
+                </p>
+
+                <h3>Key Technologies</h3>
+                <ul>
+                    <li><strong>Multi-threaded Scanning Engines:</strong> Parallel processing of millions of domains with intelligent rate limiting and retry logic</li>
+                    <li><strong>Global DNS Caching Layer:</strong> Distributed cache network to reduce latency and improve accuracy of DNS measurements</li>
+                    <li><strong>Data Sanitation Pipeline:</strong> Advanced deduplication and normalization to ensure data quality and consistency</li>
+                    <li><strong>Real-time Processing:</strong> Stream processing architecture for immediate detection of configuration changes</li>
+                    <li><strong>Machine Learning:</strong> Anomaly detection algorithms to identify unusual patterns and potential security incidents</li>
+                    <li><strong>Scalable Storage:</strong> PostgreSQL with JSONB for flexible schema and high-performance queries</li>
+                    <li><strong>API-First Design:</strong> RESTful API with comprehensive documentation for easy integration</li>
+                </ul>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">24/7</div>
+                        <div class="stat-label">Continuous Monitoring</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">20+</div>
+                        <div class="stat-label">Threat Intel Feeds</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">Global</div>
+                        <div class="stat-label">Coverage</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">Real-time</div>
+                        <div class="stat-label">Alerts</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team -->
+            <div class="section">
+                <h2>👥 Who We Are</h2>
+                <p>
+                    DNS Science is created and operated by the DNS engineering experts at <strong>After Dark Systems, LLC</strong>, 
+                    a company with over 20 years of experience designing, implementing, and managing complex DNS infrastructures 
+                    for enterprise clients worldwide.
+                </p>
+
+                <h3>Our Experience</h3>
+                <p>Our team has worked with:</p>
+                <ul>
+                    <li><strong>Tier-1 Internet Service Providers:</strong> Managing DNS infrastructure serving millions of subscribers</li>
+                    <li><strong>US-Based Petroleum Giants:</strong> Securing critical infrastructure for energy sector leaders</li>
+                    <li><strong>Large Financial Institutions:</strong> Implementing highly available, secure DNS solutions for global banking operations</li>
+                    <li><strong>Government Agencies:</strong> Designing resilient DNS architectures for public sector organizations</li>
+                    <li><strong>Healthcare Organizations:</strong> HIPAA-compliant DNS and security monitoring solutions</li>
+                    <li><strong>E-commerce Platforms:</strong> High-performance DNS for mission-critical online services</li>
+                </ul>
+
+                <p>
+                    With decades of combined experience, we've encountered every type of DNS challenge imaginable—from 
+                    complex multi-cloud deployments to incident response during sophisticated DNS attacks. This wealth 
+                    of real-world experience informs every aspect of DNS Science's design and operation.
+                </p>
+            </div>
+
+            <!-- Data Management -->
+            <div class="section">
+                <h2>📡 How We Create and Manage Data</h2>
+                <p>
+                    After Dark Systems has developed a proprietary DNS surveillance and monitoring stack that combines 
+                    multiple technologies to provide comprehensive, accurate, and timely data about internet infrastructure.
+                </p>
+
+                <h3>Data Collection Process</h3>
+                <ol>
+                    <li><strong>Active Scanning:</strong> Continuous probing of DNS infrastructure using distributed scanners</li>
+                    <li><strong>Passive Monitoring:</strong> Analysis of DNS query patterns and response behaviors</li>
+                    <li><strong>Certificate Monitoring:</strong> Real-time tracking of SSL/TLS certificates and their chains</li>
+                    <li><strong>Global Vantage Points:</strong> Measurements from multiple geographic locations to detect regional issues</li>
+                    <li><strong>Historical Analysis:</strong> Comparison of current state with historical baselines to detect drift</li>
+                </ol>
+
+                <h3>Data Enrichment</h3>
+                <p>Our data is enriched with:</p>
+                <ul>
+                    <li>Global threat intelligence from 20+ commercial and open-source feeds</li>
+                    <li>Geolocation data for IP addresses and infrastructure</li>
+                    <li>ASN (Autonomous System Number) information and routing data</li>
+                    <li>WHOIS and domain registration information</li>
+                    <li>Web3 domain data (ENS, Handshake, etc.)</li>
+                    <li>Reverse DNS mappings and PTR record validation</li>
+                    <li>Network security monitoring data from Zeek and Suricata</li>
+                </ul>
+
+                <h3>Data Quality Assurance</h3>
+                <p>
+                    Every data point passes through our multi-stage validation pipeline that includes:
+                </p>
+                <ul>
+                    <li>Automated sanitation to remove invalid or malformed data</li>
+                    <li>Deduplication to eliminate redundant information</li>
+                    <li>Cross-validation against multiple authoritative sources</li>
+                    <li>Anomaly detection to flag suspicious or unusual patterns</li>
+                    <li>Data retention policies ensuring historical accuracy</li>
+                </ul>
+            </div>
+
+            <!-- Use Cases -->
+            <div class="section">
+                <h2>🎯 Use Cases</h2>
+                <p>DNS Science serves a wide range of security and operational use cases:</p>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h4>Security Operations</h4>
+                        <p>Detect DNS hijacking, cache poisoning, unauthorized configuration changes, and other DNS-based attacks in real-time</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>Compliance Monitoring</h4>
+                        <p>Ensure DNSSEC, SPF, DMARC, and other security standards are properly configured and maintained</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>Certificate Management</h4>
+                        <p>Track certificate expiration, monitor for rogue certificates, and validate certificate chains</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>Change Management</h4>
+                        <p>Audit and track all DNS configuration changes with historical comparison and rollback capabilities</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>Threat Hunting</h4>
+                        <p>Investigate suspicious domains and infrastructure using enriched threat intelligence data</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>Performance Monitoring</h4>
+                        <p>Measure DNS propagation times, identify slow resolvers, and optimize global DNS performance</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact -->
+            <div class="section">
+                <h2>📞 Get in Touch</h2>
+                <p>
+                    Interested in learning more about DNS Science? Want to discuss enterprise licensing or custom integrations?
+                </p>
+                <div class="highlight-box">
+                    <h3>Contact Information</h3>
+                    <p>
+                        <strong>Email:</strong> admin@dnsscience.io<br>
+                        <strong>Company:</strong> After Dark Systems, LLC<br>
+                        <strong>Website:</strong> <a href="https://afterdarksys.com" style="color: white;">afterdarksys.com</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') body.classList.add('dark-mode');
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+    </script>
+</body>
+</html>
